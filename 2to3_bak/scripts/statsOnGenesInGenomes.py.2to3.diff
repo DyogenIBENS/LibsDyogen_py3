@@ -1,0 +1,226 @@
+--- scripts/statsOnGenesInGenomes.py	(original)
++++ scripts/statsOnGenesInGenomes.py	(refactored)
+@@ -58,16 +58,16 @@
+         flb = myFile.firstLineBuffer(myFile.openFile(fileName, 'r'))
+         c = flb.firstLine.split("\t")
+         if len(c) == 6:
+-            print >> sys.stderr, "(c, beg, end, s, gName, transcriptName) -> (c, s, gName)"
++            print("(c, beg, end, s, gName, transcriptName) -> (c, s, gName)", file=sys.stderr)
+             # c, beg, end, s,  gName, transcriptName
+             reader = myFile.myTSV.readTabular(fileName, [str, str, str, str, str, str])
+             reader = ((c, intOrNone(beg), intOrNone(end), intOrNone(strand), gName) for (c, beg, end, strand, gName, tName) in reader)
+         elif len(c) == 5:
+-            print >> sys.stderr, "(c, beg, end, s, gName) -> (c, s, gName)"
++            print("(c, beg, end, s, gName) -> (c, s, gName)", file=sys.stderr)
+             # c, beg, end, s,  gName
+             tmpReader = myFile.myTSV.readTabular(fileName, [str, str, str, str, str])
+             # check, with the first line, if there are several gene names (the format genome of Matthieu contains several gene names)
+-            (c, beg, end, strand, gNames) = tmpReader.next()
++            (c, beg, end, strand, gNames) = next(tmpReader)
+             severalNames = True if len(gNames.split(' ')) > 0 else False
+             reader = itertools.chain([(c, beg, end, strand, gNames)], tmpReader)
+             if severalNames:
+@@ -87,39 +87,39 @@
+         unofficialChromRemoved = True
+         continue
+     if x1 < x2 and s == -1:
+-        print >> sys.stderr, 'Warning, genome not formated by the 5\' rule of x1=beg x2=end'
++        print('Warning, genome not formated by the 5\' rule of x1=beg x2=end', file=sys.stderr)
+     elif x2 < x1 and s == +1:
+-        print >> sys.stderr, 'Warning, genome not formated by the 5\' rule of x1=beg x2=end'
++        print('Warning, genome not formated by the 5\' rule of x1=beg x2=end', file=sys.stderr)
+     genomeListByChr[chr].append((x1, x2, s, gNames))
+ if unofficialChromRemoved:
+-    print >> sys.stderr, 'At least one unofficial chromosome (int(chr) > 100 or discarded name in myLightGenome.contigType()) has been removed'
++    print('At least one unofficial chromosome (int(chr) > 100 or discarded name in myLightGenome.contigType()) has been removed', file=sys.stderr)
+ 
+ rankOfChrHasChanged = False
+ if arguments['orderChromosomesBy'] == 'decreasingNbOfGenes':
+-    if not myTools.isSorted(genomeListByChr.items(), key=lambda x: len(x[1]), stricly=False, increasingOrder=False):
+-        genomeListByChr = collections.OrderedDict(sorted(genomeListByChr.items(), key=lambda x: len(x[1]), reverse=True))
++    if not myTools.isSorted(list(genomeListByChr.items()), key=lambda x: len(x[1]), stricly=False, increasingOrder=False):
++        genomeListByChr = collections.OrderedDict(sorted(list(genomeListByChr.items()), key=lambda x: len(x[1]), reverse=True))
+         rankOfChrHasChanged = True
+ elif arguments['orderChromosomesBy'] == 'names':
+-    if not myTools.isSorted(genomeListByChr.items(), key=lambda x: myTools.keyNaturalSort(x[0])):
+-        genomeListByChr = collections.OrderedDict(sorted(genomeListByChr.items(), key=lambda x: myTools.keyNaturalSort(x[0]), reverse=False))
++    if not myTools.isSorted(list(genomeListByChr.items()), key=lambda x: myTools.keyNaturalSort(x[0])):
++        genomeListByChr = collections.OrderedDict(sorted(list(genomeListByChr.items()), key=lambda x: myTools.keyNaturalSort(x[0]), reverse=False))
+         rankOfChrHasChanged = True
+ if rankOfChrHasChanged:
+-    print >> sys.stderr, 'The rank of at least one chromosome has changed while sorting chrNames using the length of chromosomes'
+-
+-print >> sys.stderr,  'chromosome names = ', genomeListByChr.keys()
++    print('The rank of at least one chromosome has changed while sorting chrNames using the length of chromosomes', file=sys.stderr)
++
++print('chromosome names = ', list(genomeListByChr.keys()), file=sys.stderr)
+ 
+ lengthsOfGenes = []
+-for chr, chrom in genomeListByChr.iteritems():
++for chr, chrom in genomeListByChr.items():
+     for (idxGA, (begA, endA, sA, gNamesA)) in enumerate(chrom):
+         lengthsOfGenes.append(abs(begA - endA))
+ 
+-print >> sys.stderr, "total original nb of genes = %s" % len(lengthsOfGenes)
+-print >> sys.stderr, "minimal length = %s" % min(lengthsOfGenes)
+-print >> sys.stderr, "maximal length = %s" % max(lengthsOfGenes)
+-print >> sys.stderr, "mean length = %.2f" % (float(sum(lengthsOfGenes)) / len(lengthsOfGenes))
+-print >> sys.stderr, "#genes with a length < 1kb  : %s" % len([gene for gene in lengthsOfGenes if gene < 1000])
+-print >> sys.stderr, "#genes with a length < 10kb : %s" % len([gene for gene in lengthsOfGenes if gene < 10000])
+-print >> sys.stderr, "#genes with a length < 100kb: %s" % len([gene for gene in lengthsOfGenes if gene < 100000])
++print("total original nb of genes = %s" % len(lengthsOfGenes), file=sys.stderr)
++print("minimal length = %s" % min(lengthsOfGenes), file=sys.stderr)
++print("maximal length = %s" % max(lengthsOfGenes), file=sys.stderr)
++print("mean length = %.2f" % (float(sum(lengthsOfGenes)) / len(lengthsOfGenes)), file=sys.stderr)
++print("#genes with a length < 1kb  : %s" % len([gene for gene in lengthsOfGenes if gene < 1000]), file=sys.stderr)
++print("#genes with a length < 10kb : %s" % len([gene for gene in lengthsOfGenes if gene < 10000]), file=sys.stderr)
++print("#genes with a length < 100kb: %s" % len([gene for gene in lengthsOfGenes if gene < 100000]), file=sys.stderr)
+ 
+ if arguments['mode'] == 'distribOnChr':
+     # plot the density along a given chromosome
+@@ -141,7 +141,7 @@
+ 
+ if arguments['mode'] == 'longestIntergene':
+     longestIntergenePerChromosome = collections.OrderedDict()
+-    for chr, chrom in genomeListByChr.iteritems():
++    for chr, chrom in genomeListByChr.items():
+         longestIntergene = 0
+         for ((begA, endA, sA, gNamesA), (begB, endB, sB, gNamesB)) in myTools.myIterator.slidingTuple(chrom, 2):
+             assert begA <= begB
+@@ -169,7 +169,7 @@
+                 tmp_longestIntergene = 0
+             longestIntergene = max(longestIntergene, tmp_longestIntergene)
+         longestIntergenePerChromosome[chr] = longestIntergene
+-    print >> sys.stderr, 'the longest intergene length =%sbp' % max(longestIntergenePerChromosome.values())
++    print('the longest intergene length =%sbp' % max(longestIntergenePerChromosome.values()), file=sys.stderr)
+     # print >> sys.stderr, ''
+     # table = [['chromosome'],['longestIntergene (Mbp)']]
+     # for chr, longestIntergene in longestIntergenePerChromosome.iteritems():
+@@ -183,10 +183,10 @@
+     X = [x for x in range(len(longestIntergenePerChromosome))]
+     width = 0.8
+     margin = (1.0-width)/2.0
+-    plt.bar([x + margin for x in X], longestIntergenePerChromosome.values(), width=width, color='k')
++    plt.bar([x + margin for x in X], list(longestIntergenePerChromosome.values()), width=width, color='k')
+     plt.ticklabel_format()
+     middle = (width + 2 * margin) / 2.0
+-    plt.xticks([x + middle for x in X], longestIntergenePerChromosome.keys())
++    plt.xticks([x + middle for x in X], list(longestIntergenePerChromosome.keys()))
+     plt.title('Longest intergene length per chromosome of %s' % arguments['genome'])
+     plt.xlabel('chromosome names')
+     plt.ylabel('longest intergene length')
+@@ -194,8 +194,8 @@
+ 
+ if arguments['mode'] == 'minGeneLength':
+     minLengthsOfGenesPerChr = {}
+-    for chr, chrom in genomeListByChr.iteritems():
+-        minLengthsOfGenesPerChr[chr] = sys.maxint
++    for chr, chrom in genomeListByChr.items():
++        minLengthsOfGenesPerChr[chr] = sys.maxsize
+         for (beg, end, s, gNames) in chrom:
+             minLengthsOfGenesPerChr[chr] = min(minLengthsOfGenesPerChr[chr], abs(beg - end))
+     plt.figure()
+@@ -204,10 +204,10 @@
+     X = [x for x in range(len(minLengthsOfGenesPerChr))]
+     width = 0.8
+     margin = (1.0-width)/2.0
+-    plt.bar([x + margin for x in X], minLengthsOfGenesPerChr.values(), width=width, color='k')
++    plt.bar([x + margin for x in X], list(minLengthsOfGenesPerChr.values()), width=width, color='k')
+     plt.ticklabel_format()
+     middle = (width + 2 * margin) / 2.0
+-    plt.xticks([x + middle for x in X], minLengthsOfGenesPerChr.keys())
++    plt.xticks([x + middle for x in X], list(minLengthsOfGenesPerChr.keys()))
+     plt.title('Minimum gene length per chromosome of %s' % arguments['genome'])
+     plt.xlabel('chromosome names')
+     plt.ylabel('minimum gene length')
+@@ -215,7 +215,7 @@
+ 
+ if arguments['mode'] == 'correlationChromNbGenes':
+     lengthsChrom = {}
+-    for chr, chrom in genomeListByChr.iteritems():
++    for chr, chrom in genomeListByChr.items():
+         currMaxLen = 0
+         for (beg, end, s, gNames) in chrom:
+             currMaxLen = max(max(beg, end), currMaxLen)
+@@ -241,10 +241,10 @@
+     plt.gca().xaxis.set_major_formatter(formatter)
+     # http://stackoverflow.com/questions/5147112/matplotlib-how-to-put-individual-tags-for-a-scatter-plot
+     # http://stackoverflow.com/questions/21140385/matplotlib-annotate-doesnt-work-on-log-scale
+-    for chr, x, y in itertools.izip(list(lengthsChrom.keys()), X ,Y):
+-        print chr
++    for chr, x, y in zip(list(lengthsChrom.keys()), X ,Y):
++        print(chr)
+         xy = (x, y)
+-        print xy
++        print(xy)
+         plt.gca().annotate(chr, xy=xy, xycoords='data', xytext=(-17, -7), textcoords='offset points')#, arrowprops=dict(arrowstyle="->"))
+     plt.title('Correlation between the number of genes and the length of the chromosome')
+     plt.xlabel('length of the chromosome')
+@@ -259,8 +259,7 @@
+     lengthsOfGenes = [gene for gene in lengthsOfGenes if gene < 100000]
+     nbGenesAfterRemoval = len(lengthsOfGenes)
+     nbGenesRemoved = nbGenesBeforeRemoval - nbGenesAfterRemoval
+-    print >> sys.stderr,    \
+-        "For a better visualisation %s genes have been removed because they have a length > 100 kbp" % nbGenesRemoved
++    print("For a better visualisation %s genes have been removed because they have a length > 100 kbp" % nbGenesRemoved, file=sys.stderr)
+ 
+     fig = plt.figure()
+     ax1 = fig.add_subplot(111)
+@@ -305,7 +304,7 @@
+ 
+ 
+     # Figure with log scale
+-    print >> sys.stderr, "Be aware that the figure in log scale contains all the genes (even the %s genes previously removed )" % len(removedGenes)
++    print("Be aware that the figure in log scale contains all the genes (even the %s genes previously removed )" % len(removedGenes), file=sys.stderr)
+     lengthsOfGenes = lengthsOfGenes + removedGenes
+ 
+     fig2 = plt.figure()
+@@ -345,7 +344,7 @@
+ 
+ if arguments['mode'] == 'distribOnChrs':
+     lengthsChrom = {}
+-    for chr, chrom in genomeListByChr.iteritems():
++    for chr, chrom in genomeListByChr.items():
+         currMaxLen = 0
+         for (beg, end, s, gNames) in chrom:
+             currMaxLen = max(max(beg, end), currMaxLen)
+@@ -353,7 +352,7 @@
+     densityChrom = collections.OrderedDict()
+     for chr in sorted(list(lengthsChrom.keys()), key=myTools.keyNaturalSort):
+         densityChrom[chr] = float(len(genomeListByChr[chr])) / lengthsChrom[chr]
+-        print >> sys.stderr, 'density of genes in chrom %s = %s' %  (chr, densityChrom[chr])
++        print('density of genes in chrom %s = %s' %  (chr, densityChrom[chr]), file=sys.stderr)
+ 
+     # plot the densities in all chromosomes
+     def formaterDensity(unit='Mb'):
+@@ -377,10 +376,10 @@
+     X = [x for x in range(len(densityChrom))]
+     width = 0.8
+     margin = (1.0-width)/2.0
+-    plt.bar([x + margin for x in X], densityChrom.values(), width=width, color='k')
++    plt.bar([x + margin for x in X], list(densityChrom.values()), width=width, color='k')
+     plt.ticklabel_format()
+     middle = (width + 2 * margin) / 2.0
+-    plt.xticks([x + middle for x in X], densityChrom.keys())
++    plt.xticks([x + middle for x in X], list(densityChrom.keys()))
+     plt.title('Density of genes in %s' % arguments['genome'])
+     plt.xlabel('chromosome names')
+     plt.ylabel('density of genes (#genes/length of the chr in %sp)' % unit)
+@@ -390,7 +389,7 @@
+ if arguments['mode'] == 'overlap':
+     nbOverlappingGenes = 0
+     overlapPerGene = []
+-    for chr, chrom in genomeListByChr.iteritems():
++    for chr, chrom in genomeListByChr.items():
+         for (idxGA, (begA, endA, sA, gNamesA)) in enumerate(chrom):
+             overlapA = 0
+             for (begB, endB, sB, gNamesB) in chrom[0:idxGA] + chrom[idxGA+1:]:
+@@ -422,6 +421,6 @@
+     meanLengthOfGene = float(sum(lengthsOfGenes)) / len(lengthsOfGenes)
+     assert len(lengthsOfGenes) == len(overlapPerGene)
+     meanOverlapPerGene = float(sum(overlapPerGene)) / len(overlapPerGene)
+-    print >> sys.stderr, 'mean length of gene = %s' %  meanLengthOfGene
++    print('mean length of gene = %s' %  meanLengthOfGene, file=sys.stderr)
+     ratioOverlap = float(meanOverlapPerGene) / meanLengthOfGene
+-    print >> sys.stderr, 'mean overlap per gene is %s (%s%% of mean gene length)' % (meanOverlapPerGene, 100 * ratioOverlap)
++    print('mean overlap per gene is %s (%s%% of mean gene length)' % (meanOverlapPerGene, 100 * ratioOverlap), file=sys.stderr)

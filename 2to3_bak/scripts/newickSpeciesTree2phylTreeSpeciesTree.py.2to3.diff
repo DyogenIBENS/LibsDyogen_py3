@@ -1,0 +1,20 @@
+--- scripts/newickSpeciesTree2phylTreeSpeciesTree.py	(original)
++++ scripts/newickSpeciesTree2phylTreeSpeciesTree.py	(refactored)
+@@ -25,9 +25,9 @@
+         node = node.replace(myPhylTree.SYMBOL2X, "")
+         names = myFile.myTSV.printLine([node] + [x for x in phylTree.commonNames.get(node,"") if isinstance(x, str) and (x != node)], delim="|")
+         if node in phylTree.listSpecies :
+-            print ("\t" * indent) + str(names)
++            print(("\t" * indent) + str(names))
+         elif node in phylTree.items:
+-            print ("\t" * indent) + str(names) + "\t" + str(int(phylTree.ages[node]))
++            print(("\t" * indent) + str(names) + "\t" + str(int(phylTree.ages[node])))
+             for (f,_) in phylTree.items[node]:
+                 do(f, indent+1)
+     do(phylTree.root, 0)
+@@ -40,4 +40,4 @@
+             return a
+         else:
+             return "(" + ",".join([convertToFlatFile(e) + ":" + str(l) for (e,l) in phylTree.items[anc]]) + ")%s" % a #" |%d" % (a,phylTree.ages[anc])
+-    print convertToFlatFile(phylTree.root), ";"
++    print(convertToFlatFile(phylTree.root), ";")

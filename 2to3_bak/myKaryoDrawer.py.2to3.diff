@@ -1,0 +1,75 @@
+--- myKaryoDrawer.py	(original)
++++ myKaryoDrawer.py	(refactored)
+@@ -10,8 +10,8 @@
+ 
+ import itertools
+ 
+-import myTools
+-import myPsOutput
++from . import myTools
++from . import myPsOutput
+ 
+ myTools.addModuleOptions("karyo", [("roundedChr",bool,False), ("resolution",int,1), ("showText",bool,True), ("drawBorder",bool,False), ("defaultColor",str,""), ("penColor",str,"black")] )
+ 
+@@ -55,24 +55,24 @@
+         size = max(len(x) for x in all)
+ 
+         def printBorder():
+-            print "newpath"
++            print("newpath")
+             if arguments["karyo:roundedChr"]:
+-                print "%.5f cm %.5f cm %.5f cm 180 360 arc" % (x0+dx/2., y0+dx/2., dx/2.)
+-                print "%.5f %.5f 2cm rlineto" % (0,size*dy-dx)
+-                print "%.5f cm %.5f cm %.5f cm 0 180 arc" % (x0+dx/2., y0+size*dy-dx/2., dx/2.)
+-                print "%.5f %.5f 2cm rlineto" % (0,-size*dy+dx)
++                print("%.5f cm %.5f cm %.5f cm 180 360 arc" % (x0+dx/2., y0+dx/2., dx/2.))
++                print("%.5f %.5f 2cm rlineto" % (0,size*dy-dx))
++                print("%.5f cm %.5f cm %.5f cm 0 180 arc" % (x0+dx/2., y0+size*dy-dx/2., dx/2.))
++                print("%.5f %.5f 2cm rlineto" % (0,-size*dy+dx))
+             else:
+-                print "%.5f %.5f 2cm moveto" % (x0,y0)
+-                print "%.5f %.5f 2cm rlineto" % (0,size*dy)
+-                print "%.5f %.5f 2cm rlineto" % (dx,0)
+-                print "%.5f %.5f 2cm rlineto" % (0,-size*dy)
+-            print "closepath"
++                print("%.5f %.5f 2cm moveto" % (x0,y0))
++                print("%.5f %.5f 2cm rlineto" % (0,size*dy))
++                print("%.5f %.5f 2cm rlineto" % (dx,0))
++                print("%.5f %.5f 2cm rlineto" % (0,-size*dy))
++            print("closepath")
+ 
+         if arguments["karyo:roundedChr"]:
+             printBorder()
+-            print "clip"
++            print("clip")
+ 
+-        print "0 cm setlinewidth"
++        print("0 cm setlinewidth")
+         nbl = float(len(all))
+         for (i,currl) in enumerate(all):
+             y = y0
+@@ -85,18 +85,18 @@
+                 ly *= dy
+                 myPsOutput.drawBox(x0+i*dx/nbl, y, dx/nbl, ly, col, col)
+                 y += ly
+-        print "0.01 cm setlinewidth"
++        print("0.01 cm setlinewidth")
+ 
+         if arguments["karyo:drawBorder"]:
+             myPsOutput.setColor(arguments["karyo:penColor"], "color")
+             printBorder()
+-            for i in xrange(1,len(all)):
+-                print "%.5f %.5f 2cm moveto" % (x0+i*dx/nbl,y0)
+-                print "%.5f %.5f 2cm rlineto" % (0,size*dy)
+-            print "stroke"
++            for i in range(1,len(all)):
++                print("%.5f %.5f 2cm moveto" % (x0+i*dx/nbl,y0))
++                print("%.5f %.5f 2cm rlineto" % (0,size*dy))
++            print("stroke")
+ 
+         if arguments["karyo:roundedChr"]:
+-            print "initclip"
++            print("initclip")
+ 
+         if arguments["karyo:showText"] and (c is not None):
+             myPsOutput.drawText(x0, y0-1, str(c), arguments["karyo:penColor"])

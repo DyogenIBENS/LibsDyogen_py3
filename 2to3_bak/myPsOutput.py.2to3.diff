@@ -1,0 +1,210 @@
+--- myPsOutput.py	(original)
++++ myPsOutput.py	(refactored)
+@@ -6,7 +6,7 @@
+ # mail : jlucas@ens.fr
+ # Licences GLP v3 and CeCILL v2
+ 
+-import myMaths
++from . import myMaths
+ 
+ # Module d'ecriture dans un fichier PostScript
+ 
+@@ -22,22 +22,22 @@
+ # L'en-tete PostScript
+ #
+ def printPsHeader(landscape = False):
+-    print strPsHeader
+-    print strMyDef
+-    print strFontDef
+-    print "1 setlinejoin"
+-    print "0.001 cm setlinewidth"
+-    print
++    print(strPsHeader)
++    print(strMyDef)
++    print(strFontDef)
++    print("1 setlinejoin")
++    print("0.001 cm setlinewidth")
++    print()
+ 
+     initColor()
+ 
+     if landscape:
+-        print "90 rotate"
+-        print "0 -21 cm translate"
+-        print
++        print("90 rotate")
++        print("0 -21 cm translate")
++        print()
+         return (29.7,21.)
+ 
+-    print
++    print()
+     return (21.,29.7)
+ 
+ 
+@@ -45,7 +45,7 @@
+ # Le pied de page PostScript
+ #
+ def printPsFooter():
+-    print "showpage"
++    print("showpage")
+ 
+ 
+ 
+@@ -73,7 +73,7 @@
+             continue
+         rgb = tuple(int(x) for x in c[:3])
+         if not silent:
+-            print "/%s [%.3f %.3f %.3f] def" % (s, rgb[0]/255., rgb[1]/255., rgb[2]/255.)
++            print("/%s [%.3f %.3f %.3f] def" % (s, rgb[0]/255., rgb[1]/255., rgb[2]/255.))
+         colorTableRGB2UNIX[rgb] = s
+         colorTableUNIX2RGB[s] = rgb
+ 
+@@ -126,7 +126,7 @@
+ def getLinearGradient(colors, nelem):
+     l = []
+     nc = (nelem-1.) / (len(colors)-1.)
+-    for i in xrange(nelem-1):
++    for i in range(nelem-1):
+         ip = int(i/nc)
+         l.append( alphaColor(colors[ip], colors[ip+1], i/nc-ip) )
+     l.append(colors[-1])
+@@ -136,14 +136,17 @@
+ def getCubicGradient(colors, nelem):
+     l = len(colors)
+     tmp = (l-1.)/(nelem-1.)
+-    interpol = myMaths.myInterpolator.getMultDim(myMaths.myInterpolator.oneDimCubic, range(l), colors)
+-    return [interpol(i*tmp) for i in xrange(nelem)]
+-
+-
+-def alphaColor((r1,g1,b1), (r2,g2,b2), alpha):
++    interpol = myMaths.myInterpolator.getMultDim(myMaths.myInterpolator.oneDimCubic, list(range(l)), colors)
++    return [interpol(i*tmp) for i in range(nelem)]
++
++
++def alphaColor(xxx_todo_changeme, xxx_todo_changeme1, alpha):
++    (r1,g1,b1) = xxx_todo_changeme
++    (r2,g2,b2) = xxx_todo_changeme1
+     return (int(round(r1*(1.-alpha)+r2*alpha)), int(round(g1*(1.-alpha)+g2*alpha)), int(round(b1*(1.-alpha)+b2*alpha)))
+ 
+-def YUV2RGB((Y,U,V)):
++def YUV2RGB(xxx_todo_changeme2):
++    (Y,U,V) = xxx_todo_changeme2
+     R = Y + 1.140*V
+     G = Y - 0.395*U - 0.581*V
+     B = Y + 2.032*U
+@@ -180,7 +183,7 @@
+     else:
+         try:
+             if len(C) == 3:
+-                (r,g,b) = map(int,C)
++                (r,g,b) = list(map(int,C))
+             elif C[0] == '#':
+                 try:
+                     (r,g,b) = [int(x) for x in C[1:].split(':')]
+@@ -197,65 +200,65 @@
+             s = "tmp%d" % len(colorTableUNIX2RGB)
+             colorTableRGB2UNIX[(r,g,b)] = s
+             colorTableUNIX2RGB[s] = (r,g,b)
+-            print "/%s [%.3f %.3f %.3f] def" % (s, float(r)/255., float(g)/255., float(b)/255.)
+-    print s, txt
++            print("/%s [%.3f %.3f %.3f] def" % (s, float(r)/255., float(g)/255., float(b)/255.))
++    print(s, txt)
+ 
+ 
+ def drawLine(X, Y, L, H, C):
+     setColor(C, "color")
+-    print "%.6g %.6g %.6g %.6g myline" % (L,H, X,Y)
++    print("%.6g %.6g %.6g %.6g myline" % (L,H, X,Y))
+ 
+ 
+ def drawBox(X, Y, L, H, Cb, Cr):
+-    print "%.6g %.6g %.6g %.6g mybox" % (L,H, X,Y)
++    print("%.6g %.6g %.6g %.6g mybox" % (L,H, X,Y))
+     setColor(Cr, "myfill")
+     setColor(Cb, "color stroke")
+ 
+ 
+ def drawCross(X, Y, L, H, C):
+-    print "newpath"
++    print("newpath")
+     setColor(C, "color")
+-    print "%.6g cm %.6g cm moveto" % (X, Y)
+-    print "%.6g cm %.6g cm rlineto" % (L, H)
+-    print "%.6g cm %.6g cm moveto" % (X+L, Y)
+-    print "%.6g cm %.6g cm rlineto" % (-L, H)
+-    print "closepath"
+-    print "stroke"
++    print("%.6g cm %.6g cm moveto" % (X, Y))
++    print("%.6g cm %.6g cm rlineto" % (L, H))
++    print("%.6g cm %.6g cm moveto" % (X+L, Y))
++    print("%.6g cm %.6g cm rlineto" % (-L, H))
++    print("closepath")
++    print("stroke")
+ 
+ def drawCircle(X, Y, R, A, B, Cb, Cr):
+-    print "newpath"
++    print("newpath")
+     setColor(Cb, "color")
+-    print "%.6g cm %.6g cm %.6g cm %.6g %.6g arc" % (X, Y, R, A, B)
++    print("%.6g cm %.6g cm %.6g cm %.6g %.6g arc" % (X, Y, R, A, B))
+     setColor(Cr, "myfill")
+-    print "stroke"
++    print("stroke")
+ 
+ def drawArrowR(X, Y, L, H, P, Cb, Cr):
+-    print "newpath"
++    print("newpath")
+     setColor(Cb, "color")
+-    print "%.6g cm %.6g cm moveto" % (X, Y)
+-    print "%.6g cm 0 cm rlineto" % L
+-    print "%.6g cm %.6g cm rlineto" % (P, H/2)
+-    print "%.6g cm %.6g cm rlineto" % (-P, H/2)
+-    print "%.6g cm 0 cm rlineto" % (-L)
+-    print "closepath"
++    print("%.6g cm %.6g cm moveto" % (X, Y))
++    print("%.6g cm 0 cm rlineto" % L)
++    print("%.6g cm %.6g cm rlineto" % (P, H/2))
++    print("%.6g cm %.6g cm rlineto" % (-P, H/2))
++    print("%.6g cm 0 cm rlineto" % (-L))
++    print("closepath")
+     setColor(Cr, "myfill")
+-    print "stroke"
++    print("stroke")
+ 
+ def drawArrowL(X, Y, L, H, P, Cb, Cr):
+-    print "newpath";
++    print("newpath");
+     setColor(Cb, "color")
+-    print "%.6g cm %.6g cm moveto" % (X, Y+(H/2))
+-    print "%.6g cm %.6g cm rlineto" % (P, H/2)
+-    print "%.6g cm 0 cm rlineto" % L
+-    print "0 cm %.6g cm rlineto" % (-H)
+-    print "%.6g cm 0 cm rlineto" % (-L)
+-    print "closepath"
++    print("%.6g cm %.6g cm moveto" % (X, Y+(H/2)))
++    print("%.6g cm %.6g cm rlineto" % (P, H/2))
++    print("%.6g cm 0 cm rlineto" % L)
++    print("0 cm %.6g cm rlineto" % (-H))
++    print("%.6g cm 0 cm rlineto" % (-L))
++    print("closepath")
+     setColor(Cr, "myfill")
+-    print "stroke"
++    print("stroke")
+ 
+ def drawText(X, Y, T, C):
+     setColor(C, "color")
+-    print "(%s) %.6g %.6g mytext" % (T, X,Y)
++    print("(%s) %.6g %.6g mytext" % (T, X,Y))
+ 
+ 
+ 
+@@ -357,7 +360,7 @@
+     elif format == 'pdf':
+         surface = cairo.PSSurface(filename, width*72/2.54, height*72/2.54)
+     else:
+-        print >> sys.stderr, "Unknown output style '%s'" % format
++        print("Unknown output style '%s'" % format, file=sys.stderr)
+         sys.exit(1)
+ 
+     global ctx

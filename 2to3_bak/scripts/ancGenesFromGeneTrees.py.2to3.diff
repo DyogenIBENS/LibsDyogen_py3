@@ -1,0 +1,17 @@
+--- scripts/ancGenesFromGeneTrees.py	(original)
++++ scripts/ancGenesFromGeneTrees.py	(refactored)
+@@ -108,10 +108,10 @@
+     extractGeneFamilies(tree.root, tree.info[tree.root]["tree_name"], None, None) # FIXME this function modifies tree and geneFamilies even if tree and gene families are not parameters
+     tree.printTree(sys.stdout)
+ 
+-for (anc,lst) in geneFamilies.iteritems():
+-    print >> sys.stderr, "Write %s family ..." % anc,
++for (anc,lst) in geneFamilies.items():
++    print("Write %s family ..." % anc, end=' ', file=sys.stderr)
+     f = myFile.openFile(arguments["out:ancGenes"] % speciesTree.fileName[anc], "w")
+     for gg in lst:
+-        print >> f, " ".join(gg)
++        print(" ".join(gg), file=f)
+     f.close()
+-    print >> sys.stderr, len(lst), "OK"
++    print(len(lst), "OK", file=sys.stderr)

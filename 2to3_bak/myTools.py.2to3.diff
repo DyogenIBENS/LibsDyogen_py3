@@ -1,0 +1,278 @@
+--- myTools.py	(original)
++++ myTools.py	(refactored)
+@@ -20,7 +20,7 @@
+ from functools import wraps
+ from collections import OrderedDict, Callable
+ 
+-import myFile
++from . import myFile
+ 
+ null = open(os.devnull, 'w')
+ 
+@@ -37,14 +37,14 @@
+ #3
+ class Enum(object):
+     def __init__(self, *keys):
+-        self.____dict__.update(zip(keys, range(len(keys))))
++        self.____dict__.update(list(zip(keys, list(range(len(keys))))))
+ 
+ def applyFunctions(fun, data):
+-    for (f, x) in itertools.izip(fun, data):
++    for (f, x) in zip(fun, data):
+         yield f(x)
+ 
+ def funcFilter(fun):
+-    return lambda data: (f(x) for (f, x) in itertools.izip(fun, data))
++    return lambda data: (f(x) for (f, x) in zip(fun, data))
+ 
+ def __delitem__(self, key):
+     dict.__delitem__(self, self[key])
+@@ -67,7 +67,7 @@
+         ["".join([string.ljust(str(e), l + spaceBetweenColumns)
+                   for e, l in zip(r, max_lens)])
+          for r in table])
+-    print >> output, res
++    print(res, file=output)
+     return res
+ 
+ # FIXME: to print well in stream, the user needs to ensure that between two calls to printProgressIn, nothing had been
+@@ -75,7 +75,7 @@
+ class ProgressBar:
+     def __init__(self, totalLength, step=1):
+         self.totalLength = totalLength
+-        self.listOfPercentage = range(0, 101, step)[1:]
++        self.listOfPercentage = list(range(0, 101, step))[1:]
+ 
+     def printProgressIn(self, stream, currentLength, prefixLabel=None):
+         progress = int(float(currentLength*100)/self.totalLength)
+@@ -134,7 +134,7 @@
+         res = functionToExcecute(*args,**kargs)
+         tac = time.time()
+         deltaTicTac = tac - tic
+-        print >> sys.stderr, "Function \"%s\" was executed in %s seconds" % (functionToExcecute.__name__, deltaTicTac)
++        print("Function \"%s\" was executed in %s seconds" % (functionToExcecute.__name__, deltaTicTac), file=sys.stderr)
+         return res
+     return modifiedFunction
+ 
+@@ -180,7 +180,7 @@
+         except TypeError:
+             # uncachable -- for instance, passing a list as an argument.
+             # Better to not cache than to blow up entirely.
+-            print >> sys.stderr, "Warning: %s is not cacheable (from %s/%s)" % (args, self, self.func)
++            print("Warning: %s is not cacheable (from %s/%s)" % (args, self, self.func), file=sys.stderr)
+             return self.func(*args)
+ 
+     def reinit_stats(self):
+@@ -265,7 +265,7 @@
+             raise StopIteration
+         else:
+             # idxW0, idx of the left extremity of the sliding window
+-            for idxW0 in xrange(len(lst) - width + 1):
++            for idxW0 in range(len(lst) - width + 1):
+                 yield tuple(lst[idxW0: idxW0 + width])
+ 
+ # liste of partitions of size k in range(n)
+@@ -279,7 +279,7 @@
+         for x in partitions(n-1, k-1):
+             all.append( x + [[n-1]] )
+         for x in partitions(n-1, k):
+-            for i in xrange(k):
++            for i in range(k):
+                 all.append( [y if i != j else y + [n-1] for (j,y) in enumerate(x)] )
+         return all
+     else:
+@@ -296,7 +296,7 @@
+         return lst
+     else:
+         (start,_,end) = s.partition(':')
+-        return range(int(start), int(end)+1)
++        return list(range(int(start), int(end)+1))
+ 
+ 
+ # hashable dict class, useful to use it as a key
+@@ -317,7 +317,7 @@
+     def __init__(self, ini = []):
+         self.grp = list(ini)
+         self.dic = {}
+-        for i in xrange(len(self.grp)):
++        for i in range(len(self.grp)):
+             self.grp[i] = list(set(self.grp[i]))
+             for x in self.grp[i]:
+                 self.dic[x] = i
+@@ -400,19 +400,19 @@
+     options = options + __moduleoptions
+     # print error informations if wrong arguments
+     def error_usage(reason):
+-        print >> sys.stderr, "- ERROR -", reason
+-        print >> sys.stderr, " Usage :", sys.argv[0]
++        print("- ERROR -", reason, file=sys.stderr)
++        print(" Usage :", sys.argv[0], file=sys.stderr)
+         for (i,t) in enumerate(args):
+-            print >> sys.stderr, "\t", "%d:" % (i+1), t[0], t[1]
++            print("\t", "%d:" % (i+1), t[0], t[1], file=sys.stderr)
+         for t in options:
+             if isinstance(t[1], enum.Enum):
+-                print >> sys.stderr, "\t", "  -%s %s (%s)" % (t[0], t[1]._keys, t[2])
++                print("\t", "  -%s %s (%s)" % (t[0], t[1]._keys, t[2]), file=sys.stderr)
+             elif t[1] == bool:
+-                print >> sys.stderr, "\t", "+/-%s (%s)" % (t[0],t[2])
++                print("\t", "+/-%s (%s)" % (t[0],t[2]), file=sys.stderr)
+             else:
+-                print >> sys.stderr, "\t", "  -%s %s (%s)" % t
++                print("\t", "  -%s %s (%s)" % t, file=sys.stderr)
+         if info != "":
+-            print >> sys.stderr, "\n", info
++            print("\n", info, file=sys.stderr)
+         sys.exit(1)
+ 
+     def putValue(typ, authorisedVals, v):
+@@ -481,7 +481,7 @@
+                                 import psyco
+                                 psyco.full()
+                             except ImportError:
+-                                print >> sys.stderr, "Unable to load psyco !"
++                                print("Unable to load psyco !", file=sys.stderr)
+                     elif s == "bz2":
+                         if t[0] == '+':
+                             import bz2
+@@ -528,8 +528,8 @@
+     # there is less than the minimal number of arguments
+     #FIXME, the second part of the condition should be avoided by upstream corrections
+     if len(valArg) < len(args) and not (len(args) == 1 and args[0] == ()):
+-        print >> sys.stderr, "valArg=", valArg
+-        print >> sys.stderr, "args=", args
++        print("valArg=", valArg, file=sys.stderr)
++        print("args=", args, file=sys.stderr)
+         error_usage("Not enough arguments")
+ 
+     valArg.update(valOpt)
+@@ -547,21 +547,21 @@
+         rows = 50
+         columns = 80
+ 
+-    for (key, value) in arguments.iteritems():
++    for (key, value) in arguments.items():
+         longestKey = max(len(str(key)), longestKey)
+         longestValue = max(len(str(value)), longestValue)
+     longestValue = min(longestValue, rows - longestKey - 7)
+     lines = []
+     lines.append('| ' + 'Key'.ljust(longestKey) + ' | ' + 'Values'.ljust(longestValue) + ' |')
+-    for (key, value) in arguments.iteritems():
++    for (key, value) in arguments.items():
+         lines.append('| ' + str(key).ljust(longestKey) + ' | ' + str(value).ljust(longestValue) + ' |')
+     longestLine = min(max([len(line) for line in lines]), rows)
+-    print >> stream, '-' * longestLine
+-    print >> stream, lines[0]
+-    print >> stream, '-' * longestLine
++    print('-' * longestLine, file=stream)
++    print(lines[0], file=stream)
++    print('-' * longestLine, file=stream)
+     for line in lines[1:]:
+-        print >> stream, line
+-    print >> stream, '-' * longestLine
++        print(line, file=stream)
++    print('-' * longestLine, file=stream)
+ 
+ # This class is useful for recording many information (either a list of items
+ # or a value) for each cell of a matrix of whole genome comparisons. See
+@@ -639,7 +639,8 @@
+         (k1, k2, idx) = self.id2location[id]
+         return self[k1][k2][idx]
+ 
+-    def getItemsAndIdsByLocation(self, (k1, k2)):
++    def getItemsAndIdsByLocation(self, xxx_todo_changeme):
++        (k1, k2) = xxx_todo_changeme
+         return [(self.getItemById(id), id) for id in self.location2id[k1][k2]]
+ 
+     def getItemLocationById(self, id):
+@@ -653,7 +654,7 @@
+ 
+     def removeIds(self, setOfRemovedIds):
+         # debug assertions
+-        assert len(self.id2location.keys()) == len(self.orderedIds)
++        assert len(list(self.id2location.keys())) == len(self.orderedIds)
+         assert set(self.id2location.keys()) == set(self.orderedIds)
+ 
+         copyOrderedIds = list(self.orderedIds)  # need a deep copy
+@@ -671,7 +672,7 @@
+                 assert len(self.location2id[k1][k2]) == len(self[k1][k2])
+ 
+                 # debug assertions
+-                assert len(self.id2location.keys()) == len(self.orderedIds)
++                assert len(list(self.id2location.keys())) == len(self.orderedIds)
+                 assert set(self.id2location.keys()) == set(self.orderedIds)
+ 
+                 if len(self[k1][k2]) == 0:
+@@ -688,13 +689,15 @@
+         setOfRemovedIds = allIds - setOfKeptIds
+         self.removeIds(setOfRemovedIds)
+ 
+-    def addToLocation(self, (k1, k2), item):
++    def addToLocation(self, xxx_todo_changeme1, item):
++        (k1, k2) = xxx_todo_changeme1
+         self.maxId += 1
+         id = self.maxId
+         self.addToLocationWithId((k1, k2), item, id)
+         return id
+ 
+-    def addToLocationWithId(self, (k1, k2), item, id):
++    def addToLocationWithId(self, xxx_todo_changeme2, item, id):
++        (k1, k2) = xxx_todo_changeme2
+         assert id not in self.orderedIds
+         self.maxId = id if id > self.maxId else self.maxId
+         self[k1][k2].append(item)
+@@ -707,7 +710,7 @@
+         res = OrderedDict2dOfLists()
+         for (id, (k1, k2), item) in self.iterByOrderedIds():
+             res.addToLocationWithId((k1, k2), item, id)
+-        minSelfId = min([sys.maxint] + self.orderedIds)
++        minSelfId = min([sys.maxsize] + self.orderedIds)
+         maxSelfId = max([0] + self.orderedIds)
+         for (id, (k1, k2), item) in other.iterByOrderedIds():
+             assert id < minSelfId or maxSelfId < id
+@@ -750,7 +753,7 @@
+             args = tuple()
+         else:
+             args = self.default_factory,
+-        return type(self), args, None, None, self.items()
++        return type(self), args, None, None, list(self.items())
+ 
+     def copy(self):
+         return self.__copy__()
+@@ -761,7 +764,7 @@
+     def __deepcopy__(self, memo):
+         import copy
+         return type(self)(self.default_factory,
+-                          copy.deepcopy(self.items()))
++                          copy.deepcopy(list(self.items())))
+ 
+     def __repr__(self):
+         return 'OrderedDefaultDict(%s, %s)' % (self.default_factory,
+@@ -826,7 +829,7 @@
+    if current_os == 'Linux' or current_os == 'Darwin' or  current_os.startswith('CYGWIN'):
+        tuple_xy = _getTerminalSize_linux()
+    if tuple_xy is None:
+-       print "default"
++       print("default")
+        tuple_xy = (80, 25)      # default value
+    return tuple_xy
+ 
+@@ -901,14 +904,14 @@
+     assert isinstance(increasingOrder, bool)
+     if increasingOrder:
+         if stricly:
+-            res= all(key(l[i]) < key(l[i+1]) for i in xrange(len(l)-1))
++            res= all(key(l[i]) < key(l[i+1]) for i in range(len(l)-1))
+         else:
+-            res = all(key(l[i]) <= key(l[i+1]) for i in xrange(len(l)-1))
++            res = all(key(l[i]) <= key(l[i+1]) for i in range(len(l)-1))
+     else:
+         if stricly:
+-            res = all(key(l[i]) > key(l[i+1]) for i in xrange(len(l)-1))
++            res = all(key(l[i]) > key(l[i+1]) for i in range(len(l)-1))
+         else:
+-            res = all(key(l[i]) >= key(l[i+1]) for i in xrange(len(l)-1))
++            res = all(key(l[i]) >= key(l[i+1]) for i in range(len(l)-1))
+     return res
+ 
+ def keyNaturalSort(chrName):

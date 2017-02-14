@@ -1,0 +1,127 @@
+--- myProbas.py	(original)
++++ myProbas.py	(refactored)
+@@ -34,12 +34,12 @@
+ # diagonal type : either 'slash' ('/', bottom-left to top-right) or 'backslash' ('\', top-left to bottom-right)
+ # consistent diagonal : either a slash diagonal with hps signs = (+1 or None) or a backslash diagonal with hps signs = (-1 or None)
+ 
+-from myMaths import combinations
++from .myMaths import combinations
+ import itertools
+ import math
+ import sys
+ 
+-import myTools
++from . import myTools
+ 
+ # p_tbO_g={+1:%+1, -1:%-1, None:%None}, percentages of each tb orientation in genome_tb
+ # p_tbO is a dict containing the percentages for each chromosome
+@@ -85,9 +85,9 @@
+     sTbG2, sTbG2_g = statsTbOrientation(g2_tb)
+     # Probability of hps signs for each chromosome comparison
+     p_hpSign = myTools.Dict2d(dict)
+-    listOfPercentage = range(0,101,5)[1:]
++    listOfPercentage = list(range(0,101,5))[1:]
+     nbPairwiseComparisons = len(g1_tb) * len(g2_tb)
+-    print >> sys.stderr, "pairwise comparisons of chromosomes analysis for the calculation of the probabilities of hps signs",
++    print("pairwise comparisons of chromosomes analysis for the calculation of the probabilities of hps signs", end=' ', file=sys.stderr)
+     for (i,(c1,c2)) in enumerate(itertools.product(g1_tb,g2_tb)):
+         # Here we can use sets since a hp sign +1 in a comparison between ca on X vs cb on Y is still a hp sign +1 in a comparison between cb on X vs ca on Y
+         p_hpSign[c1][c2][+1] = sTbG1[c1][+1]*sTbG2[c2][+1] + sTbG1[c1][-1]*sTbG2[c2][-1]
+@@ -98,9 +98,9 @@
+         progress = int(float(i*100)/nbPairwiseComparisons)
+ 
+         if progress in listOfPercentage:
+-            print >> sys.stderr, "%s" % progress + "%",
++            print("%s" % progress + "%", end=' ', file=sys.stderr)
+             listOfPercentage.remove(progress)
+-    print >> sys.stderr, "" # new line in the print
++    print("", file=sys.stderr) # new line in the print
+     # Probability of hps sign for the comparison of twe two genomes
+     p_hpSign_g={}
+     p_hpSign_g[+1] = sTbG1_g[+1]*sTbG2_g[+1] + sTbG1_g[-1]*sTbG2_g[-1]
+@@ -130,13 +130,13 @@
+ # Warning : an assumption is made that in the mhp there are only orthologies and no paralogies
+ def p_d(k,la,lb,nab,na,nb):
+     if nab > min(na,nb):
+-        print >> sys.stderr, "Warning: during the computation of p_d(k=%s,la=%s,lb=%s,nab=%s,na=%s,nb=%s), there was too many dispersed paralogies in the MHP, thus for the calculation we chose nab=min(na,nb)=%s" % (k,la,lb,nab,na,nb,min(na,nb))
++        print("Warning: during the computation of p_d(k=%s,la=%s,lb=%s,nab=%s,na=%s,nb=%s), there was too many dispersed paralogies in the MHP, thus for the calculation we chose nab=min(na,nb)=%s" % (k,la,lb,nab,na,nb,min(na,nb)), file=sys.stderr)
+         nab = min(na,nb)
+     elif k > nab:
+-        print >> sys.stderr, "Warning: not able to compute p_d(k=%s,la=%s,lb=%s,nab=%s,na=%s,nb=%s) because there are not %s hps in the MHP" % (k,la,lb,nab,na,nb,k)
++        print("Warning: not able to compute p_d(k=%s,la=%s,lb=%s,nab=%s,na=%s,nb=%s) because there are not %s hps in the MHP" % (k,la,lb,nab,na,nb,k), file=sys.stderr)
+         return None
+     elif k > min([la, lb]):
+-        print >> sys.stderr, "Warning: not able to compute p_d(k=%s,la=%s,lb=%s,nab=%s,na=%s,nb=%s) because there are too many dispersed paralogies in the window" % (k,la,lb,nab,na,nb)
++        print("Warning: not able to compute p_d(k=%s,la=%s,lb=%s,nab=%s,na=%s,nb=%s) because there are too many dispersed paralogies in the window" % (k,la,lb,nab,na,nb), file=sys.stderr)
+         return None
+     limSum = min(la-k,nab-k)
+     sum_ = 0
+@@ -144,7 +144,7 @@
+         try:
+             foo = combinations(nab-k,i)*combinations(na-nab,la-(k+i))*combinations(nb-(k+i),lb-k)
+         except Exception as e:
+-            print >> sys.stderr, "Warning: not able to compute p_d(k=%s,la=%s,lb=%s,nab=%s,na=%s,nb=%s) because %s" % (k,la,lb,nab,na,nb,e)
++            print("Warning: not able to compute p_d(k=%s,la=%s,lb=%s,nab=%s,na=%s,nb=%s) because %s" % (k,la,lb,nab,na,nb,e), file=sys.stderr)
+             foo = 0
+         sum_ += foo
+     num = combinations(nab,k)*sum_
+@@ -167,7 +167,7 @@
+ # probability that k marked tbs form a maxgap(g)-cluster in a sequence of l tbs
+ def p_g_1D(k,g,l):
+     if k > l:
+-        print >> sys.stderr, "Warning: there are not %s tbs in the window of size %s" % (k,l)
++        print("Warning: there are not %s tbs in the window of size %s" % (k,l), file=sys.stderr)
+         return None
+     w = (k-1)*g+k
+     num = max(0,l-w+1)*math.pow((g+1),k-1)+d_0(k,g,min(l,w-1))
+@@ -177,7 +177,7 @@
+ # probability that k marked hps form a maxgap(g)-cluster in both sequences of lengths la and lb
+ def p_g_2D(k,g,la,lb):
+     if k > min(la,lb):
+-        print >> sys.stderr, "Warning: there are not %s tbs in the window of size %sx%s" % (k,la,lb)
++        print("Warning: there are not %s tbs in the window of size %sx%s" % (k,la,lb), file=sys.stderr)
+     try:
+         return p_g_1D(k,g,la) * p_g_1D(k,g,lb)
+     except TypeError:
+@@ -201,13 +201,13 @@
+ # Warning : an assumption is made that in the mhp there are only orthologies and no paralogies
+ def p_w(m,g,la,lb,nab,na,nb,p_hpSign):
+     if nab > min(na,nb):
+-        print >> sys.stderr, "Warning: during the computation of p_w(m=%s,g=%s,la=%s,lb=%s,nab=%s,na=%s,nb=%s), there was too many dispersed paralogies in the MHP, thus for the calculation we chose nab=min(na,nb)=%s" % (m,g,la,lb,nab,na,nb,min(na,nb))
++        print("Warning: during the computation of p_w(m=%s,g=%s,la=%s,lb=%s,nab=%s,na=%s,nb=%s), there was too many dispersed paralogies in the MHP, thus for the calculation we chose nab=min(na,nb)=%s" % (m,g,la,lb,nab,na,nb,min(na,nb)), file=sys.stderr)
+         nab=min(na,nb)
+     elif m > nab:
+-        print >> sys.stderr, "Warning: not able to compute p_w(%s,%s,%s,%s,%s,%s,%s) because there are not %s hps in the MHP" % (m,g,la,lb,nab,na,nb,m)
++        print("Warning: not able to compute p_w(%s,%s,%s,%s,%s,%s,%s) because there are not %s hps in the MHP" % (m,g,la,lb,nab,na,nb,m), file=sys.stderr)
+         return None
+     elif m > min([la, lb]):
+-        print >> sys.stderr, "Warning: not able to compute p_w(%s,%s,%s,%s,%s,%s,%s) because there are too many dispersed paralogies in the window" % (m,g,la,lb,nab,na,nb)
++        print("Warning: not able to compute p_w(%s,%s,%s,%s,%s,%s,%s) because there are too many dispersed paralogies in the window" % (m,g,la,lb,nab,na,nb), file=sys.stderr)
+         return None
+     sum_ = 0
+     for k in range(m,min(nab,la,lb)+1):
+@@ -225,20 +225,20 @@
+ @myTools.verbose
+ def pValue(m,g,la,lb,nab,na,nb,p_hpSign,verbose=True):
+     if nab > min(na,nb):
+-        print >> sys.stderr, "Warning: during the computation of pValue(m=%s,g=%s,la=%s,lb=%s,nab=%s,na=%s,nb=%s), there was too many dispersed paralogies in the MHP, thus for the calculation we chose nab=min(na,nb)=%s" % (m,g,la,lb,nab,na,nb,min(na,nb))
++        print("Warning: during the computation of pValue(m=%s,g=%s,la=%s,lb=%s,nab=%s,na=%s,nb=%s), there was too many dispersed paralogies in the MHP, thus for the calculation we chose nab=min(na,nb)=%s" % (m,g,la,lb,nab,na,nb,min(na,nb)), file=sys.stderr)
+         nab=min(na,nb)
+     elif m > nab:
+-        print >> sys.stderr, "Warning: not able to compute pValue(%s,%s,%s,%s,%s,%s,%s) because there are not %s hps in the MHP" % (m,g,la,lb,nab,na,nb,m)
++        print("Warning: not able to compute pValue(%s,%s,%s,%s,%s,%s,%s) because there are not %s hps in the MHP" % (m,g,la,lb,nab,na,nb,m), file=sys.stderr)
+         return None
+     elif m > min([la, lb]):
+-        print >> sys.stderr, "Warning: not able to compute pValue(%s,%s,%s,%s,%s,%s,%s) because there are too many dispersed paralogies in the window" % (m,g,la,lb,nab,na,nb)
++        print("Warning: not able to compute pValue(%s,%s,%s,%s,%s,%s,%s) because there are too many dispersed paralogies in the window" % (m,g,la,lb,nab,na,nb), file=sys.stderr)
+         return None
+ 
+     nw = float(na*nb)/float(la*lb)
+     try:
+         pw = p_w(m, g, la, lb, nab, na, nb, p_hpSign)
+     except:
+-        print >> sys.stderr, "Warning: not able to compute pValue(%s,%s,%s,%s,%s,%s,%s) for unknown reasons" % (m,g,la,lb,nab,na,nb)
++        print("Warning: not able to compute pValue(%s,%s,%s,%s,%s,%s,%s) for unknown reasons" % (m,g,la,lb,nab,na,nb), file=sys.stderr)
+         return None
+     if pw is None:
+         return None

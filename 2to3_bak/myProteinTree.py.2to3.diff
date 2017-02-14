@@ -1,0 +1,91 @@
+--- myProteinTree.py	(original)
++++ myProteinTree.py	(refactored)
+@@ -9,8 +9,8 @@
+ import sys
+ import collections
+ 
+-import myTools
+-import myFile
++from . import myTools
++from . import myFile
+ 
+ # Manage gene trees in the form of (data,info)
+ 
+@@ -60,8 +60,8 @@
+ 
+     def doBackup(self):
+         self.backRoot = self.root
+-        self.backData = dict((node,values[:]) for (node,values) in self.data.iteritems())
+-        self.backInfo = dict((node,values.copy()) for (node,values) in self.info.iteritems())
++        self.backData = dict((node,values[:]) for (node,values) in self.data.items())
++        self.backInfo = dict((node,values.copy()) for (node,values) in self.info.items())
+ 
+ 
+ 
+@@ -72,12 +72,12 @@
+ 
+             indent = "\t" * n
+             # id of the node
+-            print >> f, "%sid\t%d" % (indent, node)
++            print("%sid\t%d" % (indent, node), file=f)
+             # informations
+-            print >> f, "%sinfo\t{%s}" % (indent, ", ".join(repr(key) + ": " + repr(value) for (key, value) in sorted(self.info[node].iteritems())))
++            print("%sinfo\t{%s}" % (indent, ", ".join(repr(key) + ": " + repr(value) for (key, value) in sorted(self.info[node].items()))), file=f)
+             # children
+             for (g,d) in self.data.get(node,[]):
+-                print >> f, "%s\tlen\t%f" % (indent, d)
++                print("%s\tlen\t%f" % (indent, d), file=f)
+                 rec(n+1, g)
+ 
+         rec(0, self.root if node is None else node)
+@@ -102,7 +102,7 @@
+ 
+         if root is None:
+             root = self.root
+-        print >> f, rec(root) + ("[&&NHX:" + ":".join(("%s=%s" % ((NHX[tag],self.info[root][tag]) if tag!="Duplication" else (NHX[tag],"N" if self.info[root][tag]== 0 else "Y"))).replace(" ", ".") for tag in NHX if tag in self.info[root]) + "]" if withTags else "") + ";"
++        print(rec(root) + ("[&&NHX:" + ":".join(("%s=%s" % ((NHX[tag],self.info[root][tag]) if tag!="Duplication" else (NHX[tag],"N" if self.info[root][tag]== 0 else "Y"))).replace(" ", ".") for tag in NHX if tag in self.info[root]) + "]" if withTags else "") + ";", file=f)
+         try:
+             f.flush()
+         except AttributeError:
+@@ -119,8 +119,8 @@
+             else:
+                 return "(" + ",".join([rec(x) + ":" + str(l) for (x,l)  in self.data[node]]) + ") " + self.info[node]['family_name']
+         tr = rec(self.root if node is None else node)
+-        print >> f, " ".join(genes)
+-        print >> f, tr, ";"
++        print(" ".join(genes), file=f)
++        print(tr, ";", file=f)
+ 
+ 
+     # Compact a tree by removing intermediary nodes that have only one child
+@@ -282,11 +282,11 @@
+                     if anc in children:
+                         lst1 = children.pop(anc)
+                         lst2 = []
+-                        for tmp in children.itervalues():
++                        for tmp in children.values():
+                             lst2.extend(tmp)
+                         items = [(anc,lst1), (anc,lst2)]
+                     else:
+-                        items = children.items()
++                        items = list(children.items())
+ 
+                     newData = set()
+                     for (anc,lst) in items:
+@@ -381,7 +381,7 @@
+         return currID
+ 
+ 
+-    print >> sys.stderr, "Loading the forest of gene trees %s ..." % name,
++    print("Loading the forest of gene trees %s ..." % name, end=' ', file=sys.stderr)
+     f = myFile.openFile(name, "r") if isinstance(name, str) else name
+     ns.curr = None
+     nextLine()
+@@ -393,6 +393,6 @@
+         n = (n[0]+1, n[1]+len(tree.data), n[2]+len(tree.info)-len(tree.data))
+         if ns.curr == None:
+             break
+-    print >> sys.stderr, "%d roots, %d branches, %d nodes OK" % n
++    print("%d roots, %d branches, %d nodes OK" % n, file=sys.stderr)
+ 
+     f.close()

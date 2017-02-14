@@ -1,0 +1,197 @@
+--- myMapping.py	(original)
++++ myMapping.py	(refactored)
+@@ -9,10 +9,11 @@
+ # This file contains classes and methods for 1D management of chromosomes
+ import sys
+ 
+-import myTools
+-import myLightGenomes
+-from myLightGenomes import OGene as OGene
++from . import myTools
++from . import myLightGenomes
++from .myLightGenomes import OGene as OGene
+ import collections
++from functools import reduce
+ 
+ # because of collections.Counter
+ @myTools.minimalPythonVersion((2, 7))
+@@ -20,11 +21,11 @@
+     assert isinstance(g_fID, myLightGenomes.LightGenome)
+     # create a long chromosome with all the chromosome gene names
+     newF = []
+-    for chrom in g_fID.values():
++    for chrom in list(g_fID.values()):
+         chrom = [gene.n for gene in chrom]
+         newF = newF + chrom
+     dupCounter = collections.Counter(newF)
+-    nbGeneDup = sum([duplicates-1 for duplicates in dupCounter.values()])
++    nbGeneDup = sum([duplicates-1 for duplicates in list(dupCounter.values())])
+     return (nbGeneDup, dupCounter)
+ 
+ # Rewrite genomes as a list of family Ids
+@@ -34,15 +35,15 @@
+     """
+     assert isinstance(genome, myLightGenomes.LightGenome)
+     # there is at least one chromosome
+-    assert len(genome.values()) > 0
+-    assert isinstance(genome.values()[0], list)
++    assert len(list(genome.values())) > 0
++    assert isinstance(list(genome.values())[0], list)
+     if families is None:
+         return genome
+     assert isinstance(families, myLightGenomes.Families)
+-    assert isinstance(genome.values()[0][0], tuple)
+-    assert all(len(chrom) > 0 for chrom in genome.values())
++    assert isinstance(list(genome.values())[0][0], tuple)
++    assert all(len(chrom) > 0 for chrom in list(genome.values()))
+     newGenome = myLightGenomes.LightGenome()
+-    for c in genome.keys():
++    for c in list(genome.keys()):
+         #assert len(genome[c]) >=1
+         for (g, s) in genome[c]:
+             fid = families.getFamID(g, default=None)
+@@ -53,10 +54,10 @@
+ def labelWithFamNames(genome, families, keepGnOfGenesNotInFamilies=False):
+     assert isinstance(families, myLightGenomes.Families)
+     assert isinstance(genome, myLightGenomes.LightGenome)
+-    assert isinstance(genome.values()[0], list)
+-    assert all(len(chrom) > 0 for chrom in genome.values()), " ".join(['%s:%s' % (c,len(chrom)) for c, chrom in genome.iteritems()])
++    assert isinstance(list(genome.values())[0], list)
++    assert all(len(chrom) > 0 for chrom in list(genome.values())), " ".join(['%s:%s' % (c,len(chrom)) for c, chrom in genome.items()])
+     newGenome = myLightGenomes.LightGenome()
+-    for c in genome.keys():
++    for c in list(genome.keys()):
+         for g in genome[c]:
+             fn = families.getFamNameByName(g.n, default=None)
+             if fn is None and keepGnOfGenesNotInFamilies is True:
+@@ -78,11 +79,11 @@
+     """
+     assert isinstance(families, myLightGenomes.Families)
+     assert isinstance(genome, myLightGenomes.LightGenome)
+-    assert type(genome.values()[0]) == list
+-    assert all(len(chrom) > 0 for chrom in genome.values())
++    assert type(list(genome.values())[0]) == list
++    assert all(len(chrom) > 0 for chrom in list(genome.values()))
+ 
+     newGenome = myLightGenomes.LightGenome()
+-    for c in genome.keys():
++    for c in list(genome.keys()):
+         for g in genome[c]:
+             family = families.getFamilyByName(g.n, default=None)
+             if family is None:
+@@ -207,7 +208,7 @@
+     assert type(removedNames) == set
+     assert isinstance(genome, myLightGenomes.LightGenome)
+     (newGenome, mfGC2old, (nbChrLoss, nbGeneLoss)) = remapFilterGeneContent(genome, removedNames)
+-    assert len(newGenome.keys()) == len(mfGC2old.keys())
++    assert len(list(newGenome.keys())) == len(list(mfGC2old.keys()))
+     (newGenome, mfS2fGC, (nbChrLossSize, nbGeneLossSize)) = remapFilterSize(newGenome, minChromLength)
+     nbChrLoss += nbChrLossSize
+     nbGeneLoss += nbGeneLossSize
+@@ -299,7 +300,7 @@
+     nbChrLoss = 0
+     nbGeneLoss = 0
+     mfilt2old = {}
+-    for c in genome.keys():
++    for c in list(genome.keys()):
+         nbGenes = len(genome[c])
+         if nbGenes < minChromLength:
+             nbChrLoss += 1
+@@ -354,7 +355,7 @@
+     tandemDistMax = tandemGapMax + 1
+     #TODO next loops could be optimised
+     combinator = myTools.myCombinator()
+-    for c, chrom_tb in genome_fID.iteritems():
++    for c, chrom_tb in genome_fID.items():
+         tb2g[c] = []
+         # print >> sys.stderr, "Length in tbs before tandem gap = %s" % len(chrom_tb)
+         for (i, fID) in enumerate(chrom_tb):
+@@ -413,7 +414,7 @@
+         combinator.reset()
+ 
+     mtb2g = {}
+-    for (c, newMapC) in tb2g.iteritems():
++    for (c, newMapC) in tb2g.items():
+         mtb2g[c] = Mapping(newMapC)
+ 
+     # #DEBUG assertion
+@@ -459,7 +460,7 @@
+         #TODO next loops could be optimised
+         tmp_tb2g = {}
+         combinator = myTools.myCombinator()
+-        for c, chrom_tb in tmp_genome_tb.iteritems():
++        for c, chrom_tb in tmp_genome_tb.items():
+             # print >> sys.stderr, "Length in tbs before tandem gap = %s" % len(chrom_tb)
+             for (i, fID) in enumerate(chrom_tb):
+                 # Range starts at 2 because since genomes are already rewritten
+@@ -521,7 +522,7 @@
+         tb2g = tmp_tb2g
+ 
+     mtb2g = {}
+-    for (c, newMapC) in tb2g.iteritems():
++    for (c, newMapC) in tb2g.items():
+         mtb2g[c] = Mapping(newMapC)
+ 
+     # DEBUG assertion
+@@ -554,7 +555,7 @@
+ 
+     posDict = {}
+     distDict = {}
+-    for (chr, genes) in genomeFilt.iteritems():
++    for (chr, genes) in genomeFilt.items():
+         for (pos, gene) in enumerate(genes):
+             if gene.n in posDict:
+                 posDict[gene.n].append((chr, pos))
+@@ -568,19 +569,19 @@
+ 
+ def calcTotalDupFromDist(distDict):
+     # Given the dict of distances from calcDupDist, return number of duplication in genome
+-    return(sum([len(distances) for distances in distDict.itervalues()]))
++    return(sum([len(distances) for distances in distDict.values()]))
+ 
+ def calcTandemDupFromDist(distDict, gapMax, cumulated = True):
+     # Given the dict of distances from calcDupDist and a gapMax, return number of tandemDuplications
+     distMax = gapMax+1
+     if cumulated:
+-        return(len([distance for distances in distDict.itervalues() for distance in distances if distance != -1 and distance <= distMax]))
++        return(len([distance for distances in distDict.values() for distance in distances if distance != -1 and distance <= distMax]))
+     else:
+-        return (len([distance for distances in distDict.itervalues() for distance in distances if distance != -1 and distance == distMax]))
++        return (len([distance for distances in distDict.values() for distance in distances if distance != -1 and distance == distMax]))
+ 
+ def getAncFamNames(genomeOrFamDesc, famAnc):
+     if isinstance(genomeOrFamDesc, myLightGenomes.LightGenome):
+-        geneNameList = [gene.n for genes in genomeOrFamDesc.itervalues() for gene in genes]
++        geneNameList = [gene.n for genes in genomeOrFamDesc.values() for gene in genes]
+         out = [famAnc.getFamNameByName(gene, default=None) for gene in geneNameList]
+     elif isinstance(genomeOrFamDesc, myLightGenomes.Families):
+         out = [famAnc.getFamNameByName(next(iter(recFam.dns)), default=None) for recFam in genomeOrFamDesc]
+@@ -612,9 +613,9 @@
+         # Helper function to calcTandemDup
+         # Returns on filtered genome the exact number of tandemDups with given gap
+         dupsInDist = 0
+-        for genes in genomeFilt.itervalues():
+-            for iGene in xrange(len(genes) - 1 - allowedGap):
+-                correctedDist = [genes[iGene].n != genes[iGene + gap].n for gap in xrange(1, allowedGap+1)]
++        for genes in genomeFilt.values():
++            for iGene in range(len(genes) - 1 - allowedGap):
++                correctedDist = [genes[iGene].n != genes[iGene + gap].n for gap in range(1, allowedGap+1)]
+                 if all(correctedDist) and genes[iGene].n == genes[iGene + allowedGap + 1].n:
+                     dupsInDist += 1
+         return(dupsInDist)
+@@ -635,13 +636,13 @@
+             familySizes[gene.n] += 1
+ 
+     nGeneDupl = 0
+-    for familySize in familySizes.values():
++    for familySize in list(familySizes.values()):
+         nGeneDupl += familySize - 1
+ 
+     dupsInDist = calcTandemDupWithStrictGap(genomeFilt, allowedGap)
+ 
+     if cumulated:
+-        for recentGap in xrange(allowedGap):
++        for recentGap in range(allowedGap):
+             dupsInDist += calcTandemDupWithStrictGap(genomeFilt, recentGap)
+ 
+     return (dupsInDist, nGeneDupl)

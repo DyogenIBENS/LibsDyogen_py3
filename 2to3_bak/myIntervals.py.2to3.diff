@@ -1,0 +1,89 @@
+--- myIntervals.py	(original)
++++ myIntervals.py	(refactored)
+@@ -7,8 +7,8 @@
+ # Licences GLP v3 and CeCILL v2
+ 
+ import collections
+-from myLightGenomes import OGene, LightGenome
+-import myTools
++from .myLightGenomes import OGene, LightGenome
++from . import myTools
+ import sys
+ 
+ # GeneExtremity
+@@ -206,7 +206,7 @@
+ def analyseGenomeIntoChromExtremities(genome, oriented=True):
+     isinstance(genome, LightGenome)
+     res = set()
+-    for chrom in genome.values():
++    for chrom in list(genome.values()):
+         if oriented:
+             chromGeneExtrLeft = geneExtremityFromGene(chrom[0], -1)
+             chromGeneExtrRight = geneExtremityFromGene(chrom[-1], +1)
+@@ -223,7 +223,7 @@
+         setAdjs = set()
+     else:
+         setAdjs = list()
+-    for chrom in genome.values():
++    for chrom in list(genome.values()):
+         assert len(chrom) > 0
+         if len(chrom) > 1:
+             for (og1, og2) in myTools.myIterator.slidingTuple(chrom):
+@@ -268,20 +268,20 @@
+     isinstance(genome, LightGenome)
+     isinstance(refGenome, LightGenome)
+ 
+-    print >> sys.stderr, "nb of chroms = %s" % len(genome.keys())
+-    print >> sys.stderr, "nb of monogenic-chroms = %s" % sum([1 for chrom in genome.values() if len(chrom) == 1])
+-    print >> sys.stderr, "nb of reference chroms = %s" % len(refGenome.keys())
+-    print >> sys.stderr, "nb of reference monogenic-chroms = %s" % sum([1 for chrom in refGenome.values() if len(chrom) == 1])
++    print("nb of chroms = %s" % len(list(genome.keys())), file=sys.stderr)
++    print("nb of monogenic-chroms = %s" % sum([1 for chrom in list(genome.values()) if len(chrom) == 1]), file=sys.stderr)
++    print("nb of reference chroms = %s" % len(list(refGenome.keys())), file=sys.stderr)
++    print("nb of reference monogenic-chroms = %s" % sum([1 for chrom in list(refGenome.values()) if len(chrom) == 1]), file=sys.stderr)
+ 
+     setGeneNames = genome.getGeneNames(asA=set, checkNoDuplicates=False)
+     # R: reference
+     setGeneNamesR = refGenome.getGeneNames(asA=set, checkNoDuplicates=True)
+-    print >> sys.stderr, "nb gene names = %s" % len(setGeneNames)
+-    print >> sys.stderr, "nb gene names in reference = %s" % len(setGeneNamesR)
+-    print >> sys.stderr, "nb of gene names in both = %s" % len(setGeneNamesR & setGeneNames)
++    print("nb gene names = %s" % len(setGeneNames), file=sys.stderr)
++    print("nb gene names in reference = %s" % len(setGeneNamesR), file=sys.stderr)
++    print("nb of gene names in both = %s" % len(setGeneNamesR & setGeneNames), file=sys.stderr)
+     # this one is empti for the uniquely Amniota_mm_gg simu, whereas it contains mainy values in the whole simualtion
+-    print >> sys.stderr, "gene names that are in setGeneNames - setGeneNamesR =", setGeneNames - setGeneNamesR
+-    print >> sys.stderr, "gene names that are in setGeneNamesR - setGeneNames =", setGeneNamesR - setGeneNames
++    print("gene names that are in setGeneNames - setGeneNamesR =", setGeneNames - setGeneNamesR, file=sys.stderr)
++    print("gene names that are in setGeneNamesR - setGeneNames =", setGeneNamesR - setGeneNames, file=sys.stderr)
+ 
+     setRes = set()
+     refSetRes = set()
+@@ -295,8 +295,8 @@
+         setRes = analyseGenomeIntoChromExtremities(genome, oriented=oriented)
+         refSetRes = analyseGenomeIntoChromExtremities(refGenome, oriented=oriented)
+ 
+-    print >> sys.stderr, "nb of %s = %s" % (itemType, len(setRes))
+-    print >> sys.stderr, "nb of %s in ref = %s" % (itemType, len(refSetRes))
++    print("nb of %s = %s" % (itemType, len(setRes)), file=sys.stderr)
++    print("nb of %s in ref = %s" % (itemType, len(refSetRes)), file=sys.stderr)
+ 
+     # True positive adjs
+     sTp = setRes & refSetRes
+@@ -310,11 +310,11 @@
+     sensitivity = float(Tp) / float(Tp + Fn)
+     specificity = float(Tp) / float(Tp + Fp)
+ 
+-    print >> sys.stderr, "Tp=%s" % Tp
+-    print >> sys.stderr, "Fp=%s" % Fp
+-    print >> sys.stderr, "Fn=%s" % Fn
+-    print >> sys.stderr, "sensitivity=%s" % sensitivity
+-    print >> sys.stderr, "specificity=%s" % specificity
++    print("Tp=%s" % Tp, file=sys.stderr)
++    print("Fp=%s" % Fp, file=sys.stderr)
++    print("Fn=%s" % Fn, file=sys.stderr)
++    print("sensitivity=%s" % sensitivity, file=sys.stderr)
++    print("specificity=%s" % specificity, file=sys.stderr)
+ 
+     return (Efficiency(Tp, Tn, Fp, Fn, sensitivity, specificity), (sTp, sFp, sFn))
+ 

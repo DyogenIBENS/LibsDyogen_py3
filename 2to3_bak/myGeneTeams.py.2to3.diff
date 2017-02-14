@@ -1,0 +1,141 @@
+--- myGeneTeams.py	(original)
++++ myGeneTeams.py	(refactored)
+@@ -45,12 +45,12 @@
+ import itertools
+ import collections
+ 
+-import myMapping
+-import myFile
+-import myTools
+-import myGenomes
+-import myDiags
+-import myMaths
++from . import myMapping
++from . import myFile
++from . import myTools
++from . import myGenomes
++from . import myDiags
++from . import myMaths
+ 
+ FilterType = myDiags.FilterType
+ 
+@@ -63,7 +63,7 @@
+     families1 = set([f for (f,_) in gc1])
+     families2 = set([f for (f,_) in gc2])
+     families = dict([(f, ([], [])) for f in families1 & families2])
+-    if len(families.keys()) == 0:
++    if len(list(families.keys())) == 0:
+         return ()
+ 
+     for i1, (f,_) in enumerate(gc1):
+@@ -76,9 +76,9 @@
+ 
+     cogFileName = './tmpFile.cog'
+     cogFile = open(cogFileName, 'w')
+-    print >> cogFile, "FAMILY_ID %s %s" % (c1, c2)
+-    for (f, (i1s, i2s)) in families.iteritems():
+-        print >> cogFile, myFile.myTSV.printLine([f, ':'.join([str(i1) for i1 in i1s]), ':'.join([str(i2) for i2 in i2s])], delim=' ')
++    print("FAMILY_ID %s %s" % (c1, c2), file=cogFile)
++    for (f, (i1s, i2s)) in families.items():
++        print(myFile.myTSV.printLine([f, ':'.join([str(i1) for i1 in i1s]), ':'.join([str(i2) for i2 in i2s])], delim=' '), file=cogFile)
+     cogFile.close()
+     # The file *.cog is ok
+ 
+@@ -153,36 +153,36 @@
+     g1_aID = myMapping.labelWithFamID(g1, families)
+     g2_aID = myMapping.labelWithFamID(g2, families)
+     # genes that are not in ancGene have a aID=None
+-    print >> sys.stderr, "genome 1 initially contains %s genes" % sum([len(g1[c1]) for c1 in g1])
+-    print >> sys.stderr, "genome 2 initially contains %s genes" % sum([len(g2[c2]) for c2 in g2])
++    print("genome 1 initially contains %s genes" % sum([len(g1[c1]) for c1 in g1]), file=sys.stderr)
++    print("genome 2 initially contains %s genes" % sum([len(g2[c2]) for c2 in g2]), file=sys.stderr)
+     # Must be applied on the two genomes, because of the mode inBothGenomes (InCommonAncestor => not only anchor genes are kept but all genes herited from a gene of the LCA)
+     #mfilt2origin1 -> mGf2Go1
+     ((g1_aID, mGf2Go1, (nCL1, nGL1)), (g2_aID, mGf2Go2, (nCL2, nGL2))) =\
+         myDiags.filter2D(g1_aID, g2_aID, filterType, minChromLength)
+-    print >> sys.stderr, "genome 1 after filterType=%s and minChromLength=%s contains %s genes" %\
+-        (filterType, minChromLength, sum([len(g1_aID[c1]) for c1 in g1_aID]))
+-    print >> sys.stderr, "genome 2 after filterType=%s and minChromLength=%s contains %s genes" %\
+-        (filterType, minChromLength, sum([len(g2_aID[c2]) for c2 in g2_aID]))
++    print("genome 1 after filterType=%s and minChromLength=%s contains %s genes" %\
++        (filterType, minChromLength, sum([len(g1_aID[c1]) for c1 in g1_aID])), file=sys.stderr)
++    print("genome 2 after filterType=%s and minChromLength=%s contains %s genes" %\
++        (filterType, minChromLength, sum([len(g2_aID[c2]) for c2 in g2_aID])), file=sys.stderr)
+     nGD1 = myMapping.nbDup(g1_aID)[0]
+     nGD2 = myMapping.nbDup(g2_aID)[0]
+-    print >> sys.stderr, "genome 1 contains %s gene duplicates (initial gene excluded)" % nGD1
+-    print >> sys.stderr, "genome 2 contains %s gene duplicates (initial gene excluded)" % nGD2
++    print("genome 1 contains %s gene duplicates (initial gene excluded)" % nGD1, file=sys.stderr)
++    print("genome 2 contains %s gene duplicates (initial gene excluded)" % nGD2, file=sys.stderr)
+     (g1_tb, mtb2g1, nGTD1) = myMapping.remapRewriteInTb(g1_aID, tandemGapMax=tandemGapMax, mOld=mGf2Go1)
+     (g2_tb, mtb2g2, nGTD2) = myMapping.remapRewriteInTb(g2_aID, tandemGapMax=tandemGapMax, mOld=mGf2Go2)
+-    print >> sys.stderr, "genome 1 rewritten in tbs, contains %s tbs" % sum([len(g1_tb[c1]) for c1 in g1_tb])
+-    print >> sys.stderr, "genome 2 rewritten in tbs, contains %s tbs" % sum([len(g2_tb[c2]) for c2 in g2_tb])
++    print("genome 1 rewritten in tbs, contains %s tbs" % sum([len(g1_tb[c1]) for c1 in g1_tb]), file=sys.stderr)
++    print("genome 2 rewritten in tbs, contains %s tbs" % sum([len(g2_tb[c2]) for c2 in g2_tb]), file=sys.stderr)
+     #TODO, optimise next step
+ 
+     # second level of verbosity
+     verbose2 = True if (len(g1) > 500 or len(g2) > 500) else False
+     N12s, N12_g = myDiags.numberOfHomologies(g1_tb, g2_tb, verbose=verbose2)
+-    print >> sys.stderr, "pairwise comparison of genome 1 and genome 2 yields %s hps" % N12_g
+-    print >> sys.stderr, "genome 1 contains %s tandem duplicated genes (initial gene excluded)" % nGTD1
+-    print >> sys.stderr, "genome 2 contains %s tandem duplicated genes (initial gene excluded)" % nGTD2
++    print("pairwise comparison of genome 1 and genome 2 yields %s hps" % N12_g, file=sys.stderr)
++    print("genome 1 contains %s tandem duplicated genes (initial gene excluded)" % nGTD1, file=sys.stderr)
++    print("genome 2 contains %s tandem duplicated genes (initial gene excluded)" % nGTD2, file=sys.stderr)
+     nDD1 = myMapping.nbDup(g1_tb)[0]
+     nDD2 = myMapping.nbDup(g2_tb)[0]
+-    print >> sys.stderr, "genome 1 contains %s dispersed duplicated tbs (initial tb excluded)" % nDD1
+-    print >> sys.stderr, "genome 2 contains %s dispersed duplicated tbs (initial tb excluded)" % nDD2
++    print("genome 1 contains %s dispersed duplicated tbs (initial tb excluded)" % nDD1, file=sys.stderr)
++    print("genome 2 contains %s dispersed duplicated tbs (initial tb excluded)" % nDD2, file=sys.stderr)
+     assert nDD1 + nGTD1 == nGD1
+     assert nDD2 + nGTD2 == nGD2
+ 
+@@ -190,20 +190,20 @@
+     #################################################################################
+     # extract sbs in the tb base
+     listOfGts = []
+-    nbPairwiseComparisons = len(g1_tb.keys())*len(g2_tb.keys())
+-    listOfPercentage = range(0, 101, 5)[1:]
+-    print >> sys.stderr, "gene teams extraction",
+-    for (i, (chr1, chr2)) in enumerate(itertools.product(g1_tb.keys(), g2_tb.keys())):
++    nbPairwiseComparisons = len(list(g1_tb.keys()))*len(list(g2_tb.keys()))
++    listOfPercentage = list(range(0, 101, 5))[1:]
++    print("gene teams extraction", end=' ', file=sys.stderr)
++    for (i, (chr1, chr2)) in enumerate(itertools.product(list(g1_tb.keys()), list(g2_tb.keys()))):
+         tmpListOfGts = extractGtsInPairCompChr(chr1, chr2,
+                                                g1_tb[chr1], g2_tb[chr2],
+                                                gapMax=gapMax, verbose=True)
+         listOfGts.extend(tmpListOfGts)
+         progress = int(float(i*100)/nbPairwiseComparisons)
+         if progress in listOfPercentage:
+-            print >> sys.stderr, "%s" % progress + "%",
++            print("%s" % progress + "%", end=' ', file=sys.stderr)
+             listOfPercentage.remove(progress)
+     # new line in the print
+-    print >> sys.stderr, ""
++    print("", file=sys.stderr)
+ 
+ 
+     # setp 4 : statistical validation of gts
+@@ -250,7 +250,7 @@
+ 
+ 
+ def printGtsFile(listOfGts, genome1, genome2, families):
+-    print >> sys.stderr, "Print gene teams"
++    print("Print gene teams", file=sys.stderr)
+ 
+     def foo(genomeX, cX, lX, idxAG):
+         if isinstance(genomeX, myGenomes.Genome):
+@@ -271,6 +271,6 @@
+         for (idxAG, fId) in enumerate(la):
+             (g1s, g1Idxs) = foo(genome1, c1, l1, idxAG)
+             (g2s, g2Idxs) = foo(genome2, c2, l2, idxAG)
+-            print myFile.myTSV.printLine([idGt, families[fId].fn, c1, c2, g1Idxs, g2Idxs, g1s, g2s])
+-
+-    print >> sys.stderr, "Distribution of the lengths of gene teams\t", myMaths.myStats.syntheticTxtSummary(statsGts)
++            print(myFile.myTSV.printLine([idGt, families[fId].fn, c1, c2, g1Idxs, g2Idxs, g1s, g2s]))
++
++    print("Distribution of the lengths of gene teams\t", myMaths.myStats.syntheticTxtSummary(statsGts), file=sys.stderr)

@@ -1,0 +1,27 @@
+--- mySvgDrawer.py	(original)
++++ mySvgDrawer.py	(refactored)
+@@ -418,7 +418,8 @@
+         height = max(height, (_origin.y + _height) - origin.y)
+     return (origin, width, height)
+ 
+-def translateItems(listOfItems, (tx, ty)):
++def translateItems(listOfItems, xxx_todo_changeme):
++    (tx, ty) = xxx_todo_changeme
+     for item in listOfItems:
+         if isinstance(item, Gene):
+             item.start = Point(item.start.x + tx, item.start.y + ty)
+@@ -462,12 +463,12 @@
+     listOfItems = []
+     translateValue = sizeGene
+     currPosition = origin
+-    for (genomeName, genomeItems) in genomesItems.iteritems():
++    for (genomeName, genomeItems) in genomesItems.items():
+         # add a sapece between each genome
+         currPosition = Point(currPosition.x, currPosition.y + translateValue)
+         # genome name
+         listOfItems.append(Text(currPosition, genomeName, size=sizeGene))
+-        for (chr, chromosomeItems) in genomeItems.items():
++        for (chr, chromosomeItems) in list(genomeItems.items()):
+             # add a space between each chromosome
+             currPosition = Point(currPosition.x, currPosition.y + translateValue)
+             translateItems(chromosomeItems, currPosition)

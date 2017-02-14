@@ -1,0 +1,249 @@
+--- myLightGenomes.py	(original)
++++ myLightGenomes.py	(refactored)
+@@ -11,18 +11,19 @@
+ import collections
+ import itertools
+ import re
+-import myFile
+-import myGenomes
+-import myTools
++from . import myFile
++from . import myGenomes
++from . import myTools
+ import enum
+ 
+ 
+-def _keyFuncNaturalSort((c, chrom)):
++def _keyFuncNaturalSort(xxx_todo_changeme):
+     '''
+     alist.sort(key=natural_keys) sorts in human wished order
+     http://nedbatchelder.com/blog/200712/human_sorting.html
+     (See Toothy's implementation in the comments)
+     '''
++    (c, chrom) = xxx_todo_changeme
+     res = [myTools.atoi(c) for c in re.split('([0-9]+)', str(c))]
+     return res
+ 
+@@ -68,7 +69,7 @@
+ def newChromName(genome):
+     assert isinstance(genome, LightGenome)
+     chromNames = set([])
+-    for c in genome.keys():
++    for c in list(genome.keys()):
+         try:
+             c = int(c)
+             chromNames.add(c)
+@@ -207,20 +208,20 @@
+         flb = myFile.firstLineBuffer(myFile.openFile(fileName, 'r'))
+         c = flb.firstLine.split("\t")
+         if len(c) == 6:
+-            print >> sys.stderr, "(c, beg, end, s, gName, transcriptName) -> (c, s, gName)",
++            print("(c, beg, end, s, gName, transcriptName) -> (c, s, gName)", end=' ', file=sys.stderr)
+             # c, beg, end, s,  gName, transcriptName
+             reader = myFile.myTSV.readTabular(fileName, [str, int, int, int, str, str])
+             reader = ((c, strand, gName) for (c, beg, end, strand, gName, tName) in reader)
+         elif len(c) == 3:
+-            print >> sys.stderr, "(c, s, gName)",
++            print("(c, s, gName)", end=' ', file=sys.stderr)
+             # c, s, gName
+             reader = myFile.myTSV.readTabular(fileName, [str, int, str])
+         elif len(c) == 5:
+-            print >> sys.stderr, "(c, beg, end, s, gName) -> (c, s, gName)",
++            print("(c, beg, end, s, gName) -> (c, s, gName)", end=' ', file=sys.stderr)
+             # c, beg, end, s,  gName
+             tmpReader = myFile.myTSV.readTabular(fileName, [str, int, int, int, str])
+             # check, with the first line, if there are several gene names (the format genome of Matthieu contains several gene names)
+-            (c, beg, end, strand, gNames) = tmpReader.next()
++            (c, beg, end, strand, gNames) = next(tmpReader)
+             severalNames = True if len(gNames.split(' ')) > 0 else False
+             reader = itertools.chain([(c, beg, end, strand, gNames)], tmpReader)
+             if severalNames:
+@@ -250,11 +251,11 @@
+         if isinstance(arg, str):
+             fileName = arg
+             self.name = fileName
+-            print >> sys.stderr, "Loading LightGenome from", fileName,
++            print("Loading LightGenome from", fileName, end=' ', file=sys.stderr)
+             # FIXME use myFile.firstLineBuffer to choose which format is in input.
+             # choice of the loading function
+             reader = self.readerDependingOnFile(fileName)
+-            print >> sys.stderr, "...",
++            print("...", end=' ', file=sys.stderr)
+ 
+             # FIXME do not need beg, end and tName
+             # c = chromosome name
+@@ -274,12 +275,12 @@
+                     # dict 'G'ene to (pronounced '2') 'P'osition
+                     self.g2p[gName] = GeneP(c, idx)
+                     c_old = c
+-            print >> sys.stderr, 'OK'
++            print('OK', file=sys.stderr)
+         elif isinstance(arg, myGenomes.Genome):
+             genome = arg
+             self.name = genome.name
+             self.chrSet = arg.chrSet
+-            for c in genome.lstGenes.keys():
++            for c in list(genome.lstGenes.keys()):
+                 for (idx, g) in enumerate(genome.lstGenes[c]):
+                     self[str(c)].append(OGene(g.names[0], g.strand))
+                     if self.withDict:
+@@ -291,7 +292,7 @@
+             for c in arg:
+                 self[c] = [OGene(gene.n, gene.s) for gene in arg[c]]
+             if self.withDict:
+-                self.g2p = dict((gn, GeneP(gp.c, gp.idx)) for (gn, gp) in arg.g2p.iteritems())
++                self.g2p = dict((gn, GeneP(gp.c, gp.idx)) for (gn, gp) in arg.g2p.items())
+         elif isinstance(arg, dict):
+             genome = arg
+             for c in genome:
+@@ -352,7 +353,7 @@
+         newLightGenome = LightGenome(withDict=self.withDict)
+         newLightGenome.name = self.name
+         newLightGenome.withDict = self.withDict
+-        for c in self.keys():
++        for c in list(self.keys()):
+             newLightGenome[c] = self[c]
+         if self.withDict:
+             newLightGenome.g2p = self.g2p
+@@ -366,7 +367,7 @@
+             return objectAlreadyBuilt
+         newLightGenome = LightGenome(withDict=self.withDict)
+         newLightGenome.name = copy.deepcopy(self.name, {})
+-        for c in self.keys():
++        for c in list(self.keys()):
+             for gene in self[c]:
+                 newLightGenome[c].append(OGene(gene.n, gene.s))
+         if self.withDict:
+@@ -376,7 +377,7 @@
+ 
+     def printIn(self, stream, format='Ensembl', begIsTranscriptionStart=True):
+         if format == 'Ensembl':
+-            for c, chrom in self.iteritems():
++            for c, chrom in self.items():
+                 for (i, g) in enumerate(chrom):
+                     if begIsTranscriptionStart:
+                         if g.s in {+1, None}:
+@@ -386,7 +387,7 @@
+                             (beg, end) =(i+1, i)
+                     else:
+                         (beg, end) = (i, i+1)
+-                    print >> stream, myFile.myTSV.printLine([c, beg, end, g.s, g.n])
++                    print(myFile.myTSV.printLine([c, beg, end, g.s, g.n]), file=stream)
+ 
+ 
+     # Returns the gene names around the intergene
+@@ -405,7 +406,7 @@
+     def removeGenes(self, setRemovedGeneNames):
+         nbRemovedGenes = 0
+         nbRemovedChrs = 0
+-        for (c, chrom) in self.iteritems():
++        for (c, chrom) in self.items():
+             newChrom = []
+             lenNewChrom = 0
+             thereWasARemoval = False
+@@ -441,7 +442,7 @@
+     # TODO change name to getGeneNames (no ambiguity any more with a possible setter)
+     def getGeneNames(self, asA=set, checkNoDuplicates=False):
+         res = asA()
+-        for chrom in self.values():
++        for chrom in list(self.values()):
+             for gene in chrom:
+                 if checkNoDuplicates and gene.n in res:
+                     raise ValueError("%s contains two times the same gene name %s" % (self.name, gene.n))
+@@ -456,7 +457,7 @@
+         assert asA in [set, list]
+         assert isinstance(families, Families)
+         res = asA()
+-        for chrom in self.values():
++        for chrom in list(self.values()):
+             for gene in chrom:
+                 family = families.getFamilyByName(gene.n, default=None)
+                 if family:
+@@ -477,7 +478,7 @@
+         assert asA in [set, list]
+         assert isinstance(families, Families)
+         res = asA()
+-        for chrom in self.values():
++        for chrom in list(self.values()):
+             for gene in chrom:
+                 family = families.getFamilyByName(gene.n, default=None)
+                 if family:
+@@ -492,7 +493,7 @@
+         assert asA in [set, list]
+         assert isinstance(families, Families)
+         res = asA()
+-        for chrom in self.values():
++        for chrom in list(self.values()):
+             for gene in chrom:
+                 family = families.getFamilyByName(gene.n, default=None)
+                 if not family:
+@@ -504,7 +505,7 @@
+         return res
+ 
+     def removeChrsStrictlySmallerThan(self, minChrLen):
+-        sCs = self.keys()
++        sCs = list(self.keys())
+         nbRemovedChrs = 0
+         nbRemovedGenes = 0
+         for c in sCs:
+@@ -522,10 +523,10 @@
+         return (nbRemovedChrs, nbRemovedGenes)
+ 
+     def removeUnofficialChromosomes(self):
+-        if len(self.chrSet.keys()) == 0:
+-            for c in self.keys():
++        if len(list(self.chrSet.keys())) == 0:
++            for c in list(self.keys()):
+                 self.chrSet[contigType(c)].add(c)
+-        sCs = self.keys()
++        sCs = list(self.keys())
+         nbRemovedChrs = 0
+         nbRemovedGenes = 0
+         for c in sCs:
+@@ -544,8 +545,8 @@
+ 
+     def sort(self, byName=False):
+         """ Sort chrs by decreasing sizes (default), or byName """
+-        l = self.items()
+-        for c in self.keys():
++        l = list(self.items())
++        for c in list(self.keys()):
+             del self[c]
+         if byName is False:
+             # sort by decreasing size
+@@ -574,7 +575,7 @@
+         if len(args) == 1 and isinstance(args[0], str):
+             fileName = args[0]
+             self.name = fileName
+-            print >> sys.stderr, "Loading Families from", fileName, "...",
++            print("Loading Families from", fileName, "...", end=' ', file=sys.stderr)
+             # FIXME use myFile.firstLineBuffer to choose which format is in
+             # input.
+             # A more synthetic format would have only 3 columns:
+@@ -599,7 +600,7 @@
+             assert self.fidMax == len(self)
+         else:
+             raise ValueError('Constructor needs a file')
+-        print >> sys.stderr, 'OK'
++        print('OK', file=sys.stderr)
+ 
+     def addFamily(self, family):
+         assert isinstance(family, Family)
+@@ -658,7 +659,7 @@
+     def printIn(self, stream):
+         for (famID, family) in enumerate(self):
+             line = [str(family.fn)] + [str(name) for name in sorted(family.dns)]
+-            print >> stream, myFile.myTSV.printLine([" ".join(line)])
++            print(myFile.myTSV.printLine([" ".join(line)]), file=stream)
+ 
+     def __repr__(self):
+         res = []
+@@ -712,7 +713,7 @@
+             # assert all(f_A0_D.getFamilyByName(dn, default=None) == fn_A0 for dn in gns_D)
+             if fn_A0 is not None:
+                 tmp[fn_A0.fn].add(gn_A1)
+-    for (gn_A0, gns_A1) in tmp.iteritems():
++    for (gn_A0, gns_A1) in tmp.items():
+         f_A0_A1.addFamily(Family(gn_A0, sorted(list(gns_A1))))
+     return f_A0_A1
+ 

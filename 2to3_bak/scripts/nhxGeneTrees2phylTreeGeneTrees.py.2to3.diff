@@ -1,0 +1,40 @@
+--- scripts/nhxGeneTrees2phylTreeGeneTrees.py	(original)
++++ scripts/nhxGeneTrees2phylTreeGeneTrees.py	(refactored)
+@@ -12,7 +12,7 @@
+ """
+ 
+ 
+-import cStringIO
++import io
+ import string
+ 
+ import utils.myPhylTree as myPhylTree
+@@ -25,11 +25,11 @@
+ 
+ def processData(data):
+ 
+-    tree = myPhylTree.PhylogeneticTree(cStringIO.StringIO(data))
++    tree = myPhylTree.PhylogeneticTree(io.StringIO(data))
+ 
+     def printTree(indent, node):
+         global nodeid, ntree
+-        print "%sid\t%d" % (indent, nodeid)
++        print("%sid\t%d" % (indent, nodeid))
+         nodeid += 1
+ 
+         info={}
+@@ -119,12 +119,12 @@
+ 
+             info["gene_name"] = x
+ 
+-        print "%sinfo\t%s" % (indent, info)
++        print("%sinfo\t%s" % (indent, info))
+ 
+         if node in tree.items:
+             indent = indent + "\t"
+             for (e,l) in tree.items[node]:
+-                print "%slen\t%g" % (indent,l)
++                print("%slen\t%g" % (indent,l))
+                 printTree(indent, e)
+ 
+     printTree("", tree.root)

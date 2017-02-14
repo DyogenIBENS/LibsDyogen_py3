@@ -1,0 +1,137 @@
+--- myADHoRe.py	(original)
++++ myADHoRe.py	(refactored)
+@@ -12,7 +12,7 @@
+ import os
+ import subprocess
+ import sys
+-import myFile, myLightGenomes, myDiags
++from . import myFile, myLightGenomes, myDiags
+ 
+ 
+ # [("out:Chromosomes",str,), ("withScaffolds",bool,False), ("minChromLength",int,1), ('removeSpeciesSpecificGenes',bool,True)]
+@@ -27,7 +27,7 @@
+     assert isinstance(genome, myLightGenomes.LightGenome)
+     genome.removeUnofficialChromosomes()
+     genome.removeChrsStrictlySmallerThan(1)
+-    for chr, chrom in genome.iteritems():
++    for chr, chrom in genome.items():
+         chromosomeRewritten = []
+         for g in chrom:
+             #print >> sys.stderr, "process gene %s of chromosome %s" % (g.names[0],chrom)
+@@ -41,7 +41,7 @@
+                     chromosomeRewritten.append((g.n, g.s, None))
+         with open(outADHoReChromosomes % chr, 'w') as f_chromosomes:
+             for (gn, gs, fn) in chromosomeRewritten:
+-                print >> f_chromosomes, gn + ("+" if gs == 1 else "-")
++                print(gn + ("+" if gs == 1 else "-"), file=f_chromosomes)
+                 ADHoReFamily.append((gn, (fn if fn != None else gn)))
+     return ADHoReFamily
+ 
+@@ -62,7 +62,7 @@
+         with open(outAHoReFamilies, 'w') as f_families:
+             for (gn, fn) in ADHoReFamily:
+                 assert gn not in testNoDuplicate, gn
+-                print >> f_families, '\t'.join([gn, fn])
++                print('\t'.join([gn, fn]), file=f_families)
+                 testNoDuplicate.add(gn)
+         return ((outADHoReChromosomes1, outADHoReChromosomes2), outAHoReFamilies)
+ 
+@@ -74,27 +74,27 @@
+     with open(outAHoReConfigurationFile, 'w') as f:
+         for (Gi, (genome, outADHoReChromosomes)) in enumerate([(g1, outADHoReChromosomes1), (g2, outADHoReChromosomes2)]):
+             Gi = 'G%s' % (Gi+1)
+-            print >> f, 'genome= %s' % Gi
+-            for (chr, _) in genome.iteritems():
+-                print >> f, '%s_%s ' % (Gi, chr) + outADHoReChromosomes % (chr)
+-            print >> f, '\n'
+-
+-        print >> f, 'blast_table=%s\n' % outAHoReFamilies
+-
+-        print >> f, 'output_path=%s/' % resADHoRePath
+-        print >> f, 'table_type=family'
+-        print >> f, 'tandem_gap=%s' % tandemGapMax
+-        print >> f, 'gap_size=%s' % gapMax
+-        print >> f, 'cluster_gap=%s' % gapMax
+-        print >> f, 'q_value=0.90'
+-        print >> f, 'prob_cutoff=%s' % pThreshold
+-        print >> f, 'anchor_points= %s' % minimalLengthForSbs
+-        print >> f, 'level_2_only=true'
+-        print >> f, 'cluster_type=colinear'
+-        print >> f, 'visualizeGHM=%s' % vizualize
+-        print >> f, 'visualizeAlignment=false'
+-        print >> f, 'write_stats=true'
+-        print >> f, 'number_of_threads=4'
++            print('genome= %s' % Gi, file=f)
++            for (chr, _) in genome.items():
++                print('%s_%s ' % (Gi, chr) + outADHoReChromosomes % (chr), file=f)
++            print('\n', file=f)
++
++        print('blast_table=%s\n' % outAHoReFamilies, file=f)
++
++        print('output_path=%s/' % resADHoRePath, file=f)
++        print('table_type=family', file=f)
++        print('tandem_gap=%s' % tandemGapMax, file=f)
++        print('gap_size=%s' % gapMax, file=f)
++        print('cluster_gap=%s' % gapMax, file=f)
++        print('q_value=0.90', file=f)
++        print('prob_cutoff=%s' % pThreshold, file=f)
++        print('anchor_points= %s' % minimalLengthForSbs, file=f)
++        print('level_2_only=true', file=f)
++        print('cluster_type=colinear', file=f)
++        print('visualizeGHM=%s' % vizualize, file=f)
++        print('visualizeAlignment=false', file=f)
++        print('write_stats=true', file=f)
++        print('number_of_threads=4', file=f)
+     return outAHoReConfigurationFile
+ 
+ def lightGenomeFrombaseClusterOfADHoRe(outAHoReFamilies, outADHoReGenes, outADHoReAnchorpoints):
+@@ -113,7 +113,7 @@
+         #ENSG00000186092 Homo.sapiens H_1 0 +	0 0 0 'None' 0
+         assert s == '+' or s == '-'
+         if geneName in test:
+-            print >> sys.stderr, 'Warning: twice the same ancestral gene in adhore genes.txt'
++            print('Warning: twice the same ancestral gene in adhore genes.txt', file=sys.stderr)
+         test.add(geneName)
+         s = (+1 if s=='+' else -1)
+         geneName2Orientation[geneName] = s
+@@ -145,7 +145,7 @@
+     #Last loop for taking care of sbs of length <=1, or length <=2 if the option 'useSbsLength2' is set to false
+     newAncSbGenome=myLightGenomes.LightGenome()
+     cptSB = 0
+-    for (SBId,ancSb) in ancSbGenome.items():
++    for (SBId,ancSb) in list(ancSbGenome.items()):
+         for (ancGene,s,tb1Name,tb2Name) in ancSb:
+             newAncSbGenome[cptSB].append(myLightGenomes.OGene(ancGene, s))
+         cptSB += 1
+@@ -170,8 +170,8 @@
+                                                                                        tandemGapMax=tandemGapMax,
+                                                                                        minChromLength=1,
+                                                                                        keepOriginal=True)
+-    genes1Removed = set([g.n for (chr, chrom) in genome1.iteritems() for (gIdx, g) in enumerate(chrom) if gIdx not in tb2g1[chr].old])
+-    genes2Removed = set([g.n for (chr, chrom) in genome2.iteritems() for (gIdx, g) in enumerate(chrom) if gIdx not in tb2g2[chr].old])
++    genes1Removed = set([g.n for (chr, chrom) in genome1.items() for (gIdx, g) in enumerate(chrom) if gIdx not in tb2g1[chr].old])
++    genes2Removed = set([g.n for (chr, chrom) in genome2.items() for (gIdx, g) in enumerate(chrom) if gIdx not in tb2g2[chr].old])
+     # print >> sys.stderr, 'nb genes1 removed = %s' % len(genes1Removed)
+     # print >> sys.stderr, 'nb nGL1 = %s' % nGL1
+     # print >> sys.stderr, 'nb genes2 removed = %s' % len(genes2Removed)
+@@ -204,7 +204,7 @@
+     # proc.returncode, might be interesting too
+     # stdout is a str
+     # Use this line to output the output of GRIMM
+-    print >> sys.stderr, subProcStderr
++    print(subProcStderr, file=sys.stderr)
+ 
+     outADHoReGenes = resADHoRePath + '/' + 'genes.txt'
+     outADHoReAnchorpoints = resADHoRePath + '/' + 'anchorpoints.txt'
+@@ -219,9 +219,9 @@
+     genome1 = myLightGenomes.LightGenome('genesSTE.Homo.sapiens.list.bz2')
+     genome2 = myLightGenomes.LightGenome('genesSTE.Mus.musculus.list.bz2')
+     families = myLightGenomes.Families('ancGenes.Euarchontoglires.list.bz2')
+-    print launchADHoRe(genome1, genome2, families, gapMax=5, tandemGapMax=5, pThreshold=0.001, minimalLengthForSbs=3,
++    print(launchADHoRe(genome1, genome2, families, gapMax=5, tandemGapMax=5, pThreshold=0.001, minimalLengthForSbs=3,
+                        outADHoReChromosomes="../res/Genome.%s.Chr%s.list",
+                        outAHoReFamilies="../res/families.csv",
+                        outAHoReConfigurationFile="../res/dataset_G1_G2.ini",
+                        resADHoRePath="../res/resADHoRe",
+-                       pathIADHOREbin='/home/jlucas/Libs/i-adhore-3.0.01/build/src/i-adhore')
++                       pathIADHOREbin='/home/jlucas/Libs/i-adhore-3.0.01/build/src/i-adhore'))

@@ -1,0 +1,182 @@
+--- myCondor.py	(original)
++++ myCondor.py	(refactored)
+@@ -142,9 +142,10 @@
+         finished = True
+     return finished
+ 
+-def wait_Jid((jobid, maxTime, log)):
++def wait_Jid(xxx_todo_changeme):
+     """Waits for a cluster (or specific job) to complete.
+     maxTime: Wait no more than this time (None means unlimited)"""
++    (jobid, maxTime, log) = xxx_todo_changeme
+     if maxTime:
+         (stdout, _, _) = call("condor_wait -wait %s %s %s" % (maxTime, log, str(jobid)))
+         # logging.debug('in wait' + stdout + '. Is it "Time expired." or "All jobs done."')
+@@ -298,12 +299,12 @@
+ 
+     with open(local_buff_script, 'w') as f:
+         # prepare the script that will make the dir on the remote cluster machine
+-        print >> f, "#!/bin/sh"
+-        print >> f, "mkdir %s 2>/dev/null" % REMOTE_BUFF_FOLDER
+-        print >> f, command + " > " + remote_buff_outfile + " 2> " + remote_buff_errfile
++        print("#!/bin/sh", file=f)
++        print("mkdir %s 2>/dev/null" % REMOTE_BUFF_FOLDER, file=f)
++        print(command + " > " + remote_buff_outfile + " 2> " + remote_buff_errfile, file=f)
+         # Once the script is finished, move the results in the wished directory
+-        print >> f, "mv " + remote_buff_outfile + " " + local_buff_outfile
+-        print >> f, "mv " + remote_buff_errfile + " " + local_buff_errfile
++        print("mv " + remote_buff_outfile + " " + local_buff_outfile, file=f)
++        print("mv " + remote_buff_errfile + " " + local_buff_errfile, file=f)
+     os.chmod(local_buff_script, 0o755)
+ 
+     jid = submit_OneJob(local_buff_script, **kwargs)
+@@ -340,9 +341,9 @@
+     the list of jobids of the submitted jobs.
+     """
+     # print >> sys.stdout, condFileForSubmission
+-    print >> sys.stderr, "submission of jobs to condor, this may take some time... usually the more jobs the more time (~5sec for 100 jobs and ~25sec for 1000 jobs)"
++    print("submission of jobs to condor, this may take some time... usually the more jobs the more time (~5sec for 100 jobs and ~25sec for 1000 jobs)", file=sys.stderr)
+     out, err = chcall('condor_submit -v', condFileForSubmission)
+-    print >> sys.stderr, "submission finished"
++    print("submission finished", file=sys.stderr)
+     # list [..., (clusterId, jid), ...]
+     listOfJobids = re.findall(r'Proc (\d+\.\d+)', out)
+     for (jobid1, jobid2) in myTools.myIterator.slidingTuple(listOfJobids):
+@@ -368,7 +369,7 @@
+         scriptName = funcName + extension
+         script = path + scriptName
+         with open(script, 'w') as f:
+-            print >> f, codeFunc
++            print(codeFunc, file=f)
+         st = os.stat(script)
+         os.chmod(script, st.st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+         return (script, funcNbArgs)
+@@ -441,14 +442,14 @@
+         # If the user wrote the path toward the executable, this keeps the executable var as a path toward the executable
+         executable = distutils.spawn.find_executable(executable)
+         with open(self.wrapperExecFileName, 'w') as f:
+-            print >> f, "#!/bin/bash"
+-            print >> f, "arrayArgs=(\"$@\")"
+-            print >> f, "lenArrayArgs=${#arrayArgs[@]}"
++            print("#!/bin/bash", file=f)
++            print("arrayArgs=(\"$@\")", file=f)
++            print("lenArrayArgs=${#arrayArgs[@]}", file=f)
+             # array contains all the arguments except the two last arguments
+-            print >> f, "subArray=${arrayArgs[@]:0:$lenArrayArgs-2}"
+-            print >> f, "%s $subArray > %s" % (executable, self.outFileName % '${arrayArgs[$length-2]}.${arrayArgs[$length-1]}')
++            print("subArray=${arrayArgs[@]:0:$lenArrayArgs-2}", file=f)
++            print("%s $subArray > %s" % (executable, self.outFileName % '${arrayArgs[$length-2]}.${arrayArgs[$length-1]}'), file=f)
+             # this line will be sent to the file 'signalOfEndFileName'
+-            print >> f, "echo \"Signal to inform that job ${arrayArgs[$length-2]}.${arrayArgs[$length-1]} has finished\" "
++            print("echo \"Signal to inform that job ${arrayArgs[$length-2]}.${arrayArgs[$length-1]} has finished\" ", file=f)
+         # http://stackoverflow.com/questions/12791997/how-do-you-do-a-simple-chmod-x-from-within-python
+         st = os.stat(self.wrapperExecFileName)
+         os.chmod(self.wrapperExecFileName, st.st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+@@ -488,7 +489,7 @@
+         condFileForSubmission = "\n".join(condFileForSubmission)
+         # write a backup of the last submission file for debug purposes
+         with open(LASTCOND, 'w') as f:
+-            print >> f, condFileForSubmission
++            print(condFileForSubmission, file=f)
+         return submit_COND_ManyJobs(condFileForSubmission)
+ 
+     def waitUntilSignalOfEnd(self, jobid, waitTime=2, maxWaitTime=480):
+@@ -514,9 +515,9 @@
+         pool = Pool()
+         for (jobid, hasFinished) in pool.imap_unordered(self.waitUntilSignalOfEnd, tuple(jobid for jobid in listOfJobids)):
+             if hasFinished:
+-                print >> sys.stderr, 'return logs of job', jobid
++                print('return logs of job', jobid, file=sys.stderr)
+             else:
+-                print >> sys.stderr, 'job', jobid, 'has not finished, over max allowed running time'
++                print('job', jobid, 'has not finished, over max allowed running time', file=sys.stderr)
+             signalOfEndFileName = self.signalOfEndFileName % str(jobid)
+             try:
+                 os.remove(signalOfEndFileName)
+@@ -543,7 +544,7 @@
+         listOfJids.append((machine, jid, jobName))
+ 
+     for (machine, jid, jobName) in listOfJids:
+-        print >> sys.stderr, (machine, jid, jobName)
++        print((machine, jid, jobName), file=sys.stderr)
+         stdoutFileName, stderrFileName = getOutputWithBuffer(jid, jobName)
+         printFileIntoStream(stdoutFileName, sys.stdout)
+         printFileIntoStream(stderrFileName, sys.stderr)
+@@ -655,20 +656,23 @@
+     def __del__(self):
+         del self.command, self.target, self.args, self.log, self.res
+ 
+-def printLogErr((stdoutFileName, stderrFileName)):
++def printLogErr(xxx_todo_changeme1):
++    (stdoutFileName, stderrFileName) = xxx_todo_changeme1
+     printFileIntoStream(stderrFileName, sys.stderr)
+ 
+-def printLogOut((stdoutFileName, stderrFileName)):
++def printLogOut(xxx_todo_changeme2):
++    (stdoutFileName, stderrFileName) = xxx_todo_changeme2
+     printFileIntoStream(stdoutFileName, sys.stdout)
+ 
+-def printLogs((stdoutFileName, stderrFileName)):
++def printLogs(xxx_todo_changeme3):
++    (stdoutFileName, stderrFileName) = xxx_todo_changeme3
+     printLogErr((stdoutFileName, stdoutFileName))
+     printLogOut((stderrFileName, stderrFileName))
+ 
+ def printFileIntoStream(fileName, stream):
+     with open(fileName, 'r') as f:
+         try:
+-            print >> stream, f.read()[:-1]
++            print(f.read()[:-1], file=stream)
+         except:
+             pass
+ 
+@@ -687,7 +691,7 @@
+ 
+     def fibs_localSequential(nbJobs):
+         for n in range(nbJobs):
+-            print "job%s: fib(35) = %s" % (n, fib(35))
++            print("job%s: fib(35) = %s" % (n, fib(35)))
+ 
+     def fibs_ManyJobs(nbJobs):
+         path = './'
+@@ -697,9 +701,9 @@
+         listOfJobids = cs.submit_ManyJobs(script, listOfArguments, niceUser=True, maxSimultaneousJobsInGroup=None)
+         for (jobid, stderrFileName, stdoutFileName) in cs.getoutput_ManyJobs(listOfJobids):
+             with open(stdoutFileName, 'r') as f:
+-                print >> sys.stdout, f.read()
++                print(f.read(), file=sys.stdout)
+             with open(stderrFileName, 'r') as f:
+-                print >> sys.stderr, f.read()
++                print(f.read(), file=sys.stderr)
+             os.unlink(stderrFileName)
+             os.unlink(stdoutFileName)
+         try:
+@@ -732,13 +736,13 @@
+         for (jobid, stdoutFileName, stderrFileName) in cs.getoutput_ManyJobs(listOfJids):
+             # print the 3 first lines of stdout and stderr logs
+             with open(stdoutFileName, 'r') as f:
+-                print >> sys.stdout, f.readline(),
+-                print >> sys.stdout, f.readline(),
+-                print >> sys.stdout, f.readline(),
++                print(f.readline(), end=' ', file=sys.stdout)
++                print(f.readline(), end=' ', file=sys.stdout)
++                print(f.readline(), end=' ', file=sys.stdout)
+             with open(stderrFileName, 'r') as f:
+-                print >> sys.stderr, f.readline(),
+-                print >> sys.stdout, f.readline(),
+-                print >> sys.stdout, f.readline(),
++                print(f.readline(), end=' ', file=sys.stderr)
++                print(f.readline(), end=' ', file=sys.stdout)
++                print(f.readline(), end=' ', file=sys.stdout)
+             idxSimu = jobid.split('.')[1]
+             shutil.move(stdoutFileName, 'res/simu1/' + str(idxSimu) +'/logOut')
+             shutil.move(stderrFileName, 'res/simu1/' + str(idxSimu) +'/logErr')
+@@ -767,7 +771,7 @@
+     nbJobs = 500
+     # 1st example
+     t_fibs_ManyJobs = timeit.timeit("fibs_ManyJobs(%s)" % nbJobs, setup="from __main__ import fibs_ManyJobs", number=1)
+-    print >> sys.stderr, "t_fibs_ManyJobs", t_fibs_ManyJobs
++    print("t_fibs_ManyJobs", t_fibs_ManyJobs, file=sys.stderr)
+ 
+     # 2nd example
+ 

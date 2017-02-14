@@ -1,0 +1,40 @@
+--- myMultiprocess.py	(original)
++++ myMultiprocess.py	(refactored)
+@@ -21,7 +21,7 @@
+ 
+     # Librairies
+     import multiprocessing
+-    import cStringIO
++    import io
+ 
+     # Sauvegarde des descripteurs
+     backstdout = sys.stdout
+@@ -54,8 +54,8 @@
+ 
+             # Lancement d'un nouveau processus
+             proc[i] = multiprocessing.Process(target=newfunc, args=(i, x))
+-            sys.stdout = cStringIO.StringIO()
+-            sys.stderr = cStringIO.StringIO()
++            sys.stdout = io.StringIO()
++            sys.stderr = io.StringIO()
+             proc[i].start()
+             sys.stdout = backstdout
+             sys.stderr = backstderr
+@@ -79,7 +79,7 @@
+             progress = 100-100*(input.qsize()) / NbOfTasks
+             lock.acquire()
+             if progress in listOfPercentage:
+-                print >> sys.stderr, "%s" % progress + '%'
++                print("%s" % progress + '%', file=sys.stderr)
+                 listOfPercentage.remove(progress)
+             lock.release()
+     return f
+@@ -120,7 +120,7 @@
+         task_queue.put(task)
+ 
+     # Start worker processes
+-    print >> sys.stderr, "synteny block extraction"
++    print("synteny block extraction", file=sys.stderr)
+     for i in range(NUMBER_OF_PROCESSES):
+         Process(target=wrapper(function),
+                 args=(task_queue, KWARGS, done_queue, int(task_queue.qsize()),

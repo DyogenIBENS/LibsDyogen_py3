@@ -1,0 +1,137 @@
+--- myPhylTree.py	(original)
++++ myPhylTree.py	(refactored)
+@@ -11,7 +11,7 @@
+ import itertools
+ import collections
+ 
+-import myFile
++from . import myFile
+ 
+ SYMBOL6X = '.'
+ SYMBOL2X = '*'
+@@ -51,7 +51,7 @@
+ 
+         # analysing process of the tree
+         def recInitialize(node, stream=open(os.devnull, 'w')):
+-            print >> stream, "."
++            print(".", file=stream)
+             self.dicLinks.setdefault(node, self.newCommonNamesMapperInstance())
+             # each link between a node and itself is a list containing node
+             self.dicLinks.get(node).setdefault(node, [node])
+@@ -94,7 +94,7 @@
+             self.allDescendants.setdefault(node, frozenset(family))
+             return family
+ 
+-        print >> stream, "Data analysis ",
++        print("Data analysis ", end=' ', file=stream)
+         # filling
+         recInitialize(self.root, stream=stream)
+         # list of extant species
+@@ -133,27 +133,27 @@
+             self.numItems[self.indNames.get(a)] = [(self.indNames.get(son), l) for (son, l) in self.items.get(a)]
+         # (e)numerateParents, all nodes excepted the leaves using indNames
+         self.numParent = [None] * len(self.allNames)
+-        for (e, (par, l)) in self.parent.iteritems():
++        for (e, (par, l)) in self.parent.items():
+             self.numParent[self.indNames.get(e)] = (self.indNames.get(par), l)
+         # self.numParent[self.indNames.get('self.root')] = None
+         assert set(self.indBranches.values()) == set(range(len(self.numParent)-1))
+         # official names / common names
+         tmp = collections.defaultdict(list)
+-        for (curr, off) in self.officialName.iteritems():
++        for (curr, off) in self.officialName.items():
+             tmp[off].append(curr)
+         self.commonNames = self.newCommonNamesMapperInstance()
+         self.commonNames.update(tmp)
+         self.dicGenes = {}
+         self.dicGenomes = self.newCommonNamesMapperInstance()
+ 
+-        print >> stream, " OK"
++        print(" OK", file=stream)
+ 
+     def __init__(self, file, skipInit=False, stream=open(os.devnull, 'w')):
+         if type(file) == tuple:
+-            print >> stream, "Creation of the phylogenetic tree ...",
++            print("Creation of the phylogenetic tree ...", end=' ', file=stream)
+             (self.items, self.root, self.officialName) = file
+         else:
+-            print >> stream, "Loading phylogenetic tree %s ..." % file,
++            print("Loading phylogenetic tree %s ..." % file, end=' ', file=stream)
+             self.officialName = {}
+             self.items = self.newCommonNamesMapperInstance()
+             # name and instance of file
+@@ -171,7 +171,7 @@
+             if not skipInit:
+                 self.reinitTree()
+             else:
+-                print >> stream, "OK"
++                print("OK", file=stream)
+ 
+     # load a phylogenetic tree into the phylTree format (with tabulations)
+     def __loadFromMyFormat__(self, f):
+@@ -382,7 +382,7 @@
+                 if (x[1] >= maxlength) or (x[0] not in self.items):
+                     newitems.append(x)
+                 else:
+-                    print >> sys.stderr, "Removing node", x[0]
++                    print("Removing node", x[0], file=sys.stderr)
+                     newitems.extend(self.items.pop(x[0]))
+             self.items[node] = newitems
+         do(self.root)
+@@ -475,7 +475,7 @@
+     def getSubTree(self, goodSpecies, rootAnc=None):
+         goodAnc = set(self.dicParents[e1][e2] for (e1, e2) in itertools.combinations(goodSpecies, 2))
+         newtree = collections.defaultdict(list)
+-        import myMaths
++        from . import myMaths
+ 
+         def do(node):
+             if node in goodAnc:
+@@ -535,7 +535,7 @@
+         if len(values) == 0:
+             return matriceB
+ 
+-        rootNode = self.indNames[self.lastCommonAncestor(values.keys())]
++        rootNode = self.indNames[self.lastCommonAncestor(list(values.keys()))]
+         recBuild(rootNode, None, 0)
+         # equation solving
+         res = numpy.linalg.solve(matriceA, matriceB)
+@@ -599,7 +599,7 @@
+                 """Recursively converts the commonNamesMapper instance to a
+                 dictionary. (to allow pickling for example)"""
+                 as_dict = {}
+-                for key, value in self.iteritems():
++                for key, value in self.items():
+                     if hasattr(value, 'common_names_mapper_2_dict'):
+                         value = value.common_names_mapper_2_dict()
+                     as_dict[key] = value
+@@ -626,14 +626,14 @@
+     # load all the species of a list
+     def loadSpeciesFromList(self, lst, template, storeGenomes=True):
+ 
+-        import myGenomes
++        from . import myGenomes
+ 
+         for esp in lst:
+             esp = self.officialName[esp]
+             g = myGenomes.Genome(template % self.fileName[esp])
+             if storeGenomes:
+                 self.dicGenomes[esp] = g
+-            for (x, (c, i)) in g.dicGenes.iteritems():
++            for (x, (c, i)) in g.dicGenes.items():
+                 #self.dicGenes[x] = (esp, c, i)
+                 self.dicGenes[x] = GeneSpeciesPosition(esp, c, i)
+ 
+@@ -665,9 +665,9 @@
+         (parent, bLength) = self.parent[child]
+         foo = "# Branch %s -> %s (%s My) #" % (parent, child, bLength)
+         bar = "#" * len(foo)
+-        print >> stream, bar
+-        print >> stream, foo
+-        print >> stream, bar
++        print(bar, file=stream)
++        print(foo, file=stream)
++        print(bar, file=stream)
+ 
+     # FIXME, ensure that no two species has the same acronym!!
+     def speciesAcronym(self, node):

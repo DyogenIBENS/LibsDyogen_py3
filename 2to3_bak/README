@@ -1,0 +1,7 @@
+# Command used to convert:
+
+    for f in *.py; do ~/miniconda3/bin/2to3 -w $f 1> 2to3_bak/$f.2to3.diff 2> 2to3_bak/$f.2to3.log ; done
+    mv *.py.bak 2to3_bak
+
+    for f in scripts/*.py; do ~/miniconda3/bin/2to3 -w $f 1> 2to3_bak/$f.2to3.diff 2> 2to3_bak/$f.2to3.log ; done
+    mv scripts/*.py.bak 2to3_bak/scripts/

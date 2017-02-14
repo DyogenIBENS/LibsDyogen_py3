@@ -1,0 +1,5 @@
+RefactoringTool: Skipping optional fixer: buffer
+RefactoringTool: Skipping optional fixer: idioms
+RefactoringTool: Skipping optional fixer: set_literal
+RefactoringTool: Skipping optional fixer: ws_comma
+RefactoringTool: No files need to be modified.

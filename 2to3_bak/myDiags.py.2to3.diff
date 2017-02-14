@@ -1,0 +1,830 @@
+--- myDiags.py	(original)
++++ myDiags.py	(refactored)
+@@ -53,13 +53,13 @@
+ import collections
+ # FIXME not the good way to import
+ 
+-import myTools
+-import myGenomes
+-import myProbas
+-import myFile
+-import myMaths
+-import myMapping
+-import myLightGenomes
++from . import myTools
++from . import myGenomes
++from . import myProbas
++from . import myFile
++from . import myMaths
++from . import myMapping
++from . import myLightGenomes
+ 
+ import time
+ import multiprocessing.dummy as multiprocessing  # for using threads
+@@ -67,7 +67,7 @@
+ import enum
+ 
+ if sys.platform != 'win32':
+-    import extractDiags
++    from . import extractDiags
+ 
+ from utils.myLightGenomes import OGene
+ 
+@@ -100,7 +100,7 @@
+     if arguments is None:
+         return res
+     else:
+-        res.update(dict((k, v) for (k, v) in arguments.iteritems() if k in defaultKwargsPhylDiagDict.keys()))
++        res.update(dict((k, v) for (k, v) in arguments.items() if k in list(defaultKwargsPhylDiagDict.keys())))
+         for (argN, tpe) in [('gapMax', int), ('truncationMax', int), ('gapMaxMicroInv', int), ('pThreshold', float), ('optimisation', str)]:
+             if arguments[argN] == 'None':
+                 res[argN] = None
+@@ -201,8 +201,8 @@
+         #(x0,y0) = (l1_tb[0],l2_tb[0])
+         #(x1,y1) = (l1_tb[1],l2_tb[1])
+         #diagType = '/' if (x1 - x0)*(y1 - y0) else '\\'
+-        lw1 = [sys.maxint, -sys.maxint]
+-        lw2 = [sys.maxint, -sys.maxint]
++        lw1 = [sys.maxsize, -sys.maxsize]
++        lw2 = [sys.maxsize, -sys.maxsize]
+         for idx1 in self.l1:
+             lw1[0] = idx1 if idx1 < lw1[0] else lw1[0]
+             lw1[1] = idx1 if idx1 > lw1[1] else lw1[1]
+@@ -275,52 +275,66 @@
+         return "\ndiagType=%s\nl1=%s\nl2=%s\nla=%s\n" % (self.dt, self.l1, self.l2, self.la)
+ 
+ # Diagonal Pseudo Distance
+-def DPD((x0, y0), (x1, y1)):
++def DPD(xxx_todo_changeme2, xxx_todo_changeme3):
++    (x0, y0) = xxx_todo_changeme2
++    (x1, y1) = xxx_todo_changeme3
+     return 2 * max(abs(x1 - x0), abs(y1 - y0)) - min(abs(x1 - x0), abs(y1 - y0))
+ 
+ # Chebyshev Distance
+-def CD((x0, y0), (x1, y1)):
++def CD(xxx_todo_changeme4, xxx_todo_changeme5):
++    (x0, y0) = xxx_todo_changeme4
++    (x1, y1) = xxx_todo_changeme5
+     return max(abs(x1 - x0), abs(y1 - y0))
+ 
+ # Manhattan Distance
+-def MD((x0, y0), (x1, y1)):
++def MD(xxx_todo_changeme6, xxx_todo_changeme7):
++    (x0, y0) = xxx_todo_changeme6
++    (x1, y1) = xxx_todo_changeme7
+     return abs(x1 - x0) + abs(y1 - y0)
+ 
+ # Euclidean Distance
+-def ED((x0, y0), (x1, y1)):
++def ED(xxx_todo_changeme8, xxx_todo_changeme9):
++    (x0, y0) = xxx_todo_changeme8
++    (x1, y1) = xxx_todo_changeme9
+     return round(math.sqrt((x1 - x0) ** 2 + (y1 - y0) ** 2))
+ 
+ # not really a distance, but may be used af it is one in several cases
+-def minimumOfDistancesIn1DGenomes((x1, y1), (x2, y2)):
++def minimumOfDistancesIn1DGenomes(xxx_todo_changeme10, xxx_todo_changeme11):
++    (x1, y1) = xxx_todo_changeme10
++    (x2, y2) = xxx_todo_changeme11
+     return min(abs(x1 - x2), abs(y1 - y2))
+ 
+ # The frame of all the distances used during the merging process
+ def framed(f):
+-    def distance((x0, y0), (x1, y1), diagType):
++    def distance(xxx_todo_changeme, xxx_todo_changeme1, diagType):
++        (x0, y0) = xxx_todo_changeme
++        (x1, y1) = xxx_todo_changeme1
+         if diagType == '/':
+             # Only consider the top right part of the distance matrix, (x1 >= x0 and y1 >= y0)
+             # in i-adhore "...>0", here we allow '=' to take care of close dispered paralogies that can be understood as tandem duplicates
+             if (x1-x0) >= 0 and (y1 - y0) >= 0:
+                 res = f((x0, y0), (x1, y1))
+             else:
+-                res = sys.maxint
++                res = sys.maxsize
+         elif diagType == '\\':
+             # Only consider the bottom right part of the distance matrix, (x1>=x0 and y1<=y0)
+             # in i-adhore "...<0", here we allow '=', idem than before
+             if (x1-x0) >= 0 and (y1 - y0) <= 0:
+                 res = f((x0, y0), (x1, y1))
+             else:
+-                res = sys.maxint
++                res = sys.maxsize
+         else:
+             # diagType == None, diag is composed of a single gene
+             res = f((x0, y0), (x1, y1))
+         return res
+     return distance
+ 
+-def intervalsOverlap((x1, x2), (y1, y2)):
++def intervalsOverlap(xxx_todo_changeme12, xxx_todo_changeme13):
+     """
+     check if two 1D intervals overlap
+     """
++    (x1, x2) = xxx_todo_changeme12
++    (y1, y2) = xxx_todo_changeme13
+     assert x1 <= x2
+     assert y1 <= y2
+     # If there is an overlap it means there exists some number C which is in both ranges, i.e.
+@@ -453,11 +467,11 @@
+         return self
+ 
+     # The next returned value comes from either the buffer or from the main generator
+-    def next(self):
++    def __next__(self):
+         if len(self.todofirst) > 0:
+             return self.todofirst.pop()
+         # Returns the next value of the generator
+-        return self.gen.next()
++        return next(self.gen)
+ 
+     # The reinserted element is put on hold, the last reinserted element will be on top of the pile during the next rewind
+     def putBack(self, x):
+@@ -493,21 +507,21 @@
+         all(diag.__class__.__name__ == 'SyntenyBlock' for diag in listOfDiags), listOfDiags[0]
+ 
+     if distanceMetric == 'DPD':
+-        print >> sys.stderr, "Use Diagonal Pseudo Distance to merge diagonals with a gap up to %s elements" % gapMax
++        print("Use Diagonal Pseudo Distance to merge diagonals with a gap up to %s elements" % gapMax, file=sys.stderr)
+         distance = framed(DPD)
+     elif distanceMetric == 'CD':
+-        print >> sys.stderr, "Use Chebyshev Distance to merge diagonals with a gap up to %s elements" % gapMax
++        print("Use Chebyshev Distance to merge diagonals with a gap up to %s elements" % gapMax, file=sys.stderr)
+         distance = framed(CD)
+     elif distanceMetric == 'MD':
+-        print >> sys.stderr, "Use Manhattan Distance to merge diagonals with a gap up to %s elements" % gapMax
++        print("Use Manhattan Distance to merge diagonals with a gap up to %s elements" % gapMax, file=sys.stderr)
+         distance = framed(MD)
+     elif distanceMetric == 'ED':
+-        print >> sys.stderr, "Use Euclidean Distance to merge diagonals with a gap up to %s elements" % gapMax
++        print("Use Euclidean Distance to merge diagonals with a gap up to %s elements" % gapMax, file=sys.stderr)
+         distance = framed(ED)
+     else:
+         raise ValueError('Must use a distance either DPD (Diagonal PSeudo Distance) or MD (Manhattan Distance), Euclidean Distance (ED) or Chebyshev Distance (CD)')
+ 
+-    print >> sys.stderr, "Nb Diags before DiagMerger = ", len(listOfDiags)
++    print("Nb Diags before DiagMerger = ", len(listOfDiags), file=sys.stderr)
+     diagGen = []
+     listOfFinishedDiags = []
+     nbFusion = 0
+@@ -666,11 +680,11 @@
+             for diag in sorted(fusionableDiags + impossibleToMergeDiags, key=lambda diag: diag.l1[0]):
+                 diagGen.putBack(diag) # diagonals that were not fusionable are recorded to try to merge them after
+             diagGen.rewind()
+-        print >> sys.stderr, "Nb of merges for currGap=%s :%s" % (currGap, nbFusionCurrGap)
++        print("Nb of merges for currGap=%s :%s" % (currGap, nbFusionCurrGap), file=sys.stderr)
+     # Once all merges have been performed for a currGap it is necessary to repeat the merging process with all the diagonals for currGap+1
+-    print >> sys.stderr, "Total nb of merges =", nbFusion
++    print("Total nb of merges =", nbFusion, file=sys.stderr)
+     listOfSortedAndMergedDiagonals = sorted(list(diagGen) + listOfFinishedDiags, key=lambda diag: diag.l1[0])
+-    print >> sys.stderr, "Nb Diags after the merging process =", len(listOfSortedAndMergedDiagonals)
++    print("Nb Diags after the merging process =", len(listOfSortedAndMergedDiagonals), file=sys.stderr)
+ 
+     return listOfSortedAndMergedDiagonals
+ 
+@@ -811,7 +825,7 @@
+                         # sbb_end < sba_beg
+                         break
+         if truncationMax == 0:
+-            assert len(O.keys()) == 0
++            assert len(list(O.keys())) == 0
+         return (N, O, I)
+ 
+     # method "getItemById" of sbsInPairCompWithIds"
+@@ -820,7 +834,7 @@
+     N = collections.defaultdict(set)
+     O = collections.defaultdict(set)
+     I = collections.defaultdict(set)
+-    for c in sbsGX.keys():
++    for c in list(sbsGX.keys()):
+         (N, O, I) = findOverlapsOnGenomeOrder(rankGenome, +1, sbsGX[c], N, O, I, id2sb, truncationMax=truncationMax)
+         if truncationMax > 0:
+             # also needed to check for the overlap in the reverse
+@@ -837,7 +851,7 @@
+ 
+         def concatenateDictsOfSets(D1, D2):
+             newD = collections.defaultdict(set)
+-            for (key, value) in (list(D1.iteritems()) + list(D2.iteritems())):
++            for (key, value) in (list(D1.items()) + list(D2.items())):
+                 newD[key] = newD[key].union(value)
+             return newD
+ 
+@@ -874,7 +888,9 @@
+     res = True if max(L1) >= min(L2) and min(L1) <= max(L2) else False
+     return res
+ 
+-def statusOfSbbComparedToSbaProjected((ca, sba), (cb, sbb)):
++def statusOfSbbComparedToSbaProjected(xxx_todo_changeme14, xxx_todo_changeme15):
++    (ca, sba) = xxx_todo_changeme14
++    (cb, sbb) = xxx_todo_changeme15
+     res = 'noOverlap'
+     if ca == cb:
+         if isL2NestedInL1(sba.l1, sbb.l1):
+@@ -883,7 +899,9 @@
+             res = 'overlapping'
+     return res
+ 
+-def statusOfSbbComparedToSba(((c1a, c2a), sba), ((c1b, c2b), sbb)):
++def statusOfSbbComparedToSba(xxx_todo_changeme16, xxx_todo_changeme17):
++    ((c1a, c2a), sba) = xxx_todo_changeme16
++    ((c1b, c2b), sbb) = xxx_todo_changeme17
+     assert isinstance(sba, Diagonal)
+     assert isinstance(sbb, Diagonal)
+     resC1 = statusOfSbbComparedToSbaProjected((c1a, sba), (c1b, sbb))
+@@ -940,16 +958,16 @@
+                 # SB Removed
+                 sbr = id2sb(iD_removedSb)
+                 (c1r, c2r, _) = id2location(iD_removedSb)
+-                print >> sys.stderr, "sb (%s:%s-%s, %s:%s-%s) with %s tbs is removed because of unallowed overlap with sb (%s:%s-%s, %s:%s-%s) with %s tbs (idxs in tbs)" %\
++                print("sb (%s:%s-%s, %s:%s-%s) with %s tbs is removed because of unallowed overlap with sb (%s:%s-%s, %s:%s-%s) with %s tbs (idxs in tbs)" %\
+                     (c1r, sbr.minOnG(1), sbr.maxOnG(1), c2r, sbr.minOnG(2), sbr.maxOnG(2), len(sbr.la),
+-                     c1nr, sbnr.minOnG(1), sbnr.maxOnG(1), c2nr, sbnr.minOnG(2), sbnr.maxOnG(2), len(sbnr.la))
++                     c1nr, sbnr.minOnG(1), sbnr.maxOnG(1), c2nr, sbnr.minOnG(2), sbnr.maxOnG(2), len(sbnr.la)), file=sys.stderr)
+                 nbRemovedHps += len(sbr.la)
+                 if 'nested' in statusOfSbbComparedToSba(((c1nr, c2nr), sbnr), ((c1r, c2r), sbr)):
+                     # sbr is at least partially nested in sbnr
+-                    print >> sys.stderr, "last overlap is probably a segmental duplication"
++                    print("last overlap is probably a segmental duplication", file=sys.stderr)
+                 elif 'nested' in statusOfSbbComparedToSba(((c1r, c2r), sbr), ((c1nr, c2nr), sbnr)):
+                     # sbnr is at least partially nested in sbr
+-                    print >> sys.stderr, "last overlap is probably a (strange) segmental duplication"
++                    print("last overlap is probably a (strange) segmental duplication", file=sys.stderr)
+                 for iD_needUpdateSb in N[iD_removedSb]:
+                     N[iD_needUpdateSb].remove(iD_removedSb)
+                     if len(N[iD_needUpdateSb]) == 0:
+@@ -1024,9 +1042,9 @@
+                     truncation = len(sbt.la) - len(newla)
+                     nbRemovedHps += truncation
+                     if truncation > 0:
+-                        print >> sys.stderr, "sb (%s:%s-%s, %s:%s-%s) with %s tbs truncated (-%s tbs) because of sb (%s:%s-%s, %s:%s-%s) with %s tbs (idxs in tbs)" %\
++                        print("sb (%s:%s-%s, %s:%s-%s) with %s tbs truncated (-%s tbs) because of sb (%s:%s-%s, %s:%s-%s) with %s tbs (idxs in tbs)" %\
+                                              (c1t, sbt.minOnG(1), sbt.maxOnG(1), c2t, sbt.minOnG(2), sbt.maxOnG(2), len(sbt.la), truncation,
+-                                              c1nt, sbnt.minOnG(1), sbnt.maxOnG(1), c2nt, sbnt.minOnG(2), sbnt.maxOnG(2), len(sbnt.la))
++                                              c1nt, sbnt.minOnG(1), sbnt.maxOnG(1), c2nt, sbnt.minOnG(2), sbnt.maxOnG(2), len(sbnt.la)), file=sys.stderr)
+                     sbt.l1 = newl1
+                     sbt.l2 = newl2
+                     sbt.la = newla
+@@ -1048,13 +1066,13 @@
+     for idsb in V - noOrSmallOverlapIds:
+             (c1, c2, idx) = sbsInPairCompWithIds.getItemLocationById(idsb)
+             sb = sbsInPairCompWithIds[c1][c2][idx]
+-            print >> sys.stderr, "Removed sb (%s,%s) of %s hps because of overlap" % (c1, c2, len(sb.la))
++            print("Removed sb (%s,%s) of %s hps because of overlap" % (c1, c2, len(sb.la)), file=sys.stderr)
+             cptRemovedSbBecauseOfNotAllowedOverlap += 1
+     sbsInPairCompWithIds.keepIds(noOrSmallOverlapIds)
+ 
+     # Update the small overlap dict
+     newO = {}
+-    for (idsba, idsbbs) in O.iteritems():
++    for (idsba, idsbbs) in O.items():
+         if idsba in noOrSmallOverlapIds:
+             newO[idsba] = set([idsbb for idsbb in idsbbs if idsbb in noOrSmallOverlapIds])
+     O = newO
+@@ -1072,11 +1090,11 @@
+         # assert truncationMax > 0
+         if len(sb.la) == 0:
+             removedIdBecauseEmptySb.add(idsb)
+-            print >> sys.stderr, "Removed sb (%s,%s) because of truncation (less than 1tb in the sb after truncation)" % (c1, c2)
++            print("Removed sb (%s,%s) because of truncation (less than 1tb in the sb after truncation)" % (c1, c2), file=sys.stderr)
+             cptRemovedSbAfterTruncation += 1
+         elif len(sb.la) == 1 and removeSingleHpSbs:
+             removedIdBecauseEmptySb.add(idsb)
+-            print >> sys.stderr, "Removed sb (%s,%s) because of truncation (1tb in the sb after truncation and removeSingleHpSbs==True)" % (c1, c2)
++            print("Removed sb (%s,%s) because of truncation (1tb in the sb after truncation and removeSingleHpSbs==True)" % (c1, c2), file=sys.stderr)
+             nbRemovedHpsAfterTruncation += 1
+             cptRemovedSbAfterTruncation += 1
+ 
+@@ -1107,14 +1125,14 @@
+     nbHpsAfterOverlapFiltering = sum([len(sb.la) for (_, sb) in new_sbsInPairComp.iteritems2d()])
+     assert nbHpsAfterOverlapFiltering == nbHpsBeforeOverlapFiltering - (nbRemovedHpsBecauseOfNotAllowedOverlap + nbRemovedHpsAfterTruncation),\
+         "%s = %s - (%s + %s)" % (nbHpsAfterOverlapFiltering, nbHpsBeforeOverlapFiltering, nbRemovedHpsBecauseOfNotAllowedOverlap, nbRemovedHpsAfterTruncation)
+-    print >> sys.stderr, "Nb hps before overlap-filtering = %s" % nbHpsBeforeOverlapFiltering
++    print("Nb hps before overlap-filtering = %s" % nbHpsBeforeOverlapFiltering, file=sys.stderr)
+     assert nbHpsBeforeOverlapFiltering > 0
+-    print >> sys.stderr, "Nb hps after overlap-filtering = %s (%%%.2f)" % (nbHpsAfterOverlapFiltering, float(nbHpsAfterOverlapFiltering) / float(nbHpsBeforeOverlapFiltering))
+-    print >> sys.stderr, "Nb hps removed because of not allowed overlap = %s (%%%.2f)" % (nbRemovedHpsBecauseOfNotAllowedOverlap, float(nbRemovedHpsBecauseOfNotAllowedOverlap)/ float(nbHpsBeforeOverlapFiltering))
+-    print >> sys.stderr, "Nb hps removed because of truncation = %s (%%%.2f)" % (nbRemovedHpsAfterTruncation, float(nbRemovedHpsAfterTruncation)/ float(nbHpsBeforeOverlapFiltering))
++    print("Nb hps after overlap-filtering = %s (%%%.2f)" % (nbHpsAfterOverlapFiltering, float(nbHpsAfterOverlapFiltering) / float(nbHpsBeforeOverlapFiltering)), file=sys.stderr)
++    print("Nb hps removed because of not allowed overlap = %s (%%%.2f)" % (nbRemovedHpsBecauseOfNotAllowedOverlap, float(nbRemovedHpsBecauseOfNotAllowedOverlap)/ float(nbHpsBeforeOverlapFiltering)), file=sys.stderr)
++    print("Nb hps removed because of truncation = %s (%%%.2f)" % (nbRemovedHpsAfterTruncation, float(nbRemovedHpsAfterTruncation)/ float(nbHpsBeforeOverlapFiltering)), file=sys.stderr)
+     assert nbSbsAfterOverlapFiltering == nbSbsBeforeOverlapFiltering - (cptRemovedSbAfterTruncation + cptRemovedSbBecauseOfNotAllowedOverlap)
+-    print >> sys.stderr, "Nb sbs removed because of not allowed overlap = %s (%%%.2f)" % (cptRemovedSbBecauseOfNotAllowedOverlap, float(cptRemovedSbBecauseOfNotAllowedOverlap) / float(nbSbsBeforeOverlapFiltering))
+-    print >> sys.stderr, "Nb sbs removed during truncation = %s (%%%.2f)" % (cptRemovedSbAfterTruncation, float(cptRemovedSbAfterTruncation) / float(nbSbsBeforeOverlapFiltering))
++    print("Nb sbs removed because of not allowed overlap = %s (%%%.2f)" % (cptRemovedSbBecauseOfNotAllowedOverlap, float(cptRemovedSbBecauseOfNotAllowedOverlap) / float(nbSbsBeforeOverlapFiltering)), file=sys.stderr)
++    print("Nb sbs removed during truncation = %s (%%%.2f)" % (cptRemovedSbAfterTruncation, float(cptRemovedSbAfterTruncation) / float(nbSbsBeforeOverlapFiltering)), file=sys.stderr)
+     # This print is already in the upstream function
+     #print >> sys.stderr, "Nb non-overlapping sbs returned = %s" % nbSbsAfterOverlapFiltering
+ 
+@@ -1286,9 +1304,10 @@
+     return diagType
+ 
+ 
+-def extractDiagsInPairCompChrWrapper((c1, c2, gc1, gc2, sameStrand)):
++def extractDiagsInPairCompChrWrapper(xxx_todo_changeme18):
+     # print >> sys.stderr, "(PPID = %s, PID = %s) start to extract diagonals on G1[%s]_vs_G2[%s]" %\
+     #     (os.getppid(), os.getpid(), c1, c2)
++    (c1, c2, gc1, gc2, sameStrand) = xxx_todo_changeme18
+     (listOfDiags, nbHomologies) = extractDiagsInPairCompChr(gc1, gc2, sameStrand, verbose=False)
+     return ((c1, c2), listOfDiags, nbHomologies)
+ 
+@@ -1342,7 +1361,7 @@
+                     l1.append(i1)
+                     l2.append(i2)
+                     del M[i1][i2]
+-                    if len(M[i1].keys()) == 0:
++                    if len(list(M[i1].keys())) == 0:
+                         del M[i1]
+                     #diagType == None if sameStrand == False and len(la) == 1, first element of a diagonal which we donnot take care of gene orientation
+                     #if (diagType == "/" or diagType == None) and i1+1 in M and i2+1 in M[i1+1] and ((M[i1+1][i2+1] in [+1,None]) if sameStrand else True):
+@@ -1465,16 +1484,16 @@
+         L = (nbHps-1)*g+nbHps # lengths of the chromosomal windows
+         pVal = myProbas.pValue(nbHps,g,L,L,N12,N1,N2,p_hpSign,verbose=verbose)
+         if firstPrint == True:
+-            print >> sys.stderr, "P-values of sbs of %s hps (nbHpsRecommendedGap) hps spaced by a gap 'g' in an average MHP(N1=%s, N2=%s, N12=%s) over all MHPs involved in the whole genome comparison.:" % (nbHps,N1,N2,N12)
++            print("P-values of sbs of %s hps (nbHpsRecommendedGap) hps spaced by a gap 'g' in an average MHP(N1=%s, N2=%s, N12=%s) over all MHPs involved in the whole genome comparison.:" % (nbHps,N1,N2,N12), file=sys.stderr)
+             firstPrint=False
+-        print >> sys.stderr, "nbHps=%s, g=%g, pVal=%s" % (nbHps, g,pVal)
++        print("nbHps=%s, g=%g, pVal=%s" % (nbHps, g,pVal), file=sys.stderr)
+         if pVal != None:
+             tries.append(pVal)
+         elif pVal == None:
+             tries.append(-float('inf'))
+         else:
+             raise ValueError
+-    print >> sys.stderr, "The first p-value over targetProba=%s (targetProbaRecommendedGap) sets the recommended gap value" % targetProba
++    print("The first p-value over targetProba=%s (targetProbaRecommendedGap) sets the recommended gap value" % targetProba, file=sys.stderr)
+     for (g,pVal) in  enumerate(tries):
+         if pVal > targetProba:
+             return g
+@@ -1489,7 +1508,7 @@
+ def numberOfHomologies(g1, g2, verbose=False):
+    nbHomologies = myTools.Dict2d(int)
+    totalNbComps = len(g1) * len(g2)
+-   print >> sys.stderr, "pairwise comparison of chromosomes analysis for counting hps"
++   print("pairwise comparison of chromosomes analysis for counting hps", file=sys.stderr)
+    progressBar = myTools.ProgressBar(totalNbComps)
+    for (cptComp, (c1, c2)) in enumerate(itertools.product(g1, g2)):
+        gc1 = g1[c1]
+@@ -1592,11 +1611,11 @@
+         nab = N12s[c1][c2]  # Nb of homologies in the mhp
+         if m>1:
+             if firstPrint:
+-                print >> sys.stderr, "Diagonals of more than 1 hp that have been rejected during the statistical test:"
++                print("Diagonals of more than 1 hp that have been rejected during the statistical test:", file=sys.stderr)
+                 firstPrint = False
+             # TODO comment se fait-il que certaines diagonales soient en double ici ?
+-            print >> sys.stderr, "(c1=%s:%s-%s,c2=%s:%s-%s) \t (m=%s, max_g=%s, lw1=%s lw2=%s, nab=%s, na=%s, nb=%s)" %\
+-                (c1, l1_min, l1_max, c2, l2_min, l2_max, m, max_g, lw1, lw2, nab, na, nb), "\t p=", pVal
++            print("(c1=%s:%s-%s,c2=%s:%s-%s) \t (m=%s, max_g=%s, lw1=%s lw2=%s, nab=%s, na=%s, nb=%s)" %\
++                (c1, l1_min, l1_max, c2, l2_min, l2_max, m, max_g, lw1, lw2, nab, na, nb), "\t p=", pVal, file=sys.stderr)
+ 
+     firstPrint = True
+     for ((c1, c2), sb) in sbsInPairCompStatVal.iteritems2d():
+@@ -1606,10 +1625,10 @@
+             nb = len(g2_tb[c2])  # Nb of Tbs on C2
+             nab = N12s[c1][c2]  # Nb of homologies in the mhp
+             if firstPrint:
+-                print >> sys.stderr, "Diagonals containing 2 hps that have passed the statistical test:"
++                print("Diagonals containing 2 hps that have passed the statistical test:", file=sys.stderr)
+                 firstPrint = False
+-            print >> sys.stderr, "(c1=%s:%s-%s,c2=%s:%s-%s) \t (m=%s, max_g=%s, lw1=%s lw2=%s, nab=%s, na=%s, nb=%s)" %\
+-                (c1, l1_min, l1_max, c2, l2_min, l2_max, m, max_g, lw1, lw2, nab, na, nb), "\t p=", sb.pVal
++            print("(c1=%s:%s-%s,c2=%s:%s-%s) \t (m=%s, max_g=%s, lw1=%s lw2=%s, nab=%s, na=%s, nb=%s)" %\
++                (c1, l1_min, l1_max, c2, l2_min, l2_max, m, max_g, lw1, lw2, nab, na, nb), "\t p=", sb.pVal, file=sys.stderr)
+ 
+     def statsDiagsM(diagsInPairCompX, m):
+         if len(diagsInPairCompX.keys2d()) == 0:
+@@ -1626,13 +1645,13 @@
+         diagsXMGaps = collections.Counter(diagsInPairCompXMGaps)
+         diagsXMGaps = ["%s:%s" % (length, nb) for (length, nb) in sorted(diagsXMGaps.items())]
+         return diagsXMGaps
+-    print >> sys.stderr, "Over all sbs of 2 hps before stat. val. the distribution of gap maximum is: {%s}" % " ".join(statsDiagsM(diagsInPairComp,2))
+-    print >> sys.stderr, "Over all rejected sbs of 2 hps the distribution of gap maximum is: {%s}" % " ".join(statsDiagsM(diagsInPairCompRejected,2))
+-    print >> sys.stderr, "Over all sbs where it is imposs. to calculate the proba. with 2 hps the distribution of gap maximum is : {%s} (due to dispersed paralogies)" % " ".join(statsDiagsM(diagsInPairCompImpossibleToCalcProba,2))
+-    print >> sys.stderr, "Over all sbs where it is imposs. to calculate the proba. with 2 hps which are finally validated, the distribution of gap maximum is: {%s} (due to dispersed paralogies)" % " ".join(statsDiagsM(sbsInPairCompImpossibleToCalcProbaStatVal,2))
+-    print >> sys.stderr, "Over all sbs where it is imposs. to calculate the proba. with 2 hps which are finally rejected, the distribution of gap maximum is: {%s} (due to dispersed paralogies)" % " ".join(statsDiagsM(diagsInPairCompImpossibleToCalcProbaRejected,2))
+-
+-    print >> sys.stderr, "Over all stat. val. sbs of 2 hps the distribution of gap maximum is: {%s}" % " ".join(statsDiagsM(sbsInPairCompStatVal,2))
++    print("Over all sbs of 2 hps before stat. val. the distribution of gap maximum is: {%s}" % " ".join(statsDiagsM(diagsInPairComp,2)), file=sys.stderr)
++    print("Over all rejected sbs of 2 hps the distribution of gap maximum is: {%s}" % " ".join(statsDiagsM(diagsInPairCompRejected,2)), file=sys.stderr)
++    print("Over all sbs where it is imposs. to calculate the proba. with 2 hps the distribution of gap maximum is : {%s} (due to dispersed paralogies)" % " ".join(statsDiagsM(diagsInPairCompImpossibleToCalcProba,2)), file=sys.stderr)
++    print("Over all sbs where it is imposs. to calculate the proba. with 2 hps which are finally validated, the distribution of gap maximum is: {%s} (due to dispersed paralogies)" % " ".join(statsDiagsM(sbsInPairCompImpossibleToCalcProbaStatVal,2)), file=sys.stderr)
++    print("Over all sbs where it is imposs. to calculate the proba. with 2 hps which are finally rejected, the distribution of gap maximum is: {%s} (due to dispersed paralogies)" % " ".join(statsDiagsM(diagsInPairCompImpossibleToCalcProbaRejected,2)), file=sys.stderr)
++
++    print("Over all stat. val. sbs of 2 hps the distribution of gap maximum is: {%s}" % " ".join(statsDiagsM(sbsInPairCompStatVal,2)), file=sys.stderr)
+ 
+     def statsDiagLengths(diagsInPairCompX):
+         if len(diagsInPairCompX.keys2d()) == 0:
+@@ -1648,12 +1667,12 @@
+         diagXLengths = collections.Counter([len(diags.la) for diags in diagsInPairCompX_])
+         diagXLengths = ["%s:%s" % (length, nb) for (length, nb) in sorted(diagXLengths.items())]
+         return diagXLengths
+-    print >> sys.stderr, "Over all diagonal before the stat. val., distribution of the diag lengths: {%s}" % " ".join(statsDiagLengths(diagsInPairComp))
+-    print >> sys.stderr, "Over all rejected diagonals, distribution of all diag lengths: {%s}" % " ".join(statsDiagLengths(diagsInPairCompRejected))
+-    print >> sys.stderr, "Over all diagonals with p-Value impossible to compute (mainly due to paralogies), distribution of diag lengths: {%s}" % " ".join(statsDiagLengths(diagsInPairCompImpossibleToCalcProba))
+-    print >> sys.stderr, "Over all diagonals with p-Value impossible to compute (mainly due to paralogies) which are finally validated, distribution of diag lengths: {%s}" % " ".join(statsDiagLengths(sbsInPairCompImpossibleToCalcProbaStatVal))
+-    print >> sys.stderr, "Over all diagonals with p-Value impossible to compute (mainly due to paralogies) which are finally rejected, distribution of diag lengths: {%s}" % " ".join(statsDiagLengths(diagsInPairCompImpossibleToCalcProbaRejected))
+-    print >> sys.stderr, "Over all diagonals that passed the stat. val., distribution of diag lengths: {%s}" % " ".join(statsDiagLengths(sbsInPairCompStatVal))
++    print("Over all diagonal before the stat. val., distribution of the diag lengths: {%s}" % " ".join(statsDiagLengths(diagsInPairComp)), file=sys.stderr)
++    print("Over all rejected diagonals, distribution of all diag lengths: {%s}" % " ".join(statsDiagLengths(diagsInPairCompRejected)), file=sys.stderr)
++    print("Over all diagonals with p-Value impossible to compute (mainly due to paralogies), distribution of diag lengths: {%s}" % " ".join(statsDiagLengths(diagsInPairCompImpossibleToCalcProba)), file=sys.stderr)
++    print("Over all diagonals with p-Value impossible to compute (mainly due to paralogies) which are finally validated, distribution of diag lengths: {%s}" % " ".join(statsDiagLengths(sbsInPairCompImpossibleToCalcProbaStatVal)), file=sys.stderr)
++    print("Over all diagonals with p-Value impossible to compute (mainly due to paralogies) which are finally rejected, distribution of diag lengths: {%s}" % " ".join(statsDiagLengths(diagsInPairCompImpossibleToCalcProbaRejected)), file=sys.stderr)
++    print("Over all diagonals that passed the stat. val., distribution of diag lengths: {%s}" % " ".join(statsDiagLengths(sbsInPairCompStatVal)), file=sys.stderr)
+ 
+ 
+     tmp = myTools.Dict2d(list)
+@@ -1684,7 +1703,9 @@
+     else:
+         return True
+ 
+-def noOverlapSb(((c1a, c2a), sba), ((c1b, c2b), sbb)):
++def noOverlapSb(xxx_todo_changeme19, xxx_todo_changeme20):
++    ((c1a, c2a), sba) = xxx_todo_changeme19
++    ((c1b, c2b), sbb) = xxx_todo_changeme20
+     if c1a != c1b and c2a != c2b:
+         return False
+     res = True
+@@ -1709,7 +1730,7 @@
+     splitRanks_b = []
+     nbIDa = 0
+     nbIDb = 0
+-    iDold = sys.maxint
++    iDold = sys.maxsize
+     for (iD, _) in alternatingList:
+         if iD == 'a':
+             if iD != iDold:
+@@ -1747,8 +1768,10 @@
+         newSbs.append(SyntenyBlock(Diagonal(newDt, newl1, newl2, newla), newPval))
+     return newSbs
+ 
+-def splitNestedSbs(((c1a, c2a), sba), ((c1b, c2b), sbb)):
++def splitNestedSbs(xxx_todo_changeme21, xxx_todo_changeme22):
+     # DEBUG assertion
++    ((c1a, c2a), sba) = xxx_todo_changeme21
++    ((c1b, c2b), sbb) = xxx_todo_changeme22
+     assert len(sba.l1) == len(sba.l2) == len(sba.la)
+     assert len(sbb.l1) == len(sbb.l2) == len(sbb.la)
+     #
+@@ -1983,7 +2006,7 @@
+                                 id2splitRanks[idsba] = sorted(list(set(id2splitRanks[idsba] + splitRanks_a)))
+                                 # id2splitRanks[idsbb] = sorted(list(set(id2splitRanks[idsbb] + splitRanks_b)))
+                                 todo = todo | {idsba}
+-    print >> sys.stderr, "%s diags identified as micro-inversions" % len(idsIdentifiedMicroInv)
++    print("%s diags identified as micro-inversions" % len(idsIdentifiedMicroInv), file=sys.stderr)
+ 
+     # With 'todo' and (id of the splited sb, splitRanks)s, calculate the newSbs and removed sbs
+     # 4) splits sbs when a gap contains a micro-inversion
+@@ -2110,8 +2133,8 @@
+     :return:
+     """
+     monogenicDiagsInPairComp = myTools.Dict2d(list)
+-    for c1 in diagsInPairComp.keys():
+-        for c2 in diagsInPairComp[c1].keys():
++    for c1 in list(diagsInPairComp.keys()):
++        for c2 in list(diagsInPairComp[c1].keys()):
+             lDiags = []
+             for diag in diagsInPairComp[c1][c2]:
+                 (m, max_g, lw1, lw2, l1_min, l1_max, l2_min, l2_max) = diag.calculateCharacteristics()
+@@ -2124,7 +2147,7 @@
+                 diagsInPairComp[c1][c2] = lDiags
+             else:
+                 del diagsInPairComp[c1][c2]
+-        if len(diagsInPairComp[c1].keys()) == 0:
++        if len(list(diagsInPairComp[c1].keys())) == 0:
+             del diagsInPairComp[c1]
+     return (diagsInPairComp, monogenicDiagsInPairComp)
+ 
+@@ -2138,16 +2161,16 @@
+     # 3) gene deletion: A-B+C
+     # This looks like an inversion but it is not an inversion.
+     if identifyMonogInvs:
+-        print >> sys.stderr, 'WARNING: returned mono-genic micro-inversions may be a hidden tandem duplication, with a ' \
+-                             'revert orientation, followed by the deletion of the initial gene.'
+-
+-    print >> sys.stderr, "Nb sbs before identifying micro inversions within sbs gaps = %s" % len(sbsInPairComp.items2d())
++        print('WARNING: returned mono-genic micro-inversions may be a hidden tandem duplication, with a ' \
++                             'revert orientation, followed by the deletion of the initial gene.', file=sys.stderr)
++
++    print("Nb sbs before identifying micro inversions within sbs gaps = %s" % len(sbsInPairComp.items2d()), file=sys.stderr)
+     (sbsInPairComp, diagsNotSbsInPairComp) = fIdentifyMonoGcSsAndIdentifyMonoGinvsNestedInSbsGaps(sbsInPairComp,
+                                                                                      putativeMicroInvsInPairComp,
+                                                                                      gapMaxMicroInv=gapMaxMicroInv,
+                                                                                      identifyMonogInvs=identifyMonogInvs)
+-    print >> sys.stderr, "Nb sbs after identifying micro inversions within sbs gaps = %s" % len(sbsInPairComp.items2d())
+-    print >> sys.stderr, "Nb sbs before identifying micro inversions at sbs extremities = %s" % len(sbsInPairComp.items2d())
++    print("Nb sbs after identifying micro inversions within sbs gaps = %s" % len(sbsInPairComp.items2d()), file=sys.stderr)
++    print("Nb sbs before identifying micro inversions at sbs extremities = %s" % len(sbsInPairComp.items2d()), file=sys.stderr)
+ 
+     # TODO identify mono-genic sb when it is close to two projections of sbs-extremities, or two chromosome extremities,
+     # or one projection of sb and one chromosome extremity
+@@ -2159,7 +2182,7 @@
+                                                                                  diagsNotSbsInPairComp,
+                                                                                  gapMaxMicroInv=gapMaxMicroInv,
+                                                                                  identifyMonogInvs=identifyMonogInvs)
+-    print >> sys.stderr, "Nb sbs after identifying micro inversions at sbs extremities = %s" % len(sbsInPairComp.items2d())
++    print("Nb sbs after identifying micro inversions at sbs extremities = %s" % len(sbsInPairComp.items2d()), file=sys.stderr)
+     return (sbsInPairComp, diagsNotSbsInPairComp)
+ 
+ def loopIdentifyBreakpointsWithinGaps(sbsInPairComp):
+@@ -2204,7 +2227,7 @@
+     cptLoopIter = 0
+     while cptLoopIter <= loopIterMax:
+         if cptLoopIter  == loopIterMax:
+-            print >> sys.stderr, "identifyMonoGSbAndMicroInvs|identifyMicroRearrangements|nonOverlappingSbs|mergeNonOverlappingSbs was repeated %s times" % (cptLoopIter - 1)
++            print("identifyMonoGSbAndMicroInvs|identifyMicroRearrangements|nonOverlappingSbs|mergeNonOverlappingSbs was repeated %s times" % (cptLoopIter - 1), file=sys.stderr)
+ 
+         # identify micro-inversions
+         # TODO: Put that into the loop
+@@ -2220,37 +2243,37 @@
+                     assert not distinguishMonoGenicDiags or all([len(sb.la) > 1 for (_, sb) in putativeMicroInversionsInPairComp.iteritems2d()])
+             else:
+                 putativeMicroInversionsInPairComp = diagsNotSbsInPairComp
+-            if isfirstOrLastIter(cptLoopIter): print >> sys.stderr, "Nb sbs before identifying%s micro-inversions = %s" % (typeOfMicroInv, len(sbsInPairComp.items2d()))
++            if isfirstOrLastIter(cptLoopIter): print("Nb sbs before identifying%s micro-inversions = %s" % (typeOfMicroInv, len(sbsInPairComp.items2d())), file=sys.stderr)
+             (sbsInPairComp, diagsNotSbsInPairComp) = doIdentifyMicroInversions(sbsInPairComp, putativeMicroInversionsInPairComp, gapMaxMicroInv, identifyMonoGenicInvs, verbose=False)
+             # remark, doIdentifyMicroInversions may yield mono-genic sbs even if identifyMonoGenicInvs because of the identifyMicroRearrangements that may split a sb in two sub-sbs with one of them of one gene.
+-            if isfirstOrLastIter(cptLoopIter): print >> sys.stderr, "Nb sbs after identifying%s micro-inversions = %s" % (typeOfMicroInv, len(sbsInPairComp.items2d()))
++            if isfirstOrLastIter(cptLoopIter): print("Nb sbs after identifying%s micro-inversions = %s" % (typeOfMicroInv, len(sbsInPairComp.items2d())), file=sys.stderr)
+ 
+         # identify breakpoints within gaps
+         if identifyMicroRearrangements:
+-            if isfirstOrLastIter(cptLoopIter): print >> sys.stderr, "Nb sbs before identifying breakpoints within gaps = %s" % len(sbsInPairComp.items2d())
++            if isfirstOrLastIter(cptLoopIter): print("Nb sbs before identifying breakpoints within gaps = %s" % len(sbsInPairComp.items2d()), file=sys.stderr)
+             sbsInPairComp = loopIdentifyBreakpointsWithinGaps(sbsInPairComp)
+-            if isfirstOrLastIter(cptLoopIter): print >> sys.stderr, "Nb sbs after identifying breakpoints within gaps = %s" % len(sbsInPairComp.items2d())
++            if isfirstOrLastIter(cptLoopIter): print("Nb sbs after identifying breakpoints within gaps = %s" % len(sbsInPairComp.items2d()), file=sys.stderr)
+ 
+         # solve overlaps (truncation and removal) + merge non-overlapping sbs
+         if truncationMax is not None:
+             # solve overlaps (truncation and removal)
+-            if isfirstOrLastIter(cptLoopIter): print >> sys.stderr, "Nb sbs before solve overlaps = %s" % len(sbsInPairComp.items2d())
++            if isfirstOrLastIter(cptLoopIter): print("Nb sbs before solve overlaps = %s" % len(sbsInPairComp.items2d()), file=sys.stderr)
+             # TODO, compute the variation of the coverage before and after this step
+             sbsInPairComp= solveSbsOverlaps(sbsInPairComp, truncationMax=truncationMax, verbose=(True if cptLoopIter == 0 else False))
+-            if isfirstOrLastIter(cptLoopIter): print >> sys.stderr, "Nb sbs after solve overlaps = %s" % len(sbsInPairComp.items2d())
++            if isfirstOrLastIter(cptLoopIter): print("Nb sbs after solve overlaps = %s" % len(sbsInPairComp.items2d()), file=sys.stderr)
+ 
+             # merge non-overlapping sbs
+             # Always finish by post processes without a merge !
+             if mergeAfterSolveOverlaps and cptLoopIter < loopIterMax:
+-                if isfirstOrLastIter(cptLoopIter): print >> sys.stderr, "Nb sbs before merging non-overlapping sbs = %s" % len(sbsInPairComp.items2d())
++                if isfirstOrLastIter(cptLoopIter): print("Nb sbs before merging non-overlapping sbs = %s" % len(sbsInPairComp.items2d()), file=sys.stderr)
+                 sbsInPairComp = doMergeAllDiags(sbsInPairComp, gapMax, g2_tb, distanceMetric)
+-                if isfirstOrLastIter(cptLoopIter): print >> sys.stderr, "Nb sbs after merging non-overlapping sbs = %s" % len(sbsInPairComp.items2d())
++                if isfirstOrLastIter(cptLoopIter): print("Nb sbs after merging non-overlapping sbs = %s" % len(sbsInPairComp.items2d()), file=sys.stderr)
+         cptLoopIter += 1
+ 
+     if cptLoopIter > 1 and cptLoopIter < loopIterMax:
+         # the first merge non-overlapping sbs was useful, thus other iterations of
+         # identifyMicroRearrangements|nonOverlappingSbs|mergeNonOverlappingSbs were performed.
+-        print >> sys.stderr, "identifyMonoGSbAndMicroInvs|identifyMicroRearrangements|nonOverlappingSbs|mergeNonOverlappingSbs was repeated %s times" % (cptLoopIter - 1)
++        print("identifyMonoGSbAndMicroInvs|identifyMicroRearrangements|nonOverlappingSbs|mergeNonOverlappingSbs was repeated %s times" % (cptLoopIter - 1), file=sys.stderr)
+ 
+     return sbsInPairComp
+ 
+@@ -2261,10 +2284,10 @@
+ 
+     # distinguish mono-genic diagonals
+     if distinguishMonoGenicDiags:
+-        print >> sys.stderr, "Total nb diags = %s" % len(diagsInPairComp.items2d())
++        print("Total nb diags = %s" % len(diagsInPairComp.items2d()), file=sys.stderr)
+         (diagsInPairComp, monogenicDiagsInPairComp) = doDistinguishMonoGenicDiags(diagsInPairComp)
+-        print >> sys.stderr, "Nb non-monogenic diags = %s" % len(diagsInPairComp.items2d())
+-        print >> sys.stderr, "Nb monogenic diags = %s" % len(monogenicDiagsInPairComp.items2d())
++        print("Nb non-monogenic diags = %s" % len(diagsInPairComp.items2d()), file=sys.stderr)
++        print("Nb monogenic diags = %s" % len(monogenicDiagsInPairComp.items2d()), file=sys.stderr)
+         assert all([len(sb.la) > 1 for (_, sb) in diagsInPairComp.iteritems2d()])
+ 
+     # statistical validation of diags (putative sbs) into sbs
+@@ -2275,7 +2298,7 @@
+         sbsInPairCompStatVal = diagsInPairComp
+         diagsInPairCompRejected = myTools.Dict2d(list)
+     else:
+-        print >> sys.stderr, "Nb%s diags before statistical validation = %s" % (typeOfDiags, len(diagsInPairComp.items2d()))
++        print("Nb%s diags before statistical validation = %s" % (typeOfDiags, len(diagsInPairComp.items2d())), file=sys.stderr)
+         (sbsInPairCompStatVal, diagsInPairCompRejected) = statisticalValidation(diagsInPairComp, g1_tb, g2_tb, N12s, p_hpSign,
+                                                                                 pThreshold=pThreshold,
+                                                                                 NbOfHomologiesThreshold=50,
+@@ -2284,8 +2307,8 @@
+                                                                                 considerMonogenicSb=False,
+                                                                                 validateSbsWithGapMaxZero=True,
+                                                                                 verbose=False)
+-        print >> sys.stderr, "Nb%s diags not validated as sbs = %s" % (typeOfDiags, len(diagsInPairCompRejected.items2d()))
+-        print >> sys.stderr, "Nb%s diags%s validated as sbs = %s" % (typeOfDiags, ' stat' if pThreshold else '', len(sbsInPairCompStatVal.items2d()))
++        print("Nb%s diags not validated as sbs = %s" % (typeOfDiags, len(diagsInPairCompRejected.items2d())), file=sys.stderr)
++        print("Nb%s diags%s validated as sbs = %s" % (typeOfDiags, ' stat' if pThreshold else '', len(sbsInPairCompStatVal.items2d())), file=sys.stderr)
+     sbsInPairComp = sbsInPairCompStatVal
+ 
+     assert not (identifyMonoGenicInvs and not distinguishMonoGenicDiags), "if 'identifyMonoGenicInvs' is set to True, 'distinguishMonoGenicDiags' should also be set to True"
+@@ -2325,18 +2348,18 @@
+     diagsInPairComp = myTools.Dict2d(list)
+     N12s = myTools.Dict2d(int)
+     N12_g = 0
+-    print >> sys.stderr, "synteny block extraction"
++    print("synteny block extraction", file=sys.stderr)
+     tic = time.time()
+-    if optimisation == 'cython' and (len(g1_tb.keys()) > 1 or len(g2_tb.keys()) > 1):
++    if optimisation == 'cython' and (len(list(g1_tb.keys())) > 1 or len(list(g2_tb.keys())) > 1):
+         (p_hpSign, p_hpSign_g, N12s, N12_g, diagsInPairComp) = \
+             extractDiags.extractDiagsInPairCompChr(g1_tb, g2_tb, sameStrand, distanceMetric)
+     else:
+-        if optimisation == None or (len(g1_tb.keys()) <= 1 and len(g2_tb.keys()) <= 1):
++        if optimisation == None or (len(list(g1_tb.keys())) <= 1 and len(list(g2_tb.keys())) <= 1):
+             totalNbComps = len(g1_tb) * len(g2_tb)
+             progressBar = myTools.ProgressBar(totalNbComps)
+             currCompNb = 0
+-            for c1 in g1_tb.keys():
+-                for c2 in g2_tb.keys():
++            for c1 in list(g1_tb.keys()):
++                for c2 in list(g2_tb.keys()):
+                     (listOfDiags, N12) = extractDiagsInPairCompChr(g1_tb[c1], g2_tb[c2], sameStrand, verbose=verbose)
+                     if len(listOfDiags) > 0:
+                         diagsInPairComp[c1][c2] = listOfDiags
+@@ -2354,7 +2377,7 @@
+                 N12s[c1][c2] = N12
+                 N12_g += N12
+             tac = time.time()
+-            print >> sys.stderr, "Multiprocessing(extractDiagsInPairCompChr) was executed in %ss" % (tac - tic)
++            print("Multiprocessing(extractDiagsInPairCompChr) was executed in %ss" % (tac - tic), file=sys.stderr)
+         else:
+             raise ValueError('optimisation should be in [\'cython\', \'multiprocess\', None]')
+ 
+@@ -2362,14 +2385,14 @@
+         verbose2 = False
+         (p_hpSign, p_hpSign_g, (sTBG1, sTBG1_g), (sTBG2, sTBG2_g)) =\
+                 myProbas.statsHpSign(g1_tb, g2_tb, verbose=verbose2)
+-        print >> sys.stderr, "genome1 tb orientation proba = {+1:%.2f%%,-1:%.2f%%,None:%.2f%%} (stats are also calculated for each chromosome)" % (sTBG1_g[+1]*100, sTBG1_g[-1]*100, sTBG1_g[None]*100)
+-        print >> sys.stderr, "genome2 tb orientation proba = {+1=%.2f%%,-1:%.2f%%,None:%.2f%%} (stats are also calculated for each chromosome)" % (sTBG2_g[+1]*100, sTBG2_g[-1]*100, sTBG2_g[None]*100)
+-        print >> sys.stderr, "hp sign proba in the 'global' mhp = {+1:%.2f%%,-1:%.2f%%,None:%.2f%%) (probabilities are also calculated for pairwise mhp)" % (p_hpSign_g[+1]*100, p_hpSign_g[-1]*100, p_hpSign_g[None]*100)
++        print("genome1 tb orientation proba = {+1:%.2f%%,-1:%.2f%%,None:%.2f%%} (stats are also calculated for each chromosome)" % (sTBG1_g[+1]*100, sTBG1_g[-1]*100, sTBG1_g[None]*100), file=sys.stderr)
++        print("genome2 tb orientation proba = {+1=%.2f%%,-1:%.2f%%,None:%.2f%%} (stats are also calculated for each chromosome)" % (sTBG2_g[+1]*100, sTBG2_g[-1]*100, sTBG2_g[None]*100), file=sys.stderr)
++        print("hp sign proba in the 'global' mhp = {+1:%.2f%%,-1:%.2f%%,None:%.2f%%) (probabilities are also calculated for pairwise mhp)" % (p_hpSign_g[+1]*100, p_hpSign_g[-1]*100, p_hpSign_g[None]*100), file=sys.stderr)
+ 
+     tac = time.time()
+-    print >> sys.stderr, "%s(extractDiagsInPairCompChr) was executed in %ss" % (optimisation, (tac - tic))
+-
+-    print >> sys.stderr, "Nb strict and consistent diags = %s" % len(diagsInPairComp.items2d())
++    print("%s(extractDiagsInPairCompChr) was executed in %ss" % (optimisation, (tac - tic)), file=sys.stderr)
++
++    print("Nb strict and consistent diags = %s" % len(diagsInPairComp.items2d()), file=sys.stderr)
+     assert all([len(diagsInPairComp[k1Foo][k2Foo]) > 0 for (k1Foo, k2Foo) in diagsInPairComp.keys2d()])
+ 
+     # Compute a recommended gapMax parameter value
+@@ -2379,7 +2402,7 @@
+         #weightedAverage is even better than N50 since it returns a more stable value, not a length of a chromosome of the karyotype, it better reflects the global distribution
+         #Waring: if the genome is badly assembled and contain a lot of small contigs, this averaging is not relevant and the recommended gapMax won't be relevant neither
+         if len(g1_tb) > 50 or len(g2_tb) > 50:
+-            print >> sys.stderr, "Warning: one of the two genome seems badly assembled, this may mislead the recommended gapMax calculation"
++            print("Warning: one of the two genome seems badly assembled, this may mislead the recommended gapMax calculation", file=sys.stderr)
+         N1_weightedAverage = int(myMaths.myStats.getWeightedAverage([len(g1_tb[c1]) for c1 in g1_tb]))
+         N2_weightedAverage = int(myMaths.myStats.getWeightedAverage([len(g2_tb[c2]) for c2 in g2_tb]))
+         N1_g = sum([len(g1_tb[c1]) for c1 in g1_tb])
+@@ -2388,15 +2411,15 @@
+         # conservation of the density
+         N12_weightedAverage = int(density*N1_weightedAverage*N2_weightedAverage)
+         gap = recommendedGap(nbHpsRecommendedGap, targetProbaRecommendedGap, N12_weightedAverage, N1_weightedAverage, N2_weightedAverage, p_hpSign=p_hpSign_g, verbose=verbose)
+-        print >> sys.stderr, "recommended gapMax = %s tbs" % gap
++        print("recommended gapMax = %s tbs" % gap, file=sys.stderr)
+         gapMax = gap
+-    print >> sys.stderr, "used gapMax = %s tbs" % gapMax
++    print("used gapMax = %s tbs" % gapMax, file=sys.stderr)
+ 
+     # merge strict and consistent diagonals into gaped consistent diagonals
+     ########################################################################
+-    print >> sys.stderr, "Nb diags before merging diags = %s" % len(diagsInPairComp.items2d())
++    print("Nb diags before merging diags = %s" % len(diagsInPairComp.items2d()), file=sys.stderr)
+     diagsInPairComp = doMergeAllDiags(diagsInPairComp, gapMax, g2_tb, distanceMetric)
+-    print >> sys.stderr, "Nb diags after merging diags = %s" % len(diagsInPairComp.items2d())
++    print("Nb diags after merging diags = %s" % len(diagsInPairComp.items2d()), file=sys.stderr)
+ 
+     (sbsInPairComp, diagsInPairComp) = postProcessDiags(diagsInPairComp, distinguishMonoGenicDiags,
+                                                         pThreshold,  g1_tb, g2_tb, N12s, p_hpSign, validateImpossToCalc_mThreshold,
+@@ -2412,10 +2435,10 @@
+                 minChromLength=2,
+                 keepOriginal=False):
+     assert labelWith in {'FamID', 'FamName'}
+-    nCini1 = len(g1.keys())
+-    nCini2 = len(g2.keys())
+-    nGini1 = sum([len(chrom1) for chrom1 in g1.values()])
+-    nGini2 = sum([len(chrom2) for chrom2 in g2.values()])
++    nCini1 = len(list(g1.keys()))
++    nCini2 = len(list(g2.keys()))
++    nGini1 = sum([len(chrom1) for chrom1 in list(g1.values())])
++    nGini2 = sum([len(chrom2) for chrom2 in list(g2.values())])
+     #step 1 :filter genomes and rewrite in tandem blocks if needed
+     ##############################################################
+     # rewrite genomes by family names (ie ancGene names)
+@@ -2427,48 +2450,48 @@
+         g1_fID = myMapping.labelWithFamNames(g1, families)
+         g2_fID = myMapping.labelWithFamNames(g2, families)
+     # genes that are not in ancGene have a aID=None
+-    nGiniInFam1 = len([fID for chrom1 in g1_fID.values() for (fID, _) in chrom1 if fID is not None])
+-    nGiniInFam2 = len([fID for chrom2 in g2_fID.values() for (fID, _) in chrom2 if fID is not None])
+-    print >> sys.stderr, "genome1 initially contains %s chromosomes" % nCini1
+-    print >> sys.stderr, "genome2 initially contains %s chromosomes" % nCini2
+-    print >> sys.stderr, "genome1 initially contains %s genes (%s genes are in families, %.2f%%)" % (nGini1, nGiniInFam1, (100 * float(nGiniInFam1) / float(nGini1)))
+-    print >> sys.stderr, "genome2 initially contains %s genes (%s genes are in families, %.2f%%)" % (nGini2, nGiniInFam2, (100 * float(nGiniInFam2) / float(nGini2)))
++    nGiniInFam1 = len([fID for chrom1 in list(g1_fID.values()) for (fID, _) in chrom1 if fID is not None])
++    nGiniInFam2 = len([fID for chrom2 in list(g2_fID.values()) for (fID, _) in chrom2 if fID is not None])
++    print("genome1 initially contains %s chromosomes" % nCini1, file=sys.stderr)
++    print("genome2 initially contains %s chromosomes" % nCini2, file=sys.stderr)
++    print("genome1 initially contains %s genes (%s genes are in families, %.2f%%)" % (nGini1, nGiniInFam1, (100 * float(nGiniInFam1) / float(nGini1))), file=sys.stderr)
++    print("genome2 initially contains %s genes (%s genes are in families, %.2f%%)" % (nGini2, nGiniInFam2, (100 * float(nGiniInFam2) / float(nGini2))), file=sys.stderr)
+     # Must be applied on the two genomes, because of the mode inBothGenomes (InFamilies => not only anchor genes are kept but all genes herited from a gene of the LCA)
+     #mfilt2origin1 -> mGf2Go1
+     ((g1_fID, mGf2Go1, (nCL1, nGL1)), (g2_fID, mGf2Go2, (nCL2, nGL2))) =\
+         filter2D(g1_fID, g2_fID, filterType, minChromLength, keepOriginal=keepOriginal)
+-    print >> sys.stderr, "genome1 after filterType=%s and minChromLength=%s contains %s genes" %\
+-        (filterType, minChromLength, sum([len(g1_fID[c1]) for c1 in g1_fID]))
+-    print >> sys.stderr, "genome2 after filterType=%s and minChromLength=%s contains %s genes" %\
+-        (filterType, minChromLength, sum([len(g2_fID[c2]) for c2 in g2_fID]))
++    print("genome1 after filterType=%s and minChromLength=%s contains %s genes" %\
++        (filterType, minChromLength, sum([len(g1_fID[c1]) for c1 in g1_fID])), file=sys.stderr)
++    print("genome2 after filterType=%s and minChromLength=%s contains %s genes" %\
++        (filterType, minChromLength, sum([len(g2_fID[c2]) for c2 in g2_fID])), file=sys.stderr)
+     nGD1 = myMapping.nbDup(g1_fID)[0]
+     nGD2 = myMapping.nbDup(g2_fID)[0]
+     (g1_tb, mtb2g1, nGTD1) = myMapping.remapRewriteInTb(g1_fID, tandemGapMax=tandemGapMax, mOld=mGf2Go1)
+     (g2_tb, mtb2g2, nGTD2) = myMapping.remapRewriteInTb(g2_fID, tandemGapMax=tandemGapMax, mOld=mGf2Go2)
+-    print >> sys.stderr, "genome1 rewritten in tbs, contains %s tbs" % sum([len(g1_tb[c1]) for c1 in g1_tb])
+-    print >> sys.stderr, "genome2 rewritten in tbs, contains %s tbs" % sum([len(g2_tb[c2]) for c2 in g2_tb])
++    print("genome1 rewritten in tbs, contains %s tbs" % sum([len(g1_tb[c1]) for c1 in g1_tb]), file=sys.stderr)
++    print("genome2 rewritten in tbs, contains %s tbs" % sum([len(g2_tb[c2]) for c2 in g2_tb]), file=sys.stderr)
+     nDD1 = myMapping.nbDup(g1_tb)[0]
+     nDD2 = myMapping.nbDup(g2_tb)[0]
+-    print >> sys.stderr, "genome1 contains %s gene duplicates (initial gene excluded)" % nGD1
+-    print >> sys.stderr, "genome1 contains %s tandem duplicated genes (initial gene excluded)" % nGTD1
+-    print >> sys.stderr, "genome1 contains %s dispersed duplicated tbs (initial tb excluded)" % nDD1
+-    print >> sys.stderr, "genome2 contains %s gene duplicates (initial gene excluded)" % nGD2
+-    print >> sys.stderr, "genome2 contains %s tandem duplicated genes (initial gene excluded)" % nGTD2
+-    print >> sys.stderr, "genome2 contains %s dispersed duplicated tbs (initial tb excluded)" % nDD2
++    print("genome1 contains %s gene duplicates (initial gene excluded)" % nGD1, file=sys.stderr)
++    print("genome1 contains %s tandem duplicated genes (initial gene excluded)" % nGTD1, file=sys.stderr)
++    print("genome1 contains %s dispersed duplicated tbs (initial tb excluded)" % nDD1, file=sys.stderr)
++    print("genome2 contains %s gene duplicates (initial gene excluded)" % nGD2, file=sys.stderr)
++    print("genome2 contains %s tandem duplicated genes (initial gene excluded)" % nGTD2, file=sys.stderr)
++    print("genome2 contains %s dispersed duplicated tbs (initial tb excluded)" % nDD2, file=sys.stderr)
+     assert nDD1 + nGTD1 == nGD1
+     assert nDD2 + nGTD2 == nGD2
+ 
+     # conservation law genes
+     def nbOfGenesInAGenomeInTbs(g_tb, mtb2g):
+         nbGenes = 0
+-        for (chr, chrom) in g_tb.iteritems():
++        for (chr, chrom) in g_tb.items():
+             nbGenes += sum(len(mtb2g[chr][itb]) for (itb, _) in enumerate(chrom))
+         return nbGenes
+     assert nGini1 == nGL1 + nbOfGenesInAGenomeInTbs(g1_tb, mtb2g1)
+     assert nGini2 == nGL2 + nbOfGenesInAGenomeInTbs(g2_tb, mtb2g2)
+     # conservation law chromosomes
+-    assert nCini1 == nCL1 + len(g1_tb.keys())
+-    assert nCini2 == nCL2 + len(g2_tb.keys())
++    assert nCini1 == nCL1 + len(list(g1_tb.keys()))
++    assert nCini2 == nCL2 + len(list(g2_tb.keys()))
+ 
+     return ((g1_tb, mtb2g1, (nCL1, nGL1)), (g2_tb, mtb2g2, (nCL2, nGL2)))
+ 
+@@ -2594,7 +2617,7 @@
+ # la = [..., (aGName, strand, dist), ...]
+ # l1 = [..., [g1, ...gN], ...] with [g1, ..., gN] the child tb of the corresponding aG
+ def printSbsFile(sbsInPairComp, genome1, genome2, sortByDecrLengths=True, stream=sys.stdout):
+-    print >> sys.stderr, "Print synteny blocks"
++    print("Print synteny blocks", file=sys.stderr)
+ 
+     def foo(genomeX, cX, lX, idxHp, reverseOrder=False):
+         assert reverseOrder in {True, False, None}, reverseOrder
+@@ -2638,9 +2661,9 @@
+             (g1s, s1s) = foo(genome1, c1, sb.l1, idxHp)
+             reverseOrderOnG2 = True if sb.dt in {'/' or None} else False
+             (g2s, s2s) = foo(genome2, c2, sb.l2, idxHp, reverseOrder=reverseOrderOnG2)
+-            print >> stream, myFile.myTSV.printLine([idSb, aGname, aGstrand, dist, c1, c2, s1s, s2s, g1s, g2s])
+-
+-    print >> sys.stderr, "Distribution of the lengths of synteny blocks:", myMaths.myStats.syntheticTxtSummary(statsSbs)
++            print(myFile.myTSV.printLine([idSb, aGname, aGstrand, dist, c1, c2, s1s, s2s, g1s, g2s]), file=stream)
++
++    print("Distribution of the lengths of synteny blocks:", myMaths.myStats.syntheticTxtSummary(statsSbs), file=sys.stderr)
+ 
+ def findDiagTypeFromFileInfos(l1, l2, s1s=None, s2s=None):
+     assert len(l1) == len(l2)
+@@ -2943,10 +2966,10 @@
+ @myTools.verbose
+ def computeAncestralCoverageBySbs(g1_tb, g2_tb, ancSbGenome, verbose = False):
+     ancGenesInSbs=set([])
+-    for ancSb in ancSbGenome.values():
++    for ancSb in list(ancSbGenome.values()):
+         for (ancGene,_,_) in ancSb:
+             ancGenesInSbs.add(ancGene)
+-    print >> sys.stderr, "Nb of ancGenes in synteny blocks (each ancGene can appear at most once)", len(ancGenesInSbs)
++    print("Nb of ancGenes in synteny blocks (each ancGene can appear at most once)", len(ancGenesInSbs), file=sys.stderr)
+     ancGenesInG1Tb = set([])
+     ancGenesInG2Tb = set([])
+     for tb1 in [tb1 for c1 in g1_tb for tb1 in g1_tb[c1]]:
+@@ -2957,6 +2980,6 @@
+         ancGenesInG2Tb.add(ancGene)
+     #{ancGenes that are present in G1 rewritten in tbs and in G2 rewritten in tbs}
+     ancGenesInG1TbAndInG2Tb = ancGenesInG1Tb & ancGenesInG2Tb # intersection
+-    print >> sys.stderr, "coverage LCA_S1-S2 = cardinal({ancGenes in Sb}) / cardinal({ancGenes that are present in G1 rewritten in tbs and in G2 rewritten in tbs})\ncoverage LCA_S1-S2 = ", float(len(ancGenesInSbs)) / len(ancGenesInG1TbAndInG2Tb)
++    print("coverage LCA_S1-S2 = cardinal({ancGenes in Sb}) / cardinal({ancGenes that are present in G1 rewritten in tbs and in G2 rewritten in tbs})\ncoverage LCA_S1-S2 = ", float(len(ancGenesInSbs)) / len(ancGenesInG1TbAndInG2Tb), file=sys.stderr)
+     coverage = float(len(ancGenesInSbs)) / len(ancGenesInG1TbAndInG2Tb)
+     return coverage
