@@ -91,10 +91,10 @@ class ProgressBar:
             self.listOfPercentage.remove(progress)
 
 
-# decorator that adds a switchable verbose mode to a function
 # FIXME, if the decorated function is called with more arguments that in the
 # function definition, there is no error raised.
 def verbose(functionToExcecute):
+    """decorator that adds a switchable verbose mode to a function"""
     @wraps(functionToExcecute) # to avoid changing the name of the function
     def modifiedFunction(*args, **kargs):
         old_sys_stderr = sys.stderr
@@ -114,9 +114,10 @@ def verbose(functionToExcecute):
         return res
     return  modifiedFunction
 
-# decorator for functions that requires a minimal python version >= 2.7 for instance
-# version is a tuple, for instance if the function requires python version at least 2.7, version = (2,7)
 def minimalPythonVersion(version):
+    """decorator for functions that requires a minimal python version >= 2.7
+    for instance version is a tuple, for instance if the function requires
+    python version at least 2.7, version = (2,7)"""
     def decorator(functionToExcecute):
         def modifiedFunction(*args, **kargs):
             if sys.version_info < version:
@@ -126,8 +127,8 @@ def minimalPythonVersion(version):
         return modifiedFunction
     return decorator
 
-# decorator that computes the execution time
 def tictac(functionToExcecute):
+    """decorator that computes the execution time"""
     @wraps(functionToExcecute) # to avoid changing the name of the function
     def modifiedFunction(*args,**kargs):
         tic = time.time()
@@ -256,8 +257,8 @@ def which(program):
     return None
 
 
-# iterator of adjacent components of a list
 class myIterator:
+    """iterator of adjacent components of a list"""
     # sliding tuple (x1, x2, ...) of width=width
     @staticmethod
     def slidingTuple(lst, width=2):
@@ -268,9 +269,9 @@ class myIterator:
             for idxW0 in range(len(lst) - width + 1):
                 yield tuple(lst[idxW0: idxW0 + width])
 
-# liste of partitions of size k in range(n)
 @memoize
 def partitions(n, k):
+    """liste of partitions of size k in range(n)"""
     if n == 1:
         if k == 1:
             return [ [[0]] ]
@@ -285,8 +286,8 @@ def partitions(n, k):
     else:
         return []
 
-# management of a parallel execution on a range of values
 def getRange(s):
+    """management of a parallel execution on a range of values"""
     if myFile.hasAccess(s):
         f = myFile.openFile(s, "r")
         lst = []
@@ -299,20 +300,20 @@ def getRange(s):
         return list(range(int(start), int(end)+1))
 
 
-# hashable dict class, useful to use it as a key
 class hashabledict(dict):
+    """hashable dict class, useful to use it as a key"""
     def __hash__(self):
         return hash(tuple(sorted(self.items())))
 
-# hashable list class
 class hashablelist(list):
+    """hashable list class"""
     def __hash__(self):
         return hash(tuple(self))
 
-# This class allows to group a list of elements.
-# From an initial list of elements, links are added between these elements.
-# The class gathers elements that are linked.
 class myCombinator:
+    """This class allows to group a list of elements.
+    From an initial list of elements, links are added between these elements.
+    The class gathers elements that are linked."""
 
     def __init__(self, ini = []):
         self.grp = list(ini)
@@ -322,9 +323,9 @@ class myCombinator:
             for x in self.grp[i]:
                 self.dic[x] = i
 
-    # define a link between all elements of obj
-    # update sets already built
     def addLink(self, obj):
+        """define a link between all elements of obj. Update sets already
+        built"""
 
         if len(obj) == 0:
             return []
@@ -360,19 +361,18 @@ class myCombinator:
             return grp[i]
 
 
-    # return an iterator over the data
-    # empty sets are thus removed
     def __iter__(self):
+        """return an iterator over the data. empty sets are thus removed"""
         for g in self.grp:
             if len(g) > 0:
                 yield g
 
-    # remove empty sets
     def reduce(self):
+        """remove empty sets"""
         self.__init__(self)
 
-    # reset combinator
     def reset(self):
+        """reset combinator"""
         self.__init__()
 
 # add more options to a specific module
@@ -382,8 +382,8 @@ def addModuleOptions(namespace, options):
         __moduleoptions.append((namespace+":"+name, typ, val))
 
 
-# ask a list of file in arguments
 class FileList:
+    """ask a list of file in arguments"""
     def __init__(self, value):
         self.minNbFiles = value
 
@@ -391,11 +391,14 @@ class FileList:
         return '<FileList(%d)>' % self.minNbFiles
 
 
-# Parse arguments on the command line
-#  1. requested arguments (name, builder)
-#  2. options in the form of -opt=val (name, builder, default_value)
-# If an error occurs, user's command line is printed as well as a short description of the bug and a brief manual of the script (info).
 def checkArgs(args, options, info, showArgs=True, loadOnlyDefaultOptions=False):
+    """Parse arguments on the command line.
+
+    1. requested arguments (name, builder)
+    2. options in the form of -opt=val (name, builder, default_value)
+    
+    If an error occurs, user's command line is printed as well as a short
+    description of the bug and a brief manual of the script (info)."""
 
     options = options + __moduleoptions
     # print error informations if wrong arguments
@@ -511,10 +514,12 @@ def checkArgs(args, options, info, showArgs=True, loadOnlyDefaultOptions=False):
                 if isinstance(typ, FileList):
                     valArg[s] = list()
                     assert len(valArg) == len(args)
+                    # FIXME: file type
                     valArg[s].append(putValue(file, None, t))
                 else:
                     valArg[s] = putValue(typ, None, t)
             elif isinstance(args[-1][1], FileList):
+                # FIXME: file type
                 valArg[args[-1][0]].append(putValue(file, None, t))
             else:
                 error_usage("Too many arguments on '%s'" % t)
