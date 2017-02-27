@@ -7,6 +7,7 @@
 # Licences GLP v3 and CeCILL v2
 
 import os
+import io
 import re
 import sys
 import itertools
@@ -382,6 +383,9 @@ def addModuleOptions(namespace, options):
         __moduleoptions.append((namespace+":"+name, typ, val))
 
 
+# Make the 'File' argument type available. (was `file` under python2.7
+File = io.IOBase
+
 class FileList:
     """ask a list of file in arguments"""
     def __init__(self, value):
@@ -423,11 +427,11 @@ def checkArgs(args, options, info, showArgs=True, loadOnlyDefaultOptions=False):
         if typ == bool:
             # Type booleen
             res = {"false": False, "true":True}[v.lower()]
-        elif typ == file:
+        elif typ == File:
             # Type 'fichier': test of presence
             v = os.path.expanduser(v)
             if not myFile.hasAccess(v):
-                error_usage("File '%s' innaccessible" % v)
+                error_usage("File '%s' inaccessible" % v)
             else:
                 res = v
         elif isinstance(typ, enum.Enum):
@@ -514,13 +518,11 @@ def checkArgs(args, options, info, showArgs=True, loadOnlyDefaultOptions=False):
                 if isinstance(typ, FileList):
                     valArg[s] = list()
                     assert len(valArg) == len(args)
-                    # FIXME: file type
-                    valArg[s].append(putValue(file, None, t))
+                    valArg[s].append(putValue(File, None, t))
                 else:
                     valArg[s] = putValue(typ, None, t)
             elif isinstance(args[-1][1], FileList):
-                # FIXME: file type
-                valArg[args[-1][0]].append(putValue(file, None, t))
+                valArg[args[-1][0]].append(putValue(File, None, t))
             else:
                 error_usage("Too many arguments on '%s'" % t)
 
