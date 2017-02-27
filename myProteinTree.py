@@ -17,6 +17,12 @@ from . import myTools
 from . import myFile
 
 
+def hasLowScore_alwaysTrue(tree, node):
+    """Default function `hasLowScore` for `ProteinTree.rebuildTree`.
+    Always return True."""
+    return True
+
+
 def getIntermediateAnc(phylTree, previousAnc, lastWrittenAnc, newAnc, isDuplication):
     """return the ancestor names since the previousAnc"""
 
@@ -237,9 +243,15 @@ class ProteinTree:
         return do(self.root if node is None else node)
 
 
-    def rebuildTree(self, phylTree, hasLowScore, node=None):
+    def rebuildTree(self, phylTree, hasLowScore=hasLowScore_alwaysTrue,
+                    node=None):
         """give back the expected topology to the tree (to match the species tree)
-          gather equivalent nodes under the same child"""
+          gather equivalent nodes under the same child.
+          
+          hasLowScore: function that takes (tree, node) and return True/False.
+                       example: check that the duplication score of a node is
+                       above a given threshold.
+          """
 
         def do(node):
 
@@ -363,7 +375,7 @@ def loadTree(name):
             l = ""
             while (l == "") or l.startswith("#"):
                 # the final '\n' is removed and we cut owing to the '\t'
-                l = next(f).replace('\n', '')
+                l = next(f).decode().replace('\n', '')
             l = l.split('\t')
             # the triplet (indentation,key,value) is recorded
             ns.curr = (len(l)-2, l[-2], l[-1])
