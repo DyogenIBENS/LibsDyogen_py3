@@ -1,0 +1,4 @@
+# In module myTools:
+
+* convert the argument type `file` to something meaningful in python3.
+* module `psyco` ?
