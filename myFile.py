@@ -78,7 +78,7 @@ class myTSV:
         """write a mySQL dump file"""
         # return myTSV.printLine(data).replace("None", "\N")
         # 2to3 (unicode error on \N)
-        return myTSV.printLine(data).replace("None", "\0")
+        return myTSV.printLine(data).replace("None", "\\N")
 
 class firstLineBuffer:
     """Read the first line of a file. Useful when you want to know the format
