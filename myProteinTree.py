@@ -264,10 +264,10 @@ class ProteinTree:
             # only if it is not a true duplication the children are changed
             if self.info[node]['Duplication'] < 2:
 
-                # the node will be a speciation exepted special case under
+                # the node will be a speciation except special case under
                 self.info[node]['Duplication'] = 0
 
-                # the children are redefined for -our- phylogenetic tree by
+                # the children are redefined for *our* phylogenetic tree by
                 # organising the children into packs
                 children = collections.defaultdict(list)
                 anc = self.info[node]['taxon_name']
