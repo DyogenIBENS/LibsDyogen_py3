@@ -383,7 +383,7 @@ def addModuleOptions(namespace, options):
         __moduleoptions.append((namespace+":"+name, typ, val))
 
 
-# Make the 'File' argument type available. (was `file` under python2.7
+# Make the 'File' argument type available. (was `file` under python2.7)
 File = io.IOBase
 
 class FileList:
