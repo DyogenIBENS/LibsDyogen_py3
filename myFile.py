@@ -148,6 +148,7 @@ def openFile(nom, mode):
                 os.makedirs(os.path.dirname(nom))
             except OSError:
                 pass
+        need_decoding=True
         i = nom.find(".zip/")
         if (mode == "r") and (i >= 0):
             import zipfile
@@ -168,4 +169,11 @@ def openFile(nom, mode):
             f = lzma.LZMAFile(nom, mode)
         else:
             f = open(nom, mode)
+            need_decoding = True
+
+        if need_decoding:
+            orig_readline = f.readline
+            def readdecodeline(*args, **kwargs):
+                return orig_readline().decode()
+            f.readline = readdecodeline
     return f
