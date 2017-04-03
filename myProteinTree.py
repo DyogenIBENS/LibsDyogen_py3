@@ -375,7 +375,8 @@ def loadTree(name):
             l = ""
             while (l == "") or l.startswith("#"):
                 # the final '\n' is removed and we cut owing to the '\t'
-                l = next(f).decode().replace('\n', '')
+                #l = next(f).decode().replace('\n', '')
+                l = next(f).replace('\n', '')
             l = l.split('\t')
             # the triplet (indentation,key,value) is recorded
             ns.curr = (len(l)-2, l[-2], l[-1])
