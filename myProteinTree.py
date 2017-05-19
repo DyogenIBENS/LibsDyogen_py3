@@ -370,6 +370,7 @@ def loadTree(name):
 
     # read the next line of the file (and bufferise the next one)
     def nextLine():
+        # Uses variables `f` and `ns` from the outside scope
         old = ns.curr
         try:
             l = ""
@@ -386,6 +387,7 @@ def loadTree(name):
 
     # the analysing process of the lines of the file
     def recLoad(tree, indent):
+        # Uses variable `ns` from the outside scope
 
         # id of the point
         currID = int(nextLine()[2])
@@ -415,6 +417,6 @@ def loadTree(name):
         n = (n[0]+1, n[1]+len(tree.data), n[2]+len(tree.info)-len(tree.data))
         if ns.curr == None:
             break
-    print("%d roots, %d branches, %d nodes OK" % n, file=sys.stderr)
+    print("%d roots, %d internal nodes, %d leaves: OK" % n, file=sys.stderr)
 
     f.close()
