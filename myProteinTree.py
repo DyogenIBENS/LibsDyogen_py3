@@ -110,7 +110,11 @@ class ProteinTree:
 
     def printNewick(self, f, root=None, withDist=True, withTags=False, withAncSpeciesNames=False, withAncGenesNames=False):
         """print the tree into the Newick format (with parentheses)"""
-        NHX = {"Duplication": "D", "Bootstrap": "B", "taxon_name": "S", "duplication_confidence_score": "SIS", "dubious_duplication": "DD"}
+        NHX = {"Duplication": "D",
+               "Bootstrap": "B",
+               "taxon_name": "S",
+               "duplication_confidence_score": "SIS",
+               "dubious_duplication": "DD"}
         def rec(node):
             if node in self.data:
                 return "(" + ",".join(
@@ -120,7 +124,7 @@ class ProteinTree:
                         for (g,l) in self.data[node]
                 ) + ")" + (self.info[node]["taxon_name"].replace(' ', '.') if withAncSpeciesNames and ("taxon_name" in self.info[node]) else '')+(self.info[node]['family_name'].split("/")[0]if withAncGenesNames and ("taxon_name" in self.info[node]) else '')
             else:
-                return self.info[node]['gene_name'].split("/")[0]
+                return self.info[node].get('gene_name', '').split("/")[0]
 
         if root is None:
             root = self.root
