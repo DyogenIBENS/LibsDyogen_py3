@@ -26,29 +26,43 @@ def hasLowScore_alwaysTrue(tree, node):
 def getIntermediateAnc(phylTree, previousAnc, lastWrittenAnc, newAnc, isDuplication):
     """return the ancestor names since the previousAnc"""
 
-    if lastWrittenAnc:                                                      # cruise mode
-        toWrite =list(phylTree.dicLinks[lastWrittenAnc][newAnc][1:])    # genes of the species between lastWritten and newAnc are recorded exepted if it is a duplication node (see after)
+    if lastWrittenAnc: # cruise mode
+        # genes of the species between lastWritten and newAnc are recorded
+        # exepted if it is a duplication node (see after)
+        toWrite =list(phylTree.dicLinks[lastWrittenAnc][newAnc][1:])
 
-    elif not lastWrittenAnc:                                        # in the first species of the gene tree or at the first node outside the first species
-        if previousAnc == None:                                 # at the root
-            toWrite =list([newAnc])                         # the gene is recorded exepted if it is a duplication (see after)
+    # in the first species of the gene tree or at the first node outside the
+    # first species
+    elif not lastWrittenAnc:
+        if previousAnc == None: # at the root
+            # the gene is recorded except if it is a duplication (see after)
+            toWrite =list([newAnc])
 
-        elif previousAnc:                                       # not at the root
+        elif previousAnc: # not at the root
 
-            if previousAnc == newAnc:                       # still in the first species
-                toWrite=list([newAnc])                  # the gene is recorded exepted if it is a duplication (see after)
+            if previousAnc == newAnc: # still in the first species
+                # the gene is recorded except if it is a duplication (see after)
+                toWrite=list([newAnc])
 
-            elif previousAnc != newAnc:                     # in a child species
-                toWrite=list(phylTree.dicLinks[previousAnc][newAnc]) # the genes of the species between previousAnc and newAnc are recorded and newAnc is removed if the node is a duplication node (see after)
+            elif previousAnc != newAnc: # in a child species
+                # the genes of the species between previousAnc and newAnc are
+                # recorded and newAnc is removed if the node is a duplication
+                # node (see after)
+                toWrite=list(phylTree.dicLinks[previousAnc][newAnc])
 
-    if isDuplication:                                               # if the current node is a duplication newAnc is not recorded in the list to be written
+    # if the current node is a duplication newAnc is not recorded in the list
+    # to be written
+    if isDuplication:
         toWrite.remove(newAnc)
 
-    root=False                                              # root refers to terminal genes of the first species
-    if not lastWrittenAnc:                                  # in the first species or at the first node outside the first species
-        if not isDuplication:                           # if it is a speciation node
+    root=False # root refers to terminal genes of the first species
+    # in the first species or at the first node outside the first species
+    if not lastWrittenAnc:
+        if not isDuplication: # if it is a speciation node
             root = True
-        if previousAnc != newAnc and isDuplication:     # if at the first node outside the first species and if this node is a duplication node
+        # if at the first node outside the first species and if this node is a
+        # duplication node
+        if previousAnc != newAnc and isDuplication:
             root = True
 
     if len(toWrite) == 0:
