@@ -204,6 +204,7 @@ class PhylogeneticTree:
                 if len(l) > (indent+1):
                     age = int(l[indent+1])
                 else:
+                    # NOT A NICE IDEA. TODO. change to None?
                     age = 0
                 lines.append((indent, names, age))
             lines.reverse()
@@ -372,6 +373,7 @@ class PhylogeneticTree:
     def to_ete3(self):
         """Convert to Ete3 tree object"""
         import ete3
+        # TODO: do not import ete3 here, just try to use it and raise error
         tree = ete3.Tree(name=self.root)
         current_nodes = [tree]
         while current_nodes:
