@@ -6,6 +6,8 @@
 # mail : jlucas@ens.fr
 # Licences GLP v3 and CeCILL v2
 
+from __future__ import print_function
+
 
 """Manage gene trees in the form of (data,info)"""
 

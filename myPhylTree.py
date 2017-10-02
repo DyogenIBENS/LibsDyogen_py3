@@ -6,6 +6,9 @@
 # mail : jlucas@ens.fr
 # Licences GLP v3 and CeCILL v2
 
+from __future__ import print_function
+
+
 import os
 import sys
 import itertools
