@@ -102,6 +102,9 @@ class firstLineBuffer:
             if (not l.startswith("#")) and (len(l) > 0):
                 return l
 
+    def next(self): # python2 compatibility
+        return self.__next__()
+
     def close(self):
         return self.f.close()
 
@@ -148,7 +151,7 @@ def openFile(nom, mode):
                 os.makedirs(os.path.dirname(nom))
             except OSError:
                 pass
-        need_decoding=True
+        need_decoding = True
         i = nom.find(".zip/")
         if (mode == "r") and (i >= 0):
             import zipfile
@@ -169,9 +172,9 @@ def openFile(nom, mode):
             f = lzma.LZMAFile(nom, mode)
         else:
             f = open(nom, mode)
-            need_decoding = True
+            need_decoding = False
 
-        if need_decoding:
+        if sys.version_info.major > 2 and need_decoding:
             orig_readline = f.readline
             def readdecodeline(*args, **kwargs):
                 return orig_readline().decode()
