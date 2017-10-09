@@ -264,6 +264,8 @@ class PhylogeneticTree:
     def __loadFromNewick__(self, s):
         """tree in the Newick format (between parentheses)"""
 
+        s = " ".join(s.split()) # remove any consecutive whitespaces
+        
         #FIXME
         def readStr(nb):
             """read the nb next characters of the tree"""
@@ -287,21 +289,33 @@ class PhylogeneticTree:
 
         def readTree():
             """read the tree in the form of text informations"""
-            keepWhile(' ')
 
+            keepWhile(' \t')
+
+            # Guillaume 2017-10-03: allow spaces in labels
+            # --------------------------------------------
+            # On the contrary to the `skbio` newick parser [implementation](
+            # http://scikit-bio.org/docs/latest/generated/skbio.io.format.newick.html),
+            # here you cannot escape node labels with single quotes (meaning 
+            # the single quotes become part of the node label. Similarly to
+            # `Ete3`).
+            # Therefore it wasn't originally possible to have spaces in labels,
+            # but I allowed it here, on one *condition*: multiple consecutive
+            # whitespaces in labels are **converted into a single space**.
+            
             if s[self.pos] == '(':
                 children = []
                 # '(' the first time, then some ',' untill the final ')'
                 while readStr(1) != ')':
                     children.append(readTree())
-                    keepWhile(' ')
-                keepWhile(' ')
+                    keepWhile(' \t')
+                keepWhile(' \t')
                 # the result is the list of children + the name
-                elt = (children, keepUntil("),:;[ "))
+                elt = (children, keepUntil("),:;[\t"))
             else:
                 # the result is a name, for leaves, no children
-                elt = ([], keepUntil("),:;[ "))
-            keepWhile(' ')
+                elt = ([], keepUntil("),:;[\t"))
+            keepWhile(' \t')
 
             # possibly a non-null branch length
             if s[self.pos] == ':':
@@ -311,7 +325,7 @@ class PhylogeneticTree:
             else:
                 length = 0
 
-            keepWhile(' ')
+            keepWhile(' \t')
 
             # possibly informations between brackets
             if s[self.pos] == '[':
@@ -324,7 +338,7 @@ class PhylogeneticTree:
             else:
                 info = {}
 
-            keepWhile(' ')
+            keepWhile(' \t')
 
             return (elt, length, info)
 
