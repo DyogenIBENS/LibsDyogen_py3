@@ -387,16 +387,28 @@ class PhylogeneticTree:
         self.ages = self.newCommonNamesMapperInstance()
         calcAges(data)
 
-    def to_ete3(self):
+    def to_ete3(self, nosinglechild=True):
         """Convert to Ete3 tree object"""
         import ete3
         # TODO: do not import ete3 here, just try to use it and raise error
         tree = ete3.Tree(name=self.root)
         current_nodes = [tree]
-        while current_nodes:
-            current = current_nodes.pop()
-            for child, dist in self.items.get(current.name, []):
-                current_nodes.append(current.add_child(name=child, dist=dist))
+        if nosinglechild:
+            while current_nodes:
+                current = current_nodes.pop()
+                childlist = self.items.get(current.name, [])
+                while len(childlist) == 1:
+                    current.name = childlist[0][0]
+                    current.dist += childlist[0][1]
+                    childlist = self.items.get(current.name, [])
+                
+                for child, dist in childlist:
+                    current_nodes.append(current.add_child(name=child, dist=dist))
+        else:
+            while current_nodes:
+                current = current_nodes.pop()
+                for child, dist in self.items.get(current.name, []):
+                    current_nodes.append(current.add_child(name=child, dist=dist))
         return tree
 
     def draw(self, images=None):
