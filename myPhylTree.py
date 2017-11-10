@@ -97,7 +97,7 @@ class PhylogeneticTree:
                             self.dicLinks.get(e2).setdefault(e1, self.dicLinks.get(e2).get(node) + self.dicLinks.get(node).get(e1)[1:])
             else:
                 # leaf of the tree
-                self.fileName.setdefault(node, str(node))
+                self.fileName.setdefault(node, str(node).replace(' ', '.'))
                 self.species.setdefault(node, frozenset([node]))
                 self.tmpS.append(node)
             self.allDescendants.setdefault(node, frozenset(family))
