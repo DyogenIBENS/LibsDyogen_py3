@@ -175,8 +175,24 @@ def openFile(nom, mode):
             need_decoding = False
 
         if sys.version_info.major > 2 and need_decoding:
+            orig_read = f.read
+            orig_readlines = f.readlines
             orig_readline = f.readline
-            def readdecodeline(*args, **kwargs):
+            orig_write = f.write
+            orig_writelines = f.writelines
+            def readdecode(*args, **kwargs):
+                return orig_read().decode()
+            def readlinesdecode(*args, **kwargs):
+                return [line.decode() for line in orig_readlines()]
+            def readlinedecode(*args, **kwargs):
                 return orig_readline().decode()
-            f.readline = readdecodeline
+            def writeencode(text):
+                return orig_write(text.encode())
+            def writelinesencode(lines):
+                return orig_writelines((text.encode() for text in lines))
+            f.read       = readdecode
+            f.readlines  = readlinesdecode
+            f.readline   = readlinedecode
+            f.write      = writeencode
+            f.writelines = writelinesencode
     return f
