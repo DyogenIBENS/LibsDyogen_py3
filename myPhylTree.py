@@ -69,7 +69,7 @@ class PhylogeneticTree:
             family = [node]
             if node in self.items:
                 # interior node (not a leaf of the tree)
-                self.fileName.setdefault(node, str(node))
+                self.fileName.setdefault(node, str(node).replace(' ', '_'))
                 s = []
                 # list of subFamilies
                 lsf = []
