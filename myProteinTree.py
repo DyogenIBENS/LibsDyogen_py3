@@ -127,8 +127,8 @@ class ProteinTree:
                 ) + ")" + (self.info[node]["taxon_name"].replace(' ', '.') if withAncSpeciesNames and ("taxon_name" in self.info[node]) else '')+(self.info[node]['family_name'].split("/")[0]if withAncGenesNames and ("taxon_name" in self.info[node]) else '')
             else:
                 return self.info[node].get('gene_name', 
-                                           self.info[node]['taxon_name'] + \
-                                           self.info[node]['family_name']).split("/")[0]
+                           self.info[node]['taxon_name'].replace(' ', '.') + \
+                           self.info[node]['family_name']).split("/")[0]
 
         if root is None:
             root = self.root
