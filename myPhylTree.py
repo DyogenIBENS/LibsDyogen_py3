@@ -50,6 +50,7 @@ class PhylogeneticTree:
         self.dicParents = self.newCommonNamesMapperInstance()
         """self.dicParents = {..., node1: {..., node2: [list of nodes that are
         descendants of the LCA(node1, node2)], ...}, ...}"""
+        # NOT AT ALL. It contains the LCA(node1, node2)
 
         self.allDescendants = self.newCommonNamesMapperInstance()
         """self.allDescendants = {..., nodeI: [nodes that are descendant from nodeI], ...}
@@ -554,10 +555,48 @@ class PhylogeneticTree:
                 for (x, _) in self.items[node]:
                     newtree[node].extend(do(x))
                 return [node]
-            elif node in self.items:
+            elif node in self.items: # i.e, not an extant species.
+                # TODO: itertools.chain?
                 return myMaths.flatten([do(x) for (x, _) in self.items[node]])
             elif node in goodSpecies:
                 return [node]
+            else:
+                return []
+        root = do(self.root if rootAnc is None else rootAnc)
+        assert len(root) == 1
+        return (root[0], newtree)
+
+    def getSubAncTree(self, goodNodes, rootAnc=None):
+        """return the structure of the sub-tree in which are exclusively the
+        chosen nodes.
+        
+        It's different from `getSubTree` because if it will not omit the most
+        recent nodes given, where not descendants leaves were listed.
+        For example:
+            
+            >>> phyltree.getSubTree(['Lagomorpha', 'Rodentia'])
+            ('Glires', defaultdict(list, {'Glires': []}))
+
+        but
+
+            >>> phyltree.getSubAncTree(['Lagomorpha', 'Rodentia'])
+            ('Glires', defaultdict(list, {'Glires': ['Lagomorpha', 'Rodentia']}))
+        """
+        goodAnc = set(self.dicParents[e1][e2] for (e1, e2) in itertools.combinations(goodNodes, 2))
+        goodLeaves = set(goodNodes) - goodAnc
+        newtree = collections.defaultdict(list)
+        from . import myMaths
+
+        def do(node):
+            if node in goodAnc:
+                for (x, _) in self.items[node]:
+                    newtree[node].extend(do(x))
+                return [node]
+            elif node in goodLeaves:
+                return [node]
+            elif node in self.items: # i.e, not an extant species.
+                # TODO: itertools.chain?
+                return myMaths.flatten([do(x) for (x, _) in self.items[node]])
             else:
                 return []
         root = do(self.root if rootAnc is None else rootAnc)
