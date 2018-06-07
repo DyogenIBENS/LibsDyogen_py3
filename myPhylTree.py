@@ -593,6 +593,7 @@ class PhylogeneticTree:
                     newtree[node].extend(do(x))
                 return [node]
             elif node in goodLeaves:
+                newtree[node] = []
                 return [node]
             elif node in self.items: # i.e, not an extant species.
                 # TODO: itertools.chain?
