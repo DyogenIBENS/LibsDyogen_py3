@@ -122,13 +122,25 @@ class ProteinTree:
                 return "(" + ",".join(
                         rec(g)
                         + ((":%f" % l) if withDist else "")
-                        + ("[&&NHX:" + ":".join(("%s=%s" % ((NHX[tag],self.info[g][tag]) if tag!="Duplication" else (NHX[tag],"N" if self.info[g][tag]== 0 else "Y"))).replace(" ", ".") for tag in NHX if tag in self.info[g]) + "]" if withTags else "")
+                        + ("[&&NHX:"
+                            + ":".join(
+                                ("%s=%s" % (
+                                    (NHX[tag],self.info[g][tag]) if tag!="Duplication" else (NHX[tag],"N" if self.info[g][tag]== 0 else "Y")
+                                           )
+                                ).replace(" ", ".") for tag in NHX if tag in self.info[g]
+                            ) + "]" if withTags else ""
+                        )
                         for (g,l) in self.data[node]
-                ) + ")" + (self.info[node]["taxon_name"].replace(' ', '.') if withAncSpeciesNames and ("taxon_name" in self.info[node]) else '')+(self.info[node]['family_name'].split("/")[0]if withAncGenesNames and ("taxon_name" in self.info[node]) else '')
+                ) + ")" + (
+                        self.info[node]["taxon_name"].replace(' ', '.') if withAncSpeciesNames and ("taxon_name" in self.info[node]) else ''
+                        )+(
+                         self.info[node]['family_name'].split("/")[0] if withAncGenesNames and ("taxon_name" in self.info[node]) else ''
+                        )
             else:
                 return self.info[node].get('gene_name', 
-                           self.info[node]['taxon_name'].replace(' ', '.') + \
-                           self.info[node]['family_name']).split("/")[0]
+                           (self.info[node]['taxon_name'].replace(' ', '.') if withAncGenesNames and ("taxon_name" in self.info[node]) else '') +
+                           (self.info[node]['family_name'].split("/")[0] if withAncGenesNames and ("taxon_name" in self.info[node]) else '')
+                           )
 
         if root is None:
             root = self.root
@@ -402,7 +414,11 @@ def loadTree(name):
                 l = next(f).replace('\n', '')
             l = l.split('\t')
             # the triplet (indentation,key,value) is recorded
-            ns.curr = (len(l)-2, l[-2], l[-1])
+            try:
+                ns.curr = (len(l)-2, l[-2], l[-1])
+            except IndexError:
+                print('Badly formatted line:\n%r' % '\t'.join(l), file=sys.stderr)
+                raise
         except StopIteration:
             ns.curr = None
         return old
