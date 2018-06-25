@@ -386,7 +386,9 @@ def addModuleOptions(namespace, options):
 
 
 # Make the 'File' argument type available. (was `file` under python2.7)
-File = io.IOBase
+class File(io.IOBase):
+    pass
+
 
 class FileList:
     """ask a list of file in arguments"""
