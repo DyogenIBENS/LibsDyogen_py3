@@ -74,6 +74,7 @@ def getIntermediateAnc(phylTree, previousAnc, lastWrittenAnc, newAnc, isDuplicat
 
     return (toWrite,newLastWritten,root)
 
+
 class ProteinTree:
     """class for managing a forest of gene trees"""
 
@@ -91,7 +92,7 @@ class ProteinTree:
 
     def printTree(self, f, node=None):
         """print the tree into the phylTree format (with tabulations)"""
-
+            
         def rec(n, node):
 
             indent = "\t" * n
@@ -298,24 +299,27 @@ class ProteinTree:
             # only if it is not a true duplication the children are changed
             if self.info[node]['Duplication'] < 2:
 
-                # the node will be a speciation except special case under
+                # the node will be a speciation except special case below
                 self.info[node]['Duplication'] = 0
 
                 # the children are redefined for *our* phylogenetic tree by
                 # organising the children into packs
-                children = collections.defaultdict(list)
+                children = collections.defaultdict(list)  # *gene* children
                 anc = self.info[node]['taxon_name']
-                lchildren = phylTree.items.get(anc, [])
+                lchildren = phylTree.items.get(anc, [])   # taxon children
                 for (g,d) in self.data[node]:
                     gname = self.info[g]['taxon_name']
+                    # Place back the gene child if it has a taxon that fits.
                     for (a,_) in lchildren:
                         if phylTree.isChildOf(gname, a):
                             children[a].append( (g,d) )
                             break
+                    # There was no 'break' in the above loop: no gene child fits the expected taxa:
                     else:
+                        # Special case:
                         # we can be here only if g is in the same ancestor than
                         # node and if g is a duplication,
-                        # this usually entails Duplication >= 2, exepted for the new created nodes
+                        # this usually entails Duplication >= 2, except for the new created nodes
                         assert (gname == anc), "ERROR: name!=anc [%s / %s / %s]" % (node, anc, gname)
                         # false: g is not always a duplication !
                         # assert self.info[g]['Duplication'] >= 2
@@ -386,8 +390,8 @@ def printTree(ft, data, info, root):
 
 
 def getDupSuffix(n, upper=False):
-    """return the suffix associated to a duplication rank ('a' -> 'z', 'aa' ->
-    'az', 'ba' ...)"""
+    """return the suffix associated to a duplication rank n.
+    ('a' -> 'z', 'aa' -> 'az', 'ba' ...)"""
     base = 64 if upper else 96
     assert 1 <= n
     s = "."
@@ -398,7 +402,7 @@ def getDupSuffix(n, upper=False):
 
 
 def loadTree(name):
-    """load the tree from a file"""
+    """Load a LibsDyogen ProteinTree from a file"""
 
     ns = myTools.Namespace()
 
@@ -410,7 +414,6 @@ def loadTree(name):
             l = ""
             while (l == "") or l.startswith("#"):
                 # the final '\n' is removed and we cut owing to the '\t'
-                #l = next(f).decode().replace('\n', '')
                 l = next(f).replace('\n', '')
             l = l.split('\t')
             # the triplet (indentation,key,value) is recorded
