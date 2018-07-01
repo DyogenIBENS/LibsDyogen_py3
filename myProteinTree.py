@@ -312,6 +312,8 @@ class ProteinTree:
                     gname = self.info[g]['taxon_name']
                     # Place back the gene child if it has a taxon that fits.
                     for (a,_) in lchildren:
+                        # Check that the taxon of child genes are
+                        # **descendants** of the expected child taxa.
                         if phylTree.isChildOf(gname, a):
                             children[a].append( (g,d) )
                             break

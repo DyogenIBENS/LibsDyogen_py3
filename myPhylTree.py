@@ -442,7 +442,7 @@ class PhylogeneticTree:
         return anc
 
     def isChildOf(self, child, parent):
-        """assess if 'child' is really the child of 'parent'"""
+        """assess if 'child' is a **descendant** of 'parent'"""
         return self.dicParents[child][parent] == self.officialName[parent]
 
     #FIXME
