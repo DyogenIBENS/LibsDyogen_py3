@@ -304,8 +304,9 @@ class ProteinTree:
 
                 # the children are redefined for *our* phylogenetic tree by
                 # organising the children into packs
-                children = collections.defaultdict(list)  # *gene* children
+                children = collections.defaultdict(list)  # *gene* children, classified by taxon lineage
                 anc = self.info[node]['taxon_name']
+
                 lchildren = phylTree.items.get(anc, [])   # taxon children
                 for (g,d) in self.data[node]:
                     gname = self.info[g]['taxon_name']
@@ -334,7 +335,7 @@ class ProteinTree:
                 assert (len(children) != 1) or (anc in children), "ERROR: 1=anc [%s / %s]" % (node, children)
                 assert (len(children) <= (1+len(lchildren))), "ERROR: len>(1+nbChildren) [%s / %s]" % (node, children)
 
-                todo = []
+                todo = []  # flattened nodes
 
                 if len(children) > 1:
                     if anc in children:
@@ -358,8 +359,10 @@ class ProteinTree:
                                 if g in self.data:
                                     assert sorted(self.data[g]) != sorted(lst)
                             else:
+                                # Need to insert the correct common ancestor
                                 global nextNodeID
                                 nextNodeID += 1
+                                # Put the common anc in the middle of the shortest branch
                                 length = min([d for (_,d) in lst]) / 2
                                 self.data[nextNodeID] = [(g,d-length) for (g,d) in lst]
                                 anc = phylTree.lastCommonAncestor([self.info[g]['taxon_name'] for (g,_) in lst])
@@ -370,6 +373,7 @@ class ProteinTree:
                                 self.flattenTree(phylTree, False,  nextNodeID)
                                 flag = True
                     assert len(newData) == len(set(g for (g,_) in newData)), newData
+                    # assign newData (reordered)
                     self.data[node] = [x for x in self.data[node] if x in newData] + list(newData.difference(self.data[node]))
                     for x in todo:
                         if hasLowScore(self, x):

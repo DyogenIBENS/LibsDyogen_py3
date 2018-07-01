@@ -63,14 +63,15 @@ class PhylogeneticTree:
             """analysing process of the tree"""
             print(".", file=stream)
             self.dicLinks.setdefault(node, self.newCommonNamesMapperInstance())
-            # each link between a node and itself is a list containing node
+            # each link between a node and itself is a list containing the node itself
             self.dicLinks.get(node).setdefault(node, [node])
             self.dicParents.setdefault(node, self.newCommonNamesMapperInstance())
             self.dicParents.get(node).setdefault(node, node)
-            family = [node]
+            family = [node]  # All descendants of this node.
             if node in self.items:
                 # interior node (not a leaf of the tree)
                 self.fileName.setdefault(node, str(node).replace(' ', '_'))
+                # List of descendant species
                 s = []
                 # list of subFamilies
                 lsf = []
@@ -92,6 +93,7 @@ class PhylogeneticTree:
                 for (sf1, sf2) in itertools.combinations(lsf, 2):
                     for e1 in sf1:
                         for e2 in sf2:
+                            # node is the LCA of e1, e2
                             self.dicParents.get(e1).setdefault(e2, node)
                             self.dicParents.get(e2).setdefault(e1, node)
                             self.dicLinks.get(e1).setdefault(e2, self.dicLinks.get(e1).get(node) + self.dicLinks.get(node).get(e2)[1:])
