@@ -124,15 +124,17 @@ class ProteinTree:
                         rec(g)
                         + ((":%f" % l) if withDist else "")
                         + ("[&&NHX:"
-                            + (":I=%d" % node if withID else "")
-                            + ":".join(
-                                ("%s=%s" % (
-                                    (NHX[tag],self.info[g][tag]) 
-                                     if tag!="Duplication" 
-                                     else (NHX[tag],"N" if self.info[g][tag]== 0 else "Y")
-                                           )
-                                ).replace(" ", ".") for tag in NHX if tag in self.info[g]
-                                      ) + "]" if withTags else ""
+                           + ":".join(
+                               tuple(("%s=%s" % (
+                                       (NHX[tag],self.info[g][tag])
+                                       if tag!="Duplication"
+                                       else (NHX[tag],"N" if self.info[g][tag]== 0 else "Y")
+                                                )
+                                     ).replace(" ", ".")
+                               for tag in NHX if tag in self.info[g])
+                               + ("ID=%s" % node if withID else "",)
+                             )
+                           + "]" if withTags else ""
                           )
                           for (g,l) in self.data[node]
                         ) + ")" + (
