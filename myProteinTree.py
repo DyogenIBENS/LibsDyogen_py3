@@ -118,24 +118,27 @@ class ProteinTree:
                "taxon_name": "S",
                "duplication_confidence_score": "SIS",
                "dubious_duplication": "DD"}
+        def nodeinfo_to_tags(g):
+            return ("[&&NHX:"
+                     + ":".join(
+                         tuple(("%s=%s" % (
+                                 (NHX[tag],self.info[g][tag])
+                                 if tag!="Duplication"
+                                 else (NHX[tag],"N" if self.info[g][tag]== 0 else "Y")
+                                          )
+                               ).replace(" ", ".")
+                         for tag in NHX if tag in self.info[g])
+                         + ("ID=%s" % g if withID else "",)
+                       )
+                     + "]" if withTags else ""
+                    )
+
         def rec(node):
             if node in self.data:
                 return "(" + ",".join(
                         rec(g)
                         + ((":%f" % l) if withDist else "")
-                        + ("[&&NHX:"
-                           + ":".join(
-                               tuple(("%s=%s" % (
-                                       (NHX[tag],self.info[g][tag])
-                                       if tag!="Duplication"
-                                       else (NHX[tag],"N" if self.info[g][tag]== 0 else "Y")
-                                                )
-                                     ).replace(" ", ".")
-                               for tag in NHX if tag in self.info[g])
-                               + ("ID=%s" % node if withID else "",)
-                             )
-                           + "]" if withTags else ""
-                          )
+                        + nodeinfo_to_tags(g)
                           for (g,l) in self.data[node]
                         ) + ")" + (
                         self.info[node]["taxon_name"].replace(' ', '.') if withAncSpeciesNames and ("taxon_name" in self.info[node]) else ''
@@ -150,7 +153,7 @@ class ProteinTree:
 
         if root is None:
             root = self.root
-        print(rec(root) + ("[&&NHX:" + ":".join(("%s=%s" % ((NHX[tag],self.info[root][tag]) if tag!="Duplication" else (NHX[tag],"N" if self.info[root][tag]== 0 else "Y"))).replace(" ", ".") for tag in NHX if tag in self.info[root]) + "]" if withTags else "") + ";", file=f)
+        print(rec(root) + nodeinfo_to_tags(root) + ";", file=f)
         try:
             f.flush()
         except AttributeError:
