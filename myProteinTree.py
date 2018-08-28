@@ -175,6 +175,52 @@ class ProteinTree:
         print(tr, ";", file=f)
 
 
+    def printDyogenNewick(self, f, root=None):
+        """print the tree into the Newick format (with parentheses), keeping 
+        the information content exactly as in the Dyogen format (node id,
+        duplication score as an integer, etc)"""
+
+        NHX = {"Duplication": "D",
+               "Bootstrap": "B",
+               "taxon_name": "S",
+               "duplication_confidence_score": "SIS",
+               "dubious_duplication": "DD",
+               "gene_name": "G",
+               "protein_name": "PR",
+               "family_name": "F"}
+        
+        def nodeinfo_to_tags(g):
+            return ("[&&NHX:"
+                    + ":".join("%s=%s" % (NHX.get(tag, tag).replace(" ", "."),
+                                          value)
+                               for tag, value in self.info[g].items())
+                    + "]"  # if withTags else ""
+                    )
+
+        def rec(node):
+            if node in self.data:
+                return "(" + ",".join(
+                        rec(g)
+                        + ":%f" % l
+                        + nodeinfo_to_tags(g)
+                          for (g,l) in self.data[node]
+                        ) + ")" + str(node)
+            else:
+                return str(node)
+                       # self.info[node].get('gene_name', 
+                       #    (self.info[node]['taxon_name'].replace(' ', '.') if withAncGenesNames and ("taxon_name" in self.info[node]) else '') +
+                       #    (self.info[node].get('family_name', '').split("/")[0] if withAncGenesNames and ("taxon_name" in self.info[node]) else '')
+                       #    )
+
+        if root is None:
+            root = self.root
+        print(rec(root) + nodeinfo_to_tags(root) + ";", file=f)
+        try:
+            f.flush()
+        except AttributeError:
+            pass
+
+
     def compactTree(self, phylTree, node=None):
         """Compact a tree by removing intermediary nodes that have only one
         child"""
