@@ -25,12 +25,12 @@ def commonChrName(x):
     except ValueError:
         return sys.intern(x)
 
-ContigType = enum.Enum('Chromosome', 'Mitochondrial', 'Scaffold', 'None', 'Random')
+ContigType = enum.Enum('ContigType', 'Chromosome Mitochondrial Scaffold none Random')
 def contigType(chrName):
     if chrName in [None, "Un_random", "UNKN", "Un"]:
         # chromosome named "Un" in Monodelphis.domestica corresponds to a scaffold that concatenates all unassembled
         # fragments
-        return ContigType.None
+        return ContigType.none
     try:
         x = int(chrName)
         if x < 100:

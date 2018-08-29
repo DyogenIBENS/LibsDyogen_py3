@@ -137,7 +137,7 @@ def extractGtsInPairCompChr(c1, c2, gc1, gc2, gapMax=0, verbose=False):
 def extractGtsInPairCompGenomes(g1, g2, families,
                                 tandemGapMax=0,
                                 gapMax=None,
-                                filterType=FilterType.None,
+                                filterType=FilterType.none,
                                 minChromLength=0,
                                 verbose=True):
     if isinstance(g1, myGenomes.Genome) and isinstance(g2, myGenomes.Genome):

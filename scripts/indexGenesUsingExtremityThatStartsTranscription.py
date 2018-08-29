@@ -14,9 +14,7 @@ import collections
 """
 
 from LibsDyogen import sys, itertools
-from LibsDyogen import myTools
-from LibsDyogen import myFile
-from LibsDyogen import myLightGenomes
+from LibsDyogen import myTools, myFile, myLightGenomes
 
 def intOrNone(string):
     return int(string) if string != 'None' else None
@@ -49,7 +47,7 @@ def readerDependingOnFileWithDebAndEnd(fileName):
 # arguments
 arguments = myTools.checkArgs(
     [
-        ("genome", file),
+        ("genome", myTools.file),
     ],
     [
         ("orderGenesByIncreasingTranscriptionStart", bool, True),

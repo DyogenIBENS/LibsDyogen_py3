@@ -86,7 +86,7 @@ def newChromName(genome):
             chosenChromName = str(maxChromName + 1)
     return chosenChromName
 
-ContigType = enum.Enum('Chromosome', 'Mitochondrial', 'Scaffold', 'None', 'Random')
+ContigType = enum.Enum('ContigType', 'Chromosome Mitochondrial Scaffold none Random')
 
 # return the type of contig depending on its name
 # FIXME, add sexual chromosomes
@@ -94,7 +94,7 @@ def contigType(chrName):
     if chrName in [None, "Un_random", "UNKN", "Un"]:
         # chromosome named "Un" in Monodelphis.domestica corresponds to a scaffold that concatenates all unassembled
         # fragments
-        return ContigType.None
+        return ContigType.none
     try:
         x = int(chrName)
         if x < 100:

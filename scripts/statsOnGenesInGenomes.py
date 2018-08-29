@@ -3,20 +3,18 @@
 
 """ plot different stats about genes """
 
-import sys
-import matplotlib as mpl
-from matplotlib import pyplot as plt
-import numpy as np
-import utils.myTools
-import utils.myGenomes
 
 import sys, itertools, collections
-from LibsDyogen import myTools, myFile, myLightGenomes
+import numpy as np
+from matplotlib import pyplot as plt
 from matplotlib.ticker import FuncFormatter
 from scipy import stats
+from LibsDyogen import myTools, myFile, myLightGenomes
+
 
 def intOrNone(string):
     return int(string) if string != 'None' else None
+
 
 def formaterBasePairs(unit='bp'):
     'The two args are the value and tick position'
@@ -37,10 +35,11 @@ def formaterBasePairs(unit='bp'):
         return res
     return f
 
+
 # arguments
 arguments = myTools.checkArgs(
     [
-        ("genome", file),
+        ("genome", myTools.File),
     ],
     [
         ("removeUnofficialChrNames", bool, False),
@@ -78,6 +77,7 @@ def readerDependingOnFileWithDebAndEnd(fileName):
         else:
             raise ValueError("%s file is badly formatted" % fileName)
         return reader
+
 
 reader = readerDependingOnFileWithDebAndEnd(arguments['genome'])
 unofficialChromRemoved = False
@@ -291,10 +291,10 @@ if arguments['mode'] == 'geneLengths':
     #        return "2^{0}".format(x)
     #    )"}"))"}}}")
     ax = plt.gca()
-    ax.xaxis.set_major_formatter(mpl.ticker.FuncFormatter(mjrFormatter))
+    ax.xaxis.set_major_formatter(FuncFormatter(mjrFormatter))
     #plt.locator_params(axis = 'x', nbins = 10)
 
-    l = [float(e-s) for (s, e) in utils.myTools.myIterator.slidingTuple(bins)]
+    l = [float(e-s) for (s, e) in myTools.myIterator.slidingTuple(bins)]
     bin_size = float(sum(l))/len(l)
     plt.title("Distribution of gene lengths (bp) in \n %s" % arguments["genome"])
     plt.xlabel("Gene lengths in bp, bins_size = %s" % bin_size)
@@ -331,10 +331,10 @@ if arguments['mode'] == 'geneLengths':
         return "$10^{%s}$" % x
     #plt.xticks(np.arange(min(0), max(lengthsOfGenes)+1, 200))
     ax = plt.gca()
-    ax.xaxis.set_major_formatter(mpl.ticker.FuncFormatter(mjrFormatter))
+    ax.xaxis.set_major_formatter(FuncFormatter(mjrFormatter))
     #plt.locator_params(axis = 'x', nbins = 10)
 
-    l = [float(e-s) for (s, e) in utils.myTools.myIterator.slidingTuple(bins)]
+    l = [float(e-s) for (s, e) in myTools.myIterator.slidingTuple(bins)]
     bin_size = float(sum(l))/len(l)
     plt.title("Distribution of gene lengths (bp) in \n %s" % arguments["genome"])
     plt.xlabel("Gene lengths in bp, bins_size = $10^{%.3f}$" % bin_size)

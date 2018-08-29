@@ -1794,7 +1794,7 @@ if __name__ == '__main__':
     #families = myLightGenomes.Families('/home/jlucas/Libs/PhylDiag/data/ancGenes.Euarchontoglires.list.bz2')
 
     prepareWholeGenomeHomologyMatrices(genome1, genome2, families, inSbsInPairComp=None, maxWidth=100, maxHeight=100,
-                                filterType=FilterType.None,
+                                filterType=FilterType.none,
                                 minChromLength=0,
                                 tandemGapMax=0,
                                 outputFileName='toto.svg',

@@ -69,9 +69,9 @@ import enum
 if sys.platform != 'win32':
     from . import extractDiags
 
-from utils.myLightGenomes import OGene
+from .myLightGenomes import OGene
 
-FilterType = enum.Enum('InFamilies', 'InBothGenomes', 'None')
+FilterType = enum.Enum('FilterType', 'InFamilies InBothGenomes none')
 
 defaultArgsPhylDiag = \
     [("filterType", str, 'InBothGenomes'),
@@ -1402,7 +1402,7 @@ def crossGeneContent(g1, g2):
 
 
 # Depending on the filterType parameter:
-#       - filterType = FilterType.None (genomes are not filtered)
+#       - filterType = FilterType.none (genomes are not filtered)
 #       - filterType = FilterType.InFamilies (only genes herited from the ancestor are kept)
 #       - filterType = FilterType.InBothGenomes (only 'anchor genes', ie genes present in both species, are kept)
 # Returns (g1,g2,trans1,trans2)
@@ -1425,7 +1425,7 @@ def filter2D(g1_orig, g2_orig, filterType, minChromLength=1, keepOriginal=False)
 
     # In all cases filtering on length
     # All genes are conserved
-    if filterType == FilterType.None:
+    if filterType == FilterType.none:
         (g1, mG1f2G1o, (nCL1, nGL1)) = remapFilterSize(g1, minChromLength)
         (g2, mG2f2G2o, (nCL2, nGL2)) = remapFilterSize(g2, minChromLength)
     # Only genes herited from an ancestral genes are conserved

@@ -17,17 +17,15 @@ import collections
 
 import enum
 
-import utils.myMaths
-import utils.myTools
-import utils.myGenomes
+from . import myFile, myTools, myMaths, myGenomes
 
 
-OrthosFilterType = enum.Enum('None', 'InCommonAncestor', 'InBothSpecies')
+OrthosFilterType = enum.Enum('OrthosFilterType', 'none InCommonAncestor InBothSpecies')
 
 
 def loadConservedPairsAnc(filename):
     pairwiseDiags = []
-    f = utils.myFile.openFile(filename, "r")
+    f = myFile.openFile(filename, "r")
     for l in f:
         t = l.split("\t")
         pairwiseDiags.append(((int(t[0]), int(t[1])), (int(t[2]), int(t[3])), int(t[4])))
@@ -40,7 +38,7 @@ def loadConservedPairsAnc(filename):
 def loadConservedPairs(filename, targets):
 	print("Chargement des paires conservees %s ..." % filename, end=' ', file=sys.stderr)
 	pairwiseDiags = collections.defaultdict(list)
-	f = utils.myFile.openFile(filename, "r")
+	f = myFile.openFile(filename, "r")
 	for l in f:
 		t = l[:-1].split("\t")
 		if t[0] in targets:
@@ -57,7 +55,7 @@ def loadIntegr(filename):
 	integr = []
 	singletons = set()
 	print("Chargement des blocs integres %s ..." % filename, end=' ', file=sys.stderr)
-	f = utils.myFile.openFile(filename, "r")
+	f = myFile.openFile(filename, "r")
 	for l in f:
 		t = l.split("\t")
 		diagA = [int(x) for x in t[2].split()]
@@ -70,7 +68,7 @@ def loadIntegr(filename):
 		else:
 			integr.append((list(zip(diagA,diagS)),diagW))
 	f.close()
-	print(utils.myMaths.myStats.txtSummary([len(x[0]) for x in integr]), "+", len(singletons), "singletons OK", file=sys.stderr)
+	print(myMaths.myStats.txtSummary([len(x[0]) for x in integr]), "+", len(singletons), "singletons OK", file=sys.stderr)
 	return (integr,singletons)
 
 #
@@ -212,12 +210,12 @@ def diagMerger(diagGen, sameStrand, largeurTrou):
 #
 # Procedure complete de calculs des diagonales a partir de 2 genomes, des orthologues et de certains parametres
 ################################################################################################################
-def calcDiags(g1, g2, orthos, fusionThreshold=-1, sameStrand=True, orthosFilter=OrthosFilterType.None, minChromLength=0):
+def calcDiags(g1, g2, orthos, fusionThreshold=-1, sameStrand=True, orthosFilter=OrthosFilterType.none, minChromLength=0):
 
 	# Ecrit les genomes comme suites de numeros de genes ancestraux
 	def translateGenome(genome):
 		newGenome = {}
-		for c in genome.chrList[utils.myGenomes.ContigType.Chromosome] + genome.chrList[utils.myGenomes.ContigType.Scaffold]:
+		for c in genome.chrList[myGenomes.ContigType.Chromosome] + genome.chrList[myGenomes.ContigType.Scaffold]:
 			tmp = [(orthos.getPosition(g.names),g.strand) for g in genome.lstGenes[c]]
 			#assert set(len(x[0]) for x in tmp).issubset(set([0,1]))
 			#assert set(list(x[0])[0].chromosome for x in tmp if len(x[0]) > 0).issubset([None])
@@ -264,7 +262,7 @@ def calcDiags(g1, g2, orthos, fusionThreshold=-1, sameStrand=True, orthosFilter=
 
 	# Dans tous les cas, il faut filtrer sur la taille
 	# On garde tous les genes
-	if orthosFilter == OrthosFilterType.None:
+	if orthosFilter == OrthosFilterType.none:
 		filterSize(newg1)
 		filterSize(newg2)
 	# On ne garde que les genes presents chez l'ancetre
@@ -296,14 +294,14 @@ def calcDiags(g1, g2, orthos, fusionThreshold=-1, sameStrand=True, orthosFilter=
 		src = iterateDiags(newg1[c1], newLoc, sameStrand)
 		if (fusionThreshold > 0) or (not sameStrand):
 			src = diagMerger(src, sameStrand, fusionThreshold)
-		if orthosFilter != OrthosFilterType.None:
+		if orthosFilter != OrthosFilterType.none:
 			for (c2,d1,d2,da) in src:
 				yield ((c1,[(trans1[c1][i1],s1) for (i1,s1) in d1]), (c2,[(trans2[c2][i2],s2) for (i2,s2) in d2]), da)
 		else:
 			for (c2,d1,d2,da) in src:
 				yield ((c1,d1), (c2,d2), da)
 
-#@utils.myTools.memoize
+#@myTools.memoize
 def revGene(xxx_todo_changeme):
     # sx is an integer for the graph construction of AGORA
     # sx = +1 or -1, standard case
@@ -350,7 +348,7 @@ class WeightedDiagGraph:
 	# Insere une diagonale avec poids fixe
 	########################################
 	def addDiag(self, diag, weight=1):
-		for (xsx,ysy) in utils.myTools.myIterator.slidingTuple(diag):
+		for (xsx,ysy) in myTools.myIterator.slidingTuple(diag):
 			self.addLink(xsx, ysy, weight)
 		
 	#
@@ -358,7 +356,7 @@ class WeightedDiagGraph:
 	################################################
 	def addWeightedDiag(self, diag, weights):
 		assert len(diag) == (len(weights)+1)
-		for ((xsx,ysy),w) in zip(utils.myTools.myIterator.slidingTuple(diag), weights):
+		for ((xsx,ysy),w) in zip(myTools.myIterator.slidingTuple(diag), weights):
 			self.addLink(xsx, ysy, w)
 		
 	#

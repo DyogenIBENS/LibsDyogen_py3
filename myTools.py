@@ -38,9 +38,6 @@ class Namespace: pass
 #2
 #>>> x.bat
 #3
-class Enum(object):
-    def __init__(self, *keys):
-        self.____dict__.update(list(zip(keys, list(range(len(keys))))))
 
 def applyFunctions(fun, data):
     for (f, x) in zip(fun, data):
