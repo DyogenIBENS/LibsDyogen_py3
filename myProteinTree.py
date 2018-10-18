@@ -388,8 +388,12 @@ class ProteinTree:
                 # len(child):
                 #  1 -> only anc
                 #  2 or 3 among C1/C2/anc
-                assert (len(children) != 1) or (anc in children), "ERROR: 1=anc [%s / %s]" % (node, children)
-                assert (len(children) <= (1+len(lchildren))), "ERROR: len>(1+nbChildren) [%s / %s]" % (node, children)
+                assert (len(children) != 1) or (anc in children), \
+                       "ERROR: 1=anc [%s / %s]" % (node, children) + \
+                       "\nYou may need to use `flattenTree` to fix it."
+                assert (len(children) <= (1+len(lchildren))), \
+                       "ERROR: len>(1+nbChildren) [%s / %s]" % (node, children) + \
+                       "\nYou may need to use `flattenTree` to fix it."
 
                 todo = []  # flattened nodes
 
