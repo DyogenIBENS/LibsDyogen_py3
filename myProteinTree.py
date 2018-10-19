@@ -461,7 +461,7 @@ def getDupSuffix(n, upper=False):
     s = "."
     while n > 26:
         s = s + chr(base + (n - 1) % 26)
-        n = 1 + (n - 1)/26
+        n = 1 + (n - 1)//26
     return s + chr(base + n)
 
 
