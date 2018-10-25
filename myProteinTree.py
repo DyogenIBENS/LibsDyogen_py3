@@ -36,7 +36,7 @@ def getIntermediateAnc(phylTree, previousAnc, lastWrittenAnc, newAnc, isDuplicat
     # in the first species of the gene tree or at the first node outside the
     # first species
     elif not lastWrittenAnc:
-        if previousAnc == None: # at the root
+        if previousAnc is None: # at the root
             # the gene is recorded except if it is a duplication (see after)
             toWrite =list([newAnc])
 
@@ -55,7 +55,11 @@ def getIntermediateAnc(phylTree, previousAnc, lastWrittenAnc, newAnc, isDuplicat
     # if the current node is a duplication newAnc is not recorded in the list
     # to be written
     if isDuplication:
-        toWrite.remove(newAnc)
+        try:
+            toWrite.remove(newAnc)
+        except ValueError as err:
+            err.args += ("Args: %r, %r, %r, %s" % (previousAnc, lastWrittenAnc, newAnc, isDuplication),)
+            raise
 
     root=False # root refers to terminal genes of the first species
     # in the first species or at the first node outside the first species
@@ -297,7 +301,7 @@ class ProteinTree:
 
             self.info[node]['taxon_name'] = phylTree.lastCommonAncestor( [self.info[g]['taxon_name'] for (g,_) in self.data[node]] )
 
-            # if it is a true duplication, their is nothing more to do
+            # if it is a true duplication, there is nothing more to do
             if self.info[node]['Duplication'] >= 2:
                 return flag
 
@@ -378,6 +382,8 @@ class ProteinTree:
                         # node and if g is a duplication,
                         # this usually entails Duplication >= 2, except for the new created nodes
                         assert (gname == anc), "ERROR: name!=anc [%s / %s / %s]" % (node, anc, gname)
+                        #self.printTree(sys.stderr, node)
+
                         # false: g is not always a duplication !
                         # assert self.info[g]['Duplication'] >= 2
                         # the current node will thus be a duplication node
@@ -454,15 +460,23 @@ def printTree(ft, data, info, root):
 
 
 def getDupSuffix(n, upper=False):
-    """return the suffix associated to a duplication rank n.
-    ('a' -> 'z', 'aa' -> 'az', 'ba' ...)"""
+    """Return the suffix associated to a duplication rank `n`.
+
+    Encodes n-1 in base 26, written with higher orders on the *right*:
+    
+    1: 'a'  -> 26:'z'
+    27:'ab' -> 52:'zb', ...
+    """
     base = 64 if upper else 96
     assert 1 <= n
+    n -= 1
     s = "."
-    while n > 26:
-        s = s + chr(base + (n - 1) % 26)
-        n = 1 + (n - 1)//26
-    return s + chr(base + n)
+    while n >= 26:
+        s = s + chr(base + 1 + n % 26)
+        assert s[-1] in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', \
+                "%r: %d" % (s[-1], ord(s[-1]))
+        n //= 26
+    return s + chr(base + 1 + n)
 
 
 def loadTree(name):
@@ -501,7 +515,7 @@ def loadTree(name):
 
         # children ?
         child = []
-        while (ns.curr != None) and (ns.curr[0] == indent+1):
+        while (ns.curr is not None) and (ns.curr[0] == indent+1):
             length = float(nextLine()[2])
             child.append((recLoad(tree, indent+1), length))
         if len(child) > 0:
@@ -520,7 +534,7 @@ def loadTree(name):
         tree.root = recLoad(tree, 0)
         yield tree
         n = (n[0]+1, n[1]+len(tree.data), n[2]+len(tree.info)-len(tree.data))
-        if ns.curr == None:
+        if ns.curr is None:
             break
     print("%d roots, %d internal nodes, %d leaves: OK" % n, file=sys.stderr)
 
