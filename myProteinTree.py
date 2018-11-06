@@ -19,7 +19,7 @@ from . import myTools
 from . import myFile
 
 
-def hasLowScore_alwaysTrue(tree, node):
+def alwaysTrue(tree, node):
     """Default function `hasLowScore` for `ProteinTree.rebuildTree`.
     Always return True."""
     return True
@@ -285,7 +285,12 @@ class ProteinTree:
         and if their is no duplication For instance:
             ((Eutheria1,Eutheria2)XA,(Eutheria3,Eutheria4)XB)XC is transformed
             into (Eutheria1,Eutheria2,Eutheria3,Eutheria4) only if XA, XB et XC
-            are speciation nodes"""
+            are speciation nodes.
+            
+        - Transform the topology at nodes where 'Duplication' is <2. Once done,
+          set 'Duplication' to 0.
+        - Otherwise, just replace the 'taxon_name' by the last common ancestor
+          of the descendants."""
 
         def do(node):
             # end of the process on one leaf
@@ -299,6 +304,7 @@ class ProteinTree:
                 for (g,_) in self.data[node]:
                     flag |= do(g)
 
+            # NOTE: this removes all potential duplications followed by differential paralog loss.
             self.info[node]['taxon_name'] = phylTree.lastCommonAncestor( [self.info[g]['taxon_name'] for (g,_) in self.data[node]] )
 
             # if it is a true duplication, there is nothing more to do
@@ -309,8 +315,8 @@ class ProteinTree:
             taxonName = self.info[node]['taxon_name']
             for (g,d) in self.data[node]:
                 inf = self.info[g]
-                # 2x the same taxon and no duplication
 
+                # 2x the same taxon and no duplication
                 if (inf['taxon_name'] == taxonName) and (inf['Duplication'] < 2) and (g in self.data):
 
                     newData.extend([(g2,d+d2) for (g2,d2) in self.data[g]])
@@ -336,7 +342,7 @@ class ProteinTree:
         return do(self.root if node is None else node)
 
 
-    def rebuildTree(self, phylTree, hasLowScore=hasLowScore_alwaysTrue,
+    def rebuildTree(self, phylTree, hasLowScore=alwaysTrue,
                     node=None):
         """give back the expected topology to the tree (to match the species tree)
           gather equivalent nodes under the same child.
@@ -344,7 +350,7 @@ class ProteinTree:
           hasLowScore: function that takes (tree, node) and return True/False.
                        example: check that the duplication score of a node is
                        above a given threshold.
-          """
+        """
 
         def do(node):
 
