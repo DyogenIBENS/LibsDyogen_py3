@@ -290,7 +290,8 @@ class ProteinTree:
         - Transform the topology at nodes where 'Duplication' is <2. Once done,
           set 'Duplication' to 0.
         - Otherwise, just replace the 'taxon_name' by the last common ancestor
-          of the descendants."""
+          of the descendants.
+        - The tree traversal is postorder (first children then parents)."""
 
         def do(node):
             # end of the process on one leaf
@@ -342,14 +343,14 @@ class ProteinTree:
         return do(self.root if node is None else node)
 
 
-    def rebuildTree(self, phylTree, hasLowScore=alwaysTrue,
-                    node=None):
+    def rebuildTree(self, phylTree, hasLowScore=alwaysTrue, node=None):
         """give back the expected topology to the tree (to match the species tree)
           gather equivalent nodes under the same child.
           
-          hasLowScore: function that takes (tree, node) and return True/False.
-                       example: check that the duplication score of a node is
-                       above a given threshold.
+        hasLowScore: function that takes (tree, node) and return True/False.
+                     example: check that the duplication score of a node is
+                     above a given threshold.
+        Tree traversal is preorder (from root to leaves).
         """
 
         def do(node):
