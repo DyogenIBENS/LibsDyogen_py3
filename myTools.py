@@ -493,15 +493,15 @@ def checkArgs(args, options, info, showArgs=True, loadOnlyDefaultOptions=False):
                     elif s == "bz2":
                         if t[0] == '+':
                             import bz2
-                            sys.stdout = bz2.BZ2File("/dev/stdout", "w")
+                            sys.stdout = myFile.codec_hook(bz2.BZ2File("/dev/stdout", "w"))
                     elif s == "gz":
                         if t[0] == '+':
                             import gzip
-                            sys.stdout = gzip.GzipFile("/dev/stdout", "w")
+                            sys.stdout = myFile.codec_hook(gzip.GzipFile("/dev/stdout", "w"))
                     elif (s == "lzma") or (s == "xz"):
                         if t[0] == '+':
                             import lzma
-                            sys.stdout = lzma.LZMAFile("/dev/stdout", "w")
+                            sys.stdout = myFile.codec_hook(lzma.LZMAFile("/dev/stdout", "w"))
                     elif s == "debug":
                         if t[0] == '+':
                             global debug
