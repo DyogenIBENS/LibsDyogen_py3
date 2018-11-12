@@ -352,6 +352,8 @@ class ProteinTree:
                      above a given threshold.
         Tree traversal is preorder (from root to leaves).
         """
+        global nextNodeID
+        assert nextNodeID > max(self.info)
 
         def do(node):
 
@@ -388,7 +390,9 @@ class ProteinTree:
                         # we can be here only if g is in the same ancestor than
                         # node and if g is a duplication,
                         # this usually entails Duplication >= 2, except for the new created nodes
-                        assert (gname == anc), "ERROR: name!=anc [%s / %s / %s]" % (node, anc, gname)
+                        assert (gname == anc), \
+                               "ERROR: name!=anc [%d (%s) / %d (%s)]" % \
+                                (node, anc, g, gname)
                         #self.printTree(sys.stderr, node)
 
                         # false: g is not always a duplication !
@@ -454,7 +458,16 @@ class ProteinTree:
                             self.flattenTree(phylTree, False, x)
             # recursive calls
             for (g,_) in self.data[node]:
-                flag |= do(g)
+                try:
+                    flag |= do(g)
+                except BaseException as err:
+                    # Add the node information in the traceback.
+                    err.args = (str(err.args[0]) +
+                                ("\nnode %d %s D=%d" % (g,
+                                             self.info[g]['taxon_name'],
+                                             self.info[g]['Duplication'])),) \
+                                + err.args[1:]
+                    raise
             return flag
         return do(self.root if node is None else node)
 
