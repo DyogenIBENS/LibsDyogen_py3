@@ -51,15 +51,16 @@ def __delitem__(self, key):
     dict.__delitem__(self, key)
 
 def __len__(self):
-    """Returns the number of connections"""
+    """Return the number of connections"""
     return dict.__len__(self) // 2
 
-# Print a correctly spaced table, all columns are aligned
-# Input table format:
-# table =[[l0c0, l0c1, l0c2],
-#         [l1c0, l1c1, l1c2]]
-# With 'lxcy' a string that corresponds to line 'x' and column 'y'
 def printTable(table, output, spaceBetweenColumns=2):
+    """Print a correctly spaced table, all columns are aligned.
+
+    Input table format:
+    table =[[l0c0, l0c1, l0c2],
+            [l1c0, l1c1, l1c2]]
+    With 'lxcy' a string that corresponds to line 'x' and column 'y'"""
     max_lens = []
     for i in range(len(table[0])):
         max_lens.append(max([len(str(r[i])) for r in table]))
@@ -70,8 +71,8 @@ def printTable(table, output, spaceBetweenColumns=2):
     print(res, file=output)
     return res
 
-# FIXME: to print well in stream, the user needs to ensure that between two calls to printProgressIn, nothing had been
-# written is stream
+# FIXME: to print well in stream, the user needs to ensure that between two
+# calls to printProgressIn, nothing had been written is stream
 class ProgressBar:
     def __init__(self, totalLength, step=1):
         self.totalLength = totalLength
@@ -94,7 +95,7 @@ class ProgressBar:
 # FIXME, if the decorated function is called with more arguments that in the
 # function definition, there is no error raised.
 def verbose(functionToExcecute):
-    """decorator that adds a switchable verbose mode to a function"""
+    """Decorator that adds a switchable verbose mode to a function"""
     @wraps(functionToExcecute) # to avoid changing the name of the function
     def modifiedFunction(*args, **kargs):
         old_sys_stderr = sys.stderr
@@ -115,7 +116,7 @@ def verbose(functionToExcecute):
     return  modifiedFunction
 
 def minimalPythonVersion(version):
-    """decorator for functions that requires a minimal python version >= 2.7
+    """Decorator for functions that requires a minimal python version >= 2.7
     for instance version is a tuple, for instance if the function requires
     python version at least 2.7, version = (2,7)"""
     def decorator(functionToExcecute):
@@ -128,7 +129,7 @@ def minimalPythonVersion(version):
     return decorator
 
 def tictac(functionToExcecute):
-    """decorator that computes the execution time"""
+    """Decorator that computes the execution time"""
     @wraps(functionToExcecute) # to avoid changing the name of the function
     def modifiedFunction(*args,**kargs):
         tic = time.time()
@@ -236,10 +237,11 @@ class memoizeMethod(object):
 #    Obj.add_to(1, 2) # returns 3, result is not cached
 #    """
 
-# Check is an excecutable is accessible
-# This may be usefull to check if a plugged external programm has been added to
-# the PATH environment variable.
 def which(program):
+    """Check is an excecutable is accessible.
+
+    This may be usefull to check if a plugged external programm has been added
+    to the PATH environment variable."""
     import os
     def is_exe(fpath):
         return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
@@ -258,7 +260,7 @@ def which(program):
 
 
 class myIterator:
-    """iterator of adjacent components of a list"""
+    """Iterator of adjacent components of a list"""
     # sliding tuple (x1, x2, ...) of width=width
     @staticmethod
     def slidingTuple(lst, width=2):
@@ -271,7 +273,7 @@ class myIterator:
 
 @memoize
 def partitions(n, k):
-    """liste of partitions of size k in range(n)"""
+    """Liste of partitions of size k in range(n)"""
     if n == 1:
         if k == 1:
             return [ [[0]] ]
@@ -287,7 +289,7 @@ def partitions(n, k):
         return []
 
 def getRange(s):
-    """management of a parallel execution on a range of values"""
+    """Management of a parallel execution on a range of values"""
     if myFile.hasAccess(s):
         f = myFile.openFile(s, "r")
         lst = []
@@ -301,12 +303,12 @@ def getRange(s):
 
 
 class hashabledict(dict):
-    """hashable dict class, useful to use it as a key"""
+    """Hashable dict class, useful to use it as a key"""
     def __hash__(self):
         return hash(tuple(sorted(self.items())))
 
 class hashablelist(list):
-    """hashable list class"""
+    """Hashable list class"""
     def __hash__(self):
         return hash(tuple(self))
 
@@ -324,7 +326,7 @@ class myCombinator:
                 self.dic[x] = i
 
     def addLink(self, obj):
-        """define a link between all elements of obj. Update sets already
+        """Define a link between all elements of obj. Update sets already
         built"""
 
         if len(obj) == 0:
@@ -362,22 +364,22 @@ class myCombinator:
 
 
     def __iter__(self):
-        """return an iterator over the data. empty sets are thus removed"""
+        """Return an iterator over the data. empty sets are thus removed"""
         for g in self.grp:
             if len(g) > 0:
                 yield g
 
     def reduce(self):
-        """remove empty sets"""
+        """Remove empty sets"""
         self.__init__(self)
 
     def reset(self):
-        """reset combinator"""
+        """Reset combinator"""
         self.__init__()
 
-# add more options to a specific module
 __moduleoptions = []
 def addModuleOptions(namespace, options):
+    """Add more options to a specific module"""
     for (name,typ,val) in options:
         __moduleoptions.append((namespace+":"+name, typ, val))
 
@@ -388,7 +390,7 @@ class File(io.IOBase):
 
 
 class FileList:
-    """ask a list of file in arguments"""
+    """Ask a list of file in arguments"""
     def __init__(self, value):
         self.minNbFiles = value
 
@@ -406,8 +408,9 @@ def checkArgs(args, options, info, showArgs=True, loadOnlyDefaultOptions=False):
     description of the bug and a brief manual of the script (info)."""
 
     options = options + __moduleoptions
-    # print error informations if wrong arguments
+    
     def error_usage(reason):
+        """Print error informations if wrong arguments"""
         print("- ERROR -", reason, file=sys.stderr)
         print(" Usage :", sys.argv[0], file=sys.stderr)
         for (i,t) in enumerate(args):
@@ -571,10 +574,10 @@ def printArguments(arguments, stream=open(os.devnull, 'w')):
         print(line, file=stream)
     print('-' * longestLine, file=stream)
 
-# This class is useful for recording many information (either a list of items
-# or a value) for each cell of a matrix of whole genome comparisons. See
-# myDiags.py for instance.
 class Dict2d(collections.defaultdict):
+    """This class is useful for recording many information (either a list of
+    items or a value) for each cell of a matrix of whole genome comparisons.
+    See myDiags.py for instance."""
     # Idea to make something more general
     #def multi_dimensions(n, type):
     #    """ Creates an n-dimension dictionary where the n-th dimension is of type 'type' """
@@ -734,8 +737,8 @@ class OrderedDict2dOfLists(Dict2d):
 # http://stackoverflow.com/questions/9001509/how-can-i-sort-a-dictionary-by-key
 # to order the keys of an OrderedDict: d = collections.OrderedDict(sorted(d.items()))
 
-# This class is a fusion of collections.defaultdict and collections.OrderedDict
 class DefaultOrderedDict(OrderedDict):
+    """This class is a fusion of collections.defaultdict and collections.OrderedDict"""
     # Source: http://stackoverflow.com/a/6190500/562769
     def __init__(self, default_factory=None, *a, **kw):
         if (default_factory is not None and
@@ -821,25 +824,25 @@ class DefaultOrderedDict(OrderedDict):
 
 
 # http://stackoverflow.com/questions/566746/how-to-get-console-window-width-in-python
-# """ getTerminalSize()
-#  - get width and height of console
-#  - works on linux,os x,windows,cygwin(windows)
-# """
 def getTerminalSize():
-   import platform
-   current_os = platform.system()
-   tuple_xy=None
-   if current_os == 'Windows':
-       tuple_xy = _getTerminalSize_windows()
-       if tuple_xy is None:
-          tuple_xy = _getTerminalSize_tput()
-          # needed for window's python in cygwin's xterm!
-   if current_os == 'Linux' or current_os == 'Darwin' or  current_os.startswith('CYGWIN'):
-       tuple_xy = _getTerminalSize_linux()
-   if tuple_xy is None:
-       print("default")
-       tuple_xy = (80, 25)      # default value
-   return tuple_xy
+    """
+     - get width and height of console
+     - works on linux,os x,windows,cygwin(windows)
+    """
+    import platform
+    current_os = platform.system()
+    tuple_xy=None
+    if current_os == 'Windows':
+        tuple_xy = _getTerminalSize_windows()
+        if tuple_xy is None:
+           tuple_xy = _getTerminalSize_tput()
+           # needed for window's python in cygwin's xterm!
+    if current_os == 'Linux' or current_os == 'Darwin' or  current_os.startswith('CYGWIN'):
+        tuple_xy = _getTerminalSize_linux()
+    if tuple_xy is None:
+        print("default")
+        tuple_xy = (80, 25)      # default value
+    return tuple_xy
 
 def _getTerminalSize_windows():
     res=None
