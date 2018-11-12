@@ -18,7 +18,7 @@ from . import myFile, myLightGenomes, myDiags
 # [("out:Chromosomes",str,), ("withScaffolds",bool,False), ("minChromLength",int,1), ('removeSpeciesSpecificGenes',bool,True)]
 # genome1 = myLightGenomes.LightGenome(arguments["genome1"])
 # genome2 = myLightGenomes.LightGenome(arguments["genome2"])
-# families = utils.myLightGenomes.Families(arguments["ancGenes"])
+# families = myLightGenomes.Families(arguments["ancGenes"])
 
 def ourGenomeToADHoReGenomeAndFamily(genome, families,
                                      outADHoReChromosomes="../i-adhore/Homo.sapiens/Genome.Homo.sapiens.Chr%s.list",

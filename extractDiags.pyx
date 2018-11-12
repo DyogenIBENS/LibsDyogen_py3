@@ -8,10 +8,10 @@ import itertools
 import collections
 import sys
 
-import myTools
-import myDiags
-import myProbas
-import myLightGenomes
+from . import myTools
+from . import myDiags
+from . import myProbas
+from . import myLightGenomes
 
 def extractDiagsInPairCompChr(g1,g2,consistentSwDType,distanceMetric):
 	cdef float c11, c21, c111, c211, c1N, c2N

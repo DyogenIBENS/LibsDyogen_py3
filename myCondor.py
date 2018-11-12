@@ -39,7 +39,7 @@ import distutils.spawn
 import sys
 # import logging
 from multiprocessing.dummy import Pool
-from utils import myTools
+from . import myTools
 import stat
 import inspect
 

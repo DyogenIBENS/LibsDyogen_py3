@@ -10,7 +10,7 @@
 import collections
 
 import math
-from utils import myTools
+from . import myTools
 
 display_prog = 'firefox'  # Command to execute to display images.
 from math import sqrt, acos, cos, sin
