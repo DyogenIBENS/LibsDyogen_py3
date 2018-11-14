@@ -15,9 +15,8 @@ if sys.version_info[0] < 3:
 sys.path.remove('')
 
 from .. import \
-               myCondor, \
-               myCyntenator, \
                myFile, \
+               myTools, \
                myGenomes, \
                myGraph, \
                myIntervals, \
@@ -30,10 +29,11 @@ from .. import \
                myProteinTree, \
                myPsOutput, \
                mySvgDrawer, \
-               myTools, \
-               walktrap, \
-               myADHoRe, \
-               myDiags, \
+               myCondor, \
                myLightGenomes, \
+               walktrap, \
+               myDiags, \
+               myADHoRe, \
+               myCyntenator, \
                myGeneTeams, \
                myGenomesDrawer

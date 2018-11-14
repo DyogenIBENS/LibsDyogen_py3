@@ -6,6 +6,6 @@ set -euo pipefail
 thisfiledir="$( cd "$(dirname "$0")" ; pwd -P )"
 echo $thisfiledir
 
-PYTHONPATH="$(dirname $thisfiledir)":$PYTHONPATH python3 -m LibsDyogen._myTests.all
+PYTHONPATH="$(dirname $thisfiledir)":${PYTHONPATH:-} python3 -m LibsDyogen._myTests.all
 
 echo "Done. Return code: $?" >&2
