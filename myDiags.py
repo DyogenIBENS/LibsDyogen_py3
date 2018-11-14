@@ -67,7 +67,7 @@ import multiprocessing  # for using processes
 import enum
 
 if sys.platform != 'win32':
-    from . import extractDiags
+    from . import extractDiags  # WARNING: circular import here.
 
 from .myLightGenomes import OGene
 

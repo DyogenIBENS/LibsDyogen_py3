@@ -1,5 +1,5 @@
 # LibsDyogen version 1.0 (6/11/2015)
-# python 2.7
+# python 3.5
 # Copyright © 2015 IBENS/Dyogen : Nga THI THUY NGUYEN,  Joseph LUCAS and Hugues ROEST CROLLIUS
 # mail : jlucas@ens.fr
 # Licences GLP v3 and CeCILL v2
@@ -9,9 +9,7 @@ import collections
 import sys
 
 from . import myTools
-from . import myDiags
-from . import myProbas
-from . import myLightGenomes
+import myDiags  # WARNING: circular import here.
 
 def extractDiagsInPairCompChr(g1,g2,consistentSwDType,distanceMetric):
 	cdef float c11, c21, c111, c211, c1N, c2N
