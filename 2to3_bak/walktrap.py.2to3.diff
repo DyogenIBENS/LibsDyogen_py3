@@ -1,0 +1,108 @@
+--- walktrap.py	(original)
++++ walktrap.py	(refactored)
+@@ -23,20 +23,20 @@
+ 	"""
+ 
+ 	from . import myTools
+-	import _walktrap
+-
+-	print >> sys.stderr, "Computing connected components ...",
++	from . import _walktrap
++
++	print("Computing connected components ...", end=' ', file=sys.stderr)
+ 	# Les composantes connexes
+ 	combin = myTools.myCombinator()
+ 	superdelete = []
+ 	
+-	for (x,l) in edges.iteritems():
++	for (x,l) in edges.items():
+ 		delete = [y for y in l if l[y] <= 0.]
+ 		for y in delete:
+ 			del l[y]
+ 		l.pop(x, None)
+ 		if len(l) > 0:
+-			combin.addLink(l.keys() + [x])
++			combin.addLink(list(l.keys()) + [x])
+ 		else:
+ 			superdelete.append(x)
+ 	
+@@ -45,7 +45,7 @@
+ 		del edges[x]
+ 		res.append( ([x], [], None, None) )
+ 
+-	print >> sys.stderr, "Launching walktrap ",
++	print("Launching walktrap ", end=' ', file=sys.stderr)
+ 	n = len(edges)
+ 	for nodes in combin:
+ 		# Reindexation des noeuds
+@@ -64,7 +64,7 @@
+ 		dend = [(cut,tuple(translate(f) for f in fils),translate(pere)) for (cut,fils,pere) in dend]
+ 		res.append( (nodes, relevantCuts, dend, WalktrapDendogram(dend, nodes)) )
+ 		sys.stderr.write('.')
+-	print >> sys.stderr, " OK"
++	print(" OK", file=sys.stderr)
+ 
+ 	return res
+ 
+@@ -74,7 +74,7 @@
+ 	calcul du score."""
+ 
+ 	(edges,none) = funcScore(l)
+-	print >> sys.stderr, "input", len(edges), len(none), len(l)
++	print("input", len(edges), len(none), len(l), file=sys.stderr)
+ 
+ 	#print >> sys.stderr, edges
+ 	s = len(edges)
+@@ -94,7 +94,7 @@
+ 			else:
+ 				chrOrder.append(lonely)
+ 
+-	print >> sys.stderr, "output", len(edges), len(none), [len(x) for x in chrOrder]
++	print("output", len(edges), len(none), [len(x) for x in chrOrder], file=sys.stderr)
+ 	assert len(l) == (len(none) + sum(len(x) for x in chrOrder)), (len(l), len(none), sum(len(x) for x in chrOrder), [len(x) for x in chrOrder])
+ 	return (chrOrder,none)
+ 
+@@ -187,28 +187,29 @@
+ 
+ 	from . import myMaths
+ 
+-	def mystr( (alpha,relevance,(clusters,lonely)) ):
++	def mystr(xxx_todo_changeme ):
++		(alpha,relevance,(clusters,lonely)) = xxx_todo_changeme
+ 		return "alpha=%f relevance=%f clusters=%d size=%d lonely=%d sizes={%s}" % \
+ 			(alpha,relevance,len(clusters),sum([len(c) for c in clusters]),len(lonely),myMaths.myStats.txtSummary([len(c) for c in clusters]))
+ 
+ 	res = [(alpha,relevance,dend.cut(alpha)) for (alpha,relevance) in cuts]
+ 	# Le choix par defaut
+ 	if len(res) == 1:
+-		print >> sys.stderr, "1 seule possibilite"
++		print("1 seule possibilite", file=sys.stderr)
+ 		x = 0
+ 	else:
+ 		# Si on peut, on propose a l'utilisateur de choisir
+ 		for x in res:
+-			print >> sys.stderr, "> " + mystr(x)
++			print("> " + mystr(x), file=sys.stderr)
+ 		import os
+ 		if os.isatty(sys.stdin.fileno()):
+-			print >> sys.stderr, "Aucune entree utilisateur"
++			print("Aucune entree utilisateur", file=sys.stderr)
+ 			x = 0
+ 		else:
+ 			while True:
+ 				try:
+-					print >> sys.stderr, "Choix ? ",
+-					x = int(raw_input())
++					print("Choix ? ", end=' ', file=sys.stderr)
++					x = int(input())
+ 					break
+ 				except ValueError:
+ 					pass
+@@ -218,6 +219,6 @@
+ 				except EOFError:
+ 					x = 0
+ 					break
+-	print >> sys.stderr, "Choix de " + mystr(res[x])
++	print("Choix de " + mystr(res[x]), file=sys.stderr)
+ 	return res[x]
+ 

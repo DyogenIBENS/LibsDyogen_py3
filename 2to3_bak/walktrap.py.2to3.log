@@ -1,0 +1,66 @@
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+RefactoringTool: Skipping optional fixer: buffer
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+RefactoringTool: Skipping optional fixer: idioms
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+RefactoringTool: Skipping optional fixer: set_literal
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+RefactoringTool: Skipping optional fixer: ws_comma
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+root: Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt
+RefactoringTool: Refactored walktrap.py
+RefactoringTool: Files that were modified:
+RefactoringTool: walktrap.py

@@ -1,0 +1,9 @@
+--- myCyntenator.py	(original)
++++ myCyntenator.py	(refactored)
+@@ -13,7 +13,7 @@
+ import os
+ import subprocess
+ import sys
+-import myFile, myLightGenomes, myDiags
++from . import myFile, myLightGenomes, myDiags
+ 
