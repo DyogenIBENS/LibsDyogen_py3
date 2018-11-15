@@ -76,7 +76,7 @@ def wrapper(function):
         for args in iter(input.get, 'STOP'):
             result = function(*args, **kwargs)
             output.put(result)
-            progress = 100-100*(input.qsize()) / NbOfTasks
+            progress = 100-100*(input.qsize()) // NbOfTasks
             lock.acquire()
             if progress in listOfPercentage:
                 print("%s" % progress + '%', file=sys.stderr)

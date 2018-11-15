@@ -170,6 +170,7 @@ class memoize:
              self.nbcall/float(len(self.cache)) if len(self.cache) > 0 else 0)
 
     def __call__(self, *args, **kwargs):
+        assert not kwargs, "Memoize does not support the use of kwargs."
         self.nbcall += 1
         try:
             return self.cache[args]

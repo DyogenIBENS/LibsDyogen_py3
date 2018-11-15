@@ -328,7 +328,7 @@ class Genome:
 
         # dichotomizing search of a gene with a non-null overlap with the window
         def dichotFind(a, b):
-            i = (a+b)/2
+            i = (a+b)//2
             if a == i: # si b == a+1
                 return a
             if lst[i].end < beg:
@@ -444,7 +444,7 @@ class Genome:
             totalLenChrom += lenChrom if lenChrom > 0 else None
             totalLenConsideredGenes += lenConsideredGenes
         if totalLenChrom:
-            densityInConsideredGenes = totalLenConsideredGenes / totalLenChrom
+            densityInConsideredGenes = totalLenConsideredGenes / totalLenChrom  # Float division
         else:
             densityInConsideredGenes = None
         return (chromosomesMeanInterConsideredGeneLen, densityInConsideredGenes)

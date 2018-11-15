@@ -229,7 +229,7 @@ class LevelIdxGenerator():
         if farIdxs is not None:
             new_availableLevels = []
             for unit in range(0, farIdxs):
-                for i in range(0, len(self.availableLevels) / farIdxs + 1):
+                for i in range(0, len(self.availableLevels) // farIdxs + 1):
                     if i*farIdxs + unit < len(self.availableLevels):
                         new_availableLevels.append(self.availableLevels[(i*farIdxs) + unit])
             assert len(new_availableLevels) == len(self.availableLevels)

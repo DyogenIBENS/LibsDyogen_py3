@@ -74,8 +74,8 @@ def quantityEatenByOneJob(maxSimultaneousJobs):
 # def pythonFunctionWrapper(func):
 #     local_buff_pythonWrapper = LOCAL_BUFF_FOLDER
 #     with open(local_buff_pythonWrapper, 'w') as f:
-#         print >> f, "#!/bin/python"
-#         print >> f, coreOfFunction
+#         print("#!/bin/python", file=f)
+#         print(coreOfFunction, file=f)
 #     os.chmod(local_buff_pythonWrapper, 0o755)
 
 class NotYetFinished(Exception):

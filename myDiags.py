@@ -2371,7 +2371,7 @@ def extractSbsInPairCompGenomesInTbs(g1_tb, g2_tb,
             # if the multiprocess option is True and if there is more than one pairwise comparison of chromosomes
             pool = multiprocessing.Pool()
             tasks = [(c1, c2, g1_tb[c1], g2_tb[c2], sameStrand) for (c1, c2) in itertools.product([c1 for c1 in g1_tb], [c2 for c2 in g2_tb])]
-            for ((c1, c2), listOfDiags, N12) in pool.map(extractDiagsInPairCompChrWrapper, tasks, chunksize=(len(tasks)/4)):
+            for ((c1, c2), listOfDiags, N12) in pool.map(extractDiagsInPairCompChrWrapper, tasks, chunksize=(len(tasks)//4)):
                 if len(listOfDiags) > 0:
                     diagsInPairComp[c1][c2] = listOfDiags
                 N12s[c1][c2] = N12
@@ -2959,7 +2959,7 @@ def getSbsMeanLengths(genome1, genome2, sbsInPairComp, lengthUnit='Mb', meanInte
                 lengthG2 = lengthProjectionOnGenome(2, sb, c2, genome2, correctLens=True)
             averageSbLength = float(lengthG1 + lengthG2) / 2.0
             # in megabases
-            averageSbLength = averageSbLength / 1000000
+            averageSbLength = averageSbLength / 1000000  # Float division.
             sbId2Length[id] = averageSbLength
     return sbId2Length
 

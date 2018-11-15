@@ -277,7 +277,7 @@ class myInterpolator:
                 n = len(intervalList)
                 if n < 2:
                     return ("A=%.10e;B=%.10e;C=%.10e;D=%.10e;" % intervalList[0])
-                n2 = n / 2
+                n2 = n // 2
                 return ("if (x < %.10e) {%s} else {%s}" % (points[n2], codeChoice(intervalList[:n2]), codeChoice(intervalList[n2:])))
             return ("double interpolator(double x) {double A,B,C,D;" + codeChoice(intervals) + "return ((A * x + B) * x + C) * x + D;}")
 
@@ -351,7 +351,7 @@ class randomValue:
             for _ in range(niter):
                 s += int(random.paretovariate(alpha))
                 n += 1
-            newm = s/n
+            newm = s/n  # Float division
             if abs(lastm-newm) < precision:
                 return newm
             lastm = newm
@@ -383,7 +383,7 @@ def flatten(lst):
 def sqrti(n, part, nbdec):
     if (len(n) % 2) == 1:
         n = "0" + n
-    backup = len(n) / 2
+    backup = len(n) // 2
     iniL = len(n) + len(part)
     s = n + (part + ("00" * nbdec))[:2*nbdec]
     maxL = len(s)
@@ -393,7 +393,7 @@ def sqrti(n, part, nbdec):
     while ((c != 0) or (i < iniL)) and (i<maxL):
         c = 100*c + int(s[i:i+2])
         i += 2
-        for x in [9,8,7,6,5,4,3,2,1,0]:
+        for x in (9,8,7,6,5,4,3,2,1,0):
             y = (20*p+x)*x
             if y <= c:
                 break

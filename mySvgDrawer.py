@@ -105,7 +105,7 @@ class Point(collections.namedtuple('Point', ['x', 'y'])):
         tmp = tmp + origin
         return tmp
 
-def colorstr(rgb): return "#%x%x%x" % (rgb[0] / 16, rgb[1] / 16, rgb[2] / 16) if rgb != 'none' else 'none'
+def colorstr(rgb): return "#%x%x%x" % (rgb[0] // 16, rgb[1] // 16, rgb[2] // 16) if rgb != 'none' else 'none'
 
 
 class Scene:

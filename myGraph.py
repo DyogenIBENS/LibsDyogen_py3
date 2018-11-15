@@ -169,7 +169,10 @@ class queueWithBackup:
 ########################################################################################
 def diagMerger(diagGen, sameStrand, largeurTrou):
 	
-	diagGen = queueWithBackup( (l1, l2, la, c2, l1[0][1]/l2[0][1], (min(l1)[0],max(l1)[0]), (min(l2)[0],max(l2)[0])) for (c2,l1,l2,la) in diagGen )
+	diagGen = queueWithBackup(
+				(l1, l2, la, c2, l1[0][1]/l2[0][1],  # is it an integer division?
+				 (min(l1)[0],max(l1)[0]),
+				 (min(l2)[0],max(l2)[0])) for (c2,l1,l2,la) in diagGen)
 
 	# On rassemble des diagonales separees par une espace pas trop large
 	for (la1,la2,laa,ca2,sa,(_,fina1),(deba2,fina2)) in diagGen:
