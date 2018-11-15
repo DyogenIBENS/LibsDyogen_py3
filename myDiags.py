@@ -825,7 +825,7 @@ def findOverlapsOnGenome(rankGenome, sbsInPairCompWithIds, sbsGX, truncationMax=
                         # sbb_end < sba_beg
                         break
         if truncationMax == 0:
-            assert len(list(O.keys())) == 0
+            assert len(O) == 0
         return (N, O, I)
 
     # method "getItemById" of sbsInPairCompWithIds"
@@ -834,7 +834,7 @@ def findOverlapsOnGenome(rankGenome, sbsInPairCompWithIds, sbsGX, truncationMax=
     N = collections.defaultdict(set)
     O = collections.defaultdict(set)
     I = collections.defaultdict(set)
-    for c in list(sbsGX.keys()):
+    for c in sbsGX.keys():
         (N, O, I) = findOverlapsOnGenomeOrder(rankGenome, +1, sbsGX[c], N, O, I, id2sb, truncationMax=truncationMax)
         if truncationMax > 0:
             # also needed to check for the overlap in the reverse
@@ -1108,7 +1108,7 @@ def solveSbsOverlaps(sbsInPairComp, truncationMax=0, removeSingleHpSbs=False, ve
 
         #assert set(O.keys()) >= noOrSmallOverlapIds
         # FIXME, is it right to do that ?
-        #O = dict([(iDsba, iDsbb)  for (iDsba, iDsbb) in O.iteritems() if ((iDsba in noOrSmallOverlapIds) and (iDsbb in noOrSmallOverlapIds))])
+        #O = dict([(iDsba, iDsbb)  for (iDsba, iDsbb) in O.items() if ((iDsba in noOrSmallOverlapIds) and (iDsbb in noOrSmallOverlapIds))])
         #assert len(noOrSmallOverlapIds) == len([a for a in new_sbsInPairComp])
 
     new_sbsInPairComp = myTools.Dict2d(list)
@@ -1361,7 +1361,7 @@ def extractDiagsInPairCompChr(gc1, gc2, sameStrand=True, verbose=False):
                     l1.append(i1)
                     l2.append(i2)
                     del M[i1][i2]
-                    if len(list(M[i1].keys())) == 0:
+                    if len(M[i1].keys()) == 0:
                         del M[i1]
                     #diagType == None if sameStrand == False and len(la) == 1, first element of a diagonal which we donnot take care of gene orientation
                     #if (diagType == "/" or diagType == None) and i1+1 in M and i2+1 in M[i1+1] and ((M[i1+1][i2+1] in [+1,None]) if sameStrand else True):
@@ -2133,8 +2133,8 @@ def doDistinguishMonoGenicDiags(diagsInPairComp):
     :return:
     """
     monogenicDiagsInPairComp = myTools.Dict2d(list)
-    for c1 in list(diagsInPairComp.keys()):
-        for c2 in list(diagsInPairComp[c1].keys()):
+    for c1 in diagsInPairComp.keys():
+        for c2 in diagsInPairComp[c1].keys():
             lDiags = []
             for diag in diagsInPairComp[c1][c2]:
                 (m, max_g, lw1, lw2, l1_min, l1_max, l2_min, l2_max) = diag.calculateCharacteristics()
@@ -2147,7 +2147,7 @@ def doDistinguishMonoGenicDiags(diagsInPairComp):
                 diagsInPairComp[c1][c2] = lDiags
             else:
                 del diagsInPairComp[c1][c2]
-        if len(list(diagsInPairComp[c1].keys())) == 0:
+        if len(diagsInPairComp[c1].keys()) == 0:
             del diagsInPairComp[c1]
     return (diagsInPairComp, monogenicDiagsInPairComp)
 
@@ -2350,16 +2350,16 @@ def extractSbsInPairCompGenomesInTbs(g1_tb, g2_tb,
     N12_g = 0
     print("synteny block extraction", file=sys.stderr)
     tic = time.time()
-    if optimisation == 'cython' and (len(list(g1_tb.keys())) > 1 or len(list(g2_tb.keys())) > 1):
+    if optimisation == 'cython' and (len(g1_tb.keys()) > 1 or len(g2_tb.keys()) > 1):
         (p_hpSign, p_hpSign_g, N12s, N12_g, diagsInPairComp) = \
             extractDiags.extractDiagsInPairCompChr(g1_tb, g2_tb, sameStrand, distanceMetric)
     else:
-        if optimisation == None or (len(list(g1_tb.keys())) <= 1 and len(list(g2_tb.keys())) <= 1):
+        if optimisation == None or (len(g1_tb.keys()) <= 1 and len(g2_tb.keys()) <= 1):
             totalNbComps = len(g1_tb) * len(g2_tb)
             progressBar = myTools.ProgressBar(totalNbComps)
             currCompNb = 0
-            for c1 in list(g1_tb.keys()):
-                for c2 in list(g2_tb.keys()):
+            for c1 in g1_tb.keys():
+                for c2 in g2_tb.keys():
                     (listOfDiags, N12) = extractDiagsInPairCompChr(g1_tb[c1], g2_tb[c2], sameStrand, verbose=verbose)
                     if len(listOfDiags) > 0:
                         diagsInPairComp[c1][c2] = listOfDiags
@@ -2435,10 +2435,10 @@ def editGenomes(g1, g2, families,
                 minChromLength=2,
                 keepOriginal=False):
     assert labelWith in {'FamID', 'FamName'}
-    nCini1 = len(list(g1.keys()))
-    nCini2 = len(list(g2.keys()))
-    nGini1 = sum([len(chrom1) for chrom1 in list(g1.values())])
-    nGini2 = sum([len(chrom2) for chrom2 in list(g2.values())])
+    nCini1 = len(g1.keys())
+    nCini2 = len(g2.keys())
+    nGini1 = sum([len(chrom1) for chrom1 in g1.values()])
+    nGini2 = sum([len(chrom2) for chrom2 in g2.values()])
     #step 1 :filter genomes and rewrite in tandem blocks if needed
     ##############################################################
     # rewrite genomes by family names (ie ancGene names)
@@ -2450,8 +2450,8 @@ def editGenomes(g1, g2, families,
         g1_fID = myMapping.labelWithFamNames(g1, families)
         g2_fID = myMapping.labelWithFamNames(g2, families)
     # genes that are not in ancGene have a aID=None
-    nGiniInFam1 = len([fID for chrom1 in list(g1_fID.values()) for (fID, _) in chrom1 if fID is not None])
-    nGiniInFam2 = len([fID for chrom2 in list(g2_fID.values()) for (fID, _) in chrom2 if fID is not None])
+    nGiniInFam1 = len([fID for chrom1 in g1_fID.values() for (fID, _) in chrom1 if fID is not None])
+    nGiniInFam2 = len([fID for chrom2 in g2_fID.values() for (fID, _) in chrom2 if fID is not None])
     print("genome1 initially contains %s chromosomes" % nCini1, file=sys.stderr)
     print("genome2 initially contains %s chromosomes" % nCini2, file=sys.stderr)
     print("genome1 initially contains %s genes (%s genes are in families, %.2f%%)" % (nGini1, nGiniInFam1, (100 * float(nGiniInFam1) / float(nGini1))), file=sys.stderr)
@@ -2490,8 +2490,8 @@ def editGenomes(g1, g2, families,
     assert nGini1 == nGL1 + nbOfGenesInAGenomeInTbs(g1_tb, mtb2g1)
     assert nGini2 == nGL2 + nbOfGenesInAGenomeInTbs(g2_tb, mtb2g2)
     # conservation law chromosomes
-    assert nCini1 == nCL1 + len(list(g1_tb.keys()))
-    assert nCini2 == nCL2 + len(list(g2_tb.keys()))
+    assert nCini1 == nCL1 + len(g1_tb.keys())
+    assert nCini2 == nCL2 + len(g2_tb.keys())
 
     return ((g1_tb, mtb2g1, (nCL1, nGL1)), (g2_tb, mtb2g2, (nCL2, nGL2)))
 
@@ -2966,7 +2966,7 @@ def getSbsMeanLengths(genome1, genome2, sbsInPairComp, lengthUnit='Mb', meanInte
 @myTools.verbose
 def computeAncestralCoverageBySbs(g1_tb, g2_tb, ancSbGenome, verbose = False):
     ancGenesInSbs=set([])
-    for ancSb in list(ancSbGenome.values()):
+    for ancSb in ancSbGenome.values():
         for (ancGene,_,_) in ancSb:
             ancGenesInSbs.add(ancGene)
     print("Nb of ancGenes in synteny blocks (each ancGene can appear at most once)", len(ancGenesInSbs), file=sys.stderr)
@@ -2983,3 +2983,52 @@ def computeAncestralCoverageBySbs(g1_tb, g2_tb, ancSbGenome, verbose = False):
     print("coverage LCA_S1-S2 = cardinal({ancGenes in Sb}) / cardinal({ancGenes that are present in G1 rewritten in tbs and in G2 rewritten in tbs})\ncoverage LCA_S1-S2 = ", float(len(ancGenesInSbs)) / len(ancGenesInG1TbAndInG2Tb), file=sys.stderr)
     coverage = float(len(ancGenesInSbs)) / len(ancGenesInG1TbAndInG2Tb)
     return coverage
+
+@myTools.verbose
+def computeMeanCoverageInGenes(genome1, genome2, sbsInPairComp, families=None, verbose=True):
+    # TODO, use Diagonal.functions to compute projections on genomes
+    # if families is provided, reduce gene names to genes in families
+
+    assert isinstance(genome1, myLightGenomes.LightGenome)
+    assert isinstance(genome2, myLightGenomes.LightGenome)
+    if isinstance(sbsInPairComp, myTools.OrderedDict2dOfLists):
+        _sbsInPairCompWithIds = sbsInPairComp
+    else:
+        assert isinstance(sbsInPairComp, myTools.Dict2d)
+        _sbsInPairCompWithIds = myTools.OrderedDict2dOfLists()
+        for ((c1, c2), sb) in sbsInPairComp.iteritems2d():
+            _sbsInPairCompWithIds.addToLocation((c1, c2), sb)
+
+    genome1.getGeneNames(asA=set, checkNoDuplicates=True)
+    setExtantGenes1 = set([(c1, gIdx1) for (c1, chrom1) in genome1.items() for gIdx1 in range(0, len(chrom1))])
+    #assert all([0<= gIdx1 < len(genome1[c1])+1 for (c1, gIdx1) in setExtantGenes1])
+    genome2.getGeneNames(asA=set, checkNoDuplicates=True)
+    setExtantGenes2 = set([(c2, gIdx2) for (c2, chrom2) in genome2.items() for gIdx2 in range(0, len(chrom2))])
+
+    setExtantGenes1WithinSbsBoundaries = set()
+    setExtantGenes2WithinSbsBoundaries = set()
+    for (id, (c1, c2), sb) in _sbsInPairCompWithIds.iterByOrderedIds():
+        assert isinstance(sb, SyntenyBlock)
+        gIdxsInL1 = [gIdx1 for tb1 in sb.l1 for gIdx1 in tb1]
+        for gIdx1 in range(min(gIdxsInL1), max(gIdxsInL1)+1):
+            setExtantGenes1WithinSbsBoundaries.add((c1, gIdx1))
+        gIdxsInL2 = [gIdx2 for tb2 in sb.l2 for gIdx2 in tb2]
+        for gIdx2 in range(min(gIdxsInL2), max(gIdxsInL2)+1):
+            setExtantGenes2WithinSbsBoundaries.add((c2, gIdx2))
+
+    if families is not None:
+        # reduce sets of genes that are in families
+        assert isinstance(families, myLightGenomes.Families)
+        for setGenes in [setExtantGenes1, setExtantGenes1WithinSbsBoundaries]:
+            setGenes = set([(c1, gIdx1) for (c1, gIdx1) in setGenes if families.getFamilyByName(genome1[c1][gIdx1].n) is not None])
+        for setGenes in [setExtantGenes2, setExtantGenes2WithinSbsBoundaries]:
+            setGenes = set([(c2, gIdx2) for (c2, gIdx2) in setGenes if families.getFamilyByName(genome2[c2][gIdx2].n) is not None])
+
+    coverage1 = float(len(setExtantGenes1WithinSbsBoundaries)) / len(setExtantGenes1)
+    coverage2 = float(len(setExtantGenes2WithinSbsBoundaries)) / len(setExtantGenes2)
+
+    meanCoverage = 0.5 * (coverage1 + coverage2)
+
+    return meanCoverage
+
+

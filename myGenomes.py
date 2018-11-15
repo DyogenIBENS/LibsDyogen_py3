@@ -204,9 +204,9 @@ class Genome:
                     s = int(s) if s != 'None' else None
                     (beg, end) = (int(beg), int(end))
                     # TODO ensure that the 5' extremity (transcription start site) is the beg column
-                    if not ((s in {None, +1} and beg < end) or (s == -1  and end < beg)):
-                        pass
-                    assert (s in {None, +1} and beg < end) or (s == -1  and end < beg), 's=%s, beg=%s and end=%s' % (s, beg, end)
+                    #if not ((s in {None, +1} and beg < end) or (s == -1  and end < beg)):
+                    #    pass
+                    #assert (s in {None, +1} and beg < end) or (s == -1  and end < beg), 's=%s, beg=%s and end=%s' % (s, beg, end)
                     self.addGene(geneNames.split(), chr, beg, end, s)
                 print("(Ensembl)", end=' ', file=sys.stderr)
 
@@ -222,9 +222,9 @@ class Genome:
                         lastC = c[0]
                         pos = 0
                         currC = commonChrName(c[0])
-                    data = list(zip([int(x) for x in c[2].split()], [int(x) for x in c[3].split()]))
+                    data = zip([int(x) for x in c[2].split()], [int(x) for x in c[3].split()])
                     if int(c[1]) < 0:
-                        data = [(i,-s) for (i,s) in data.__reversed__()]
+                        data = [(i,-s) for (i,s) in reversed(data)]
                     for (index,strand) in data:
                         if 'ancGenes' in kwargs:
                             self.lstGenes[currC].append( Gene(currC, pos, pos+1, strand, ancGenes[index].names) )
@@ -415,7 +415,7 @@ class Genome:
         # Warning : it is important to use a dict since there are sometimes a
         # jump in the numerotation of chromosomes in a genome.
         newGenome = {}
-        for c in list(self.lstGenes.keys()):
+        for c in self.lstGenes.keys():
             assert len(self.lstGenes[c]) >=1
             newGenome[c] = [(g.names[0],g.strand) for g in self.lstGenes[c]]
         return newGenome

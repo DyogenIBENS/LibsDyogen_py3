@@ -31,7 +31,7 @@ def geneExtremityFromGene(og, leftOrRight):
         elif og.s == -1:
             geneExtr = GeneExtremity(og.n, 't' if leftOrRight == +1 else 'h')
         else:
-            assert og.s == None
+            assert og.s == None, 'og.s = %s' % og.s
             geneExtr = GeneExtremity(og.n, None)
     return geneExtr
 
@@ -206,7 +206,7 @@ def intergeneFromAdjacency(adjacency, genomeWithDict, default=None):
 def analyseGenomeIntoChromExtremities(genome, oriented=True):
     isinstance(genome, LightGenome)
     res = set()
-    for chrom in list(genome.values()):
+    for chrom in genome.values():
         if oriented:
             chromGeneExtrLeft = geneExtremityFromGene(chrom[0], -1)
             chromGeneExtrRight = geneExtremityFromGene(chrom[-1], +1)
@@ -223,7 +223,7 @@ def analyseGenomeIntoAdjacencies(genome, oriented=True, asA=set, fixOrderInAdj=F
         setAdjs = set()
     else:
         setAdjs = list()
-    for chrom in list(genome.values()):
+    for chrom in genome.values():
         assert len(chrom) > 0
         if len(chrom) > 1:
             for (og1, og2) in myTools.myIterator.slidingTuple(chrom):
@@ -252,71 +252,81 @@ def analyseGenomeIntoAdjacencies(genome, oriented=True, asA=set, fixOrderInAdj=F
 # fn = nb False Negatives
 # sn = sensitivity
 # sp = specificity
-Efficiency = collections.namedtuple('efficiency', ('tp', 'tn', 'fp', 'fn', 'sn', 'sp'))
+# for pickle, 'Efficiency' variable must have the same name as the class 'Efficiency'
+#Efficiency = collections.namedtuple('Efficiency', ('tp', 'tn', 'fp', 'fn', 'r', 'p', 'f1'))
+Efficiency = collections.namedtuple('Efficiency', ('tp', 'tn', 'fp', 'fn', 'sn', 'sp'))
+
+def computeEfficiency(setIdentified, setTrue):
+    # True positive adjs
+    sTp = setIdentified & setTrue
+    Tp = len(sTp)
+    Tn = None
+    sFp = setIdentified - setTrue
+    Fp = len(sFp)
+    sFn = setTrue - setIdentified
+    Fn = len(sFn)
+    assert len(setTrue) == Tp + Fn
+    recall = float(Tp) / float(Tp + Fn)
+    precision = float(Tp) / float(Tp + Fp)
+    F1 = float(2 * recall * precision) / float(recall + precision)
+    return (Efficiency(Tp, Tn, Fp, Fn, recall, precision, F1), (sTp, sFp, sFn))
 
 @myTools.verbose
-def compareGenomes(genome, refGenome, mode='adjacency', oriented=True, verbose=False):
+def compareGenomes(genomeIdentified, genomeTrue, mode='adjacency', oriented=True, returnSets=False, verbose=False):
     """
-    :param genome: studied genome
-    :param refGenome: the reference genome
-    :param mode: either 'adjacency' or 'chromExtremity'
+    :param genomeIdentified: genome studied
+    :param genomeTrue: reference genome
+    :param mode: either 'adjacency' or 'chromExtremity' or 'geneName'
     :param oriented: use oriented genes if True, else use unoriented genes
     :param verbose: print infos in sys.stderr
     :return: Efficiency(Tp, Tn, Fp, Fn, sensitivity, specificity)
     """
-    assert mode in {'adjacency', 'chromExtremity'}
-    isinstance(genome, LightGenome)
-    isinstance(refGenome, LightGenome)
+    assert mode in {'adjacency', 'chromExtremity', 'geneName'}
+    if mode == 'geneName':
+        # orientation of genes is useless
+        oriented = None
+    isinstance(genomeIdentified, LightGenome)
+    isinstance(genomeTrue, LightGenome)
 
-    print("nb of chroms = %s" % len(list(genome.keys())), file=sys.stderr)
-    print("nb of monogenic-chroms = %s" % sum([1 for chrom in list(genome.values()) if len(chrom) == 1]), file=sys.stderr)
-    print("nb of reference chroms = %s" % len(list(refGenome.keys())), file=sys.stderr)
-    print("nb of reference monogenic-chroms = %s" % sum([1 for chrom in list(refGenome.values()) if len(chrom) == 1]), file=sys.stderr)
+    print("#chroms = %s" % len(genomeIdentified.keys()), file=sys.stderr)
+    print("#monogenic-chroms = %s" % sum([1 for chrom in genomeIdentified.values() if len(chrom) == 1]), file=sys.stderr)
+    print("#true chroms = %s" % len(genomeTrue.keys()), file=sys.stderr)
+    print("#true monogenic-chroms = %s" % sum([1 for chrom in genomeTrue.values() if len(chrom) == 1]), file=sys.stderr)
 
-    setGeneNames = genome.getGeneNames(asA=set, checkNoDuplicates=False)
-    # R: reference
-    setGeneNamesR = refGenome.getGeneNames(asA=set, checkNoDuplicates=True)
-    print("nb gene names = %s" % len(setGeneNames), file=sys.stderr)
-    print("nb gene names in reference = %s" % len(setGeneNamesR), file=sys.stderr)
-    print("nb of gene names in both = %s" % len(setGeneNamesR & setGeneNames), file=sys.stderr)
-    # this one is empti for the uniquely Amniota_mm_gg simu, whereas it contains mainy values in the whole simualtion
-    print("gene names that are in setGeneNames - setGeneNamesR =", setGeneNames - setGeneNamesR, file=sys.stderr)
-    print("gene names that are in setGeneNamesR - setGeneNames =", setGeneNamesR - setGeneNames, file=sys.stderr)
-
-    setRes = set()
-    refSetRes = set()
+    setIdentified = set()
+    setTrue = set()
     if mode == 'adjacency':
         itemType = 'OAdjacency' if oriented else 'Adjacency'
-        setRes = analyseGenomeIntoAdjacencies(genome, oriented=oriented)
-        refSetRes = analyseGenomeIntoAdjacencies(refGenome, oriented=oriented)
-    else:
-        assert mode == 'chromExtremity'
+        setIdentified = analyseGenomeIntoAdjacencies(genomeIdentified, oriented=oriented)
+        setTrue = analyseGenomeIntoAdjacencies(genomeTrue, oriented=oriented)
+    elif mode == 'chromExtremity':
         itemType = 'OChromosomeExtremity' if oriented else "chromosomeExtremity"
-        setRes = analyseGenomeIntoChromExtremities(genome, oriented=oriented)
-        refSetRes = analyseGenomeIntoChromExtremities(refGenome, oriented=oriented)
+        setIdentified = analyseGenomeIntoChromExtremities(genomeIdentified, oriented=oriented)
+        setTrue = analyseGenomeIntoChromExtremities(genomeTrue, oriented=oriented)
+    elif mode == 'geneName':
+        itemType = 'familyName'
+        setIdentified = genomeIdentified.getGeneNames(asA=set, checkNoDuplicates=False)
+        setTrue = genomeTrue.getGeneNames(asA=set, checkNoDuplicates=False)
+    else:
+        raise ValueError('mode=%s should be in {\'adjacency\', \'chromExtremity\', \'geneName\'}' % mode)
 
-    print("nb of %s = %s" % (itemType, len(setRes)), file=sys.stderr)
-    print("nb of %s in ref = %s" % (itemType, len(refSetRes)), file=sys.stderr)
 
-    # True positive adjs
-    sTp = setRes & refSetRes
-    Tp = len(sTp)
-    Tn = None
-    sFp = setRes - refSetRes
-    Fp = len(sFp)
-    sFn = refSetRes - setRes
-    Fn = len(sFn)
-    assert len(refSetRes) == Tp + Fn
-    sensitivity = float(Tp) / float(Tp + Fn)
-    specificity = float(Tp) / float(Tp + Fp)
+    print("#%s = %s" % (itemType, len(setIdentified)), file=sys.stderr)
+    print("#true %s = %s" % (itemType, len(setTrue)), file=sys.stderr)
 
-    print("Tp=%s" % Tp, file=sys.stderr)
-    print("Fp=%s" % Fp, file=sys.stderr)
-    print("Fn=%s" % Fn, file=sys.stderr)
-    print("sensitivity=%s" % sensitivity, file=sys.stderr)
-    print("specificity=%s" % specificity, file=sys.stderr)
+    (eff, (sTp, sFp, sFn)) = computeEfficiency(setIdentified, setTrue)
 
-    return (Efficiency(Tp, Tn, Fp, Fn, sensitivity, specificity), (sTp, sFp, sFn))
+    print("Tp=%s" % eff.tp, file=sys.stderr)
+    print("Fp=%s" % eff.fp, file=sys.stderr)
+    print("Fn=%s" % eff.fn, file=sys.stderr)
+    print("recall=%s" % eff.r, file=sys.stderr)
+    print("precision=%s" % eff.p, file=sys.stderr)
+    print("f1=%s" % eff.f1, file=sys.stderr)
+
+    if not returnSets:
+        return eff
+    else:
+        return (eff, (sTp, sFp, sFn))
 
 # TODO
 # def adjacencyFromIntergene(intergene, genomeWithDict, default=None):

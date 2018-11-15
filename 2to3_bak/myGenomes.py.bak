@@ -204,9 +204,9 @@ class Genome:
                     s = int(s) if s != 'None' else None
                     (beg, end) = (int(beg), int(end))
                     # TODO ensure that the 5' extremity (transcription start site) is the beg column
-                    if not ((s in {None, +1} and beg < end) or (s == -1  and end < beg)):
-                        pass
-                    assert (s in {None, +1} and beg < end) or (s == -1  and end < beg), 's=%s, beg=%s and end=%s' % (s, beg, end)
+                    #if not ((s in {None, +1} and beg < end) or (s == -1  and end < beg)):
+                    #    pass
+                    #assert (s in {None, +1} and beg < end) or (s == -1  and end < beg), 's=%s, beg=%s and end=%s' % (s, beg, end)
                     self.addGene(geneNames.split(), chr, beg, end, s)
                 print >> sys.stderr, "(Ensembl)",
 

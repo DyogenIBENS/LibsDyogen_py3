@@ -69,7 +69,7 @@ GeneP = collections.namedtuple("GeneP", ['c', 'idx'])
 def newChromName(genome):
     assert isinstance(genome, LightGenome)
     chromNames = set([])
-    for c in list(genome.keys()):
+    for c in genome.keys():
         try:
             c = int(c)
             chromNames.add(c)
@@ -280,7 +280,7 @@ class LightGenome(myTools.DefaultOrderedDict):
             genome = arg
             self.name = genome.name
             self.chrSet = arg.chrSet
-            for c in list(genome.lstGenes.keys()):
+            for c in genome.lstGenes.keys():
                 for (idx, g) in enumerate(genome.lstGenes[c]):
                     self[str(c)].append(OGene(g.names[0], g.strand))
                     if self.withDict:
@@ -353,7 +353,7 @@ class LightGenome(myTools.DefaultOrderedDict):
         newLightGenome = LightGenome(withDict=self.withDict)
         newLightGenome.name = self.name
         newLightGenome.withDict = self.withDict
-        for c in list(self.keys()):
+        for c in self.keys():
             newLightGenome[c] = self[c]
         if self.withDict:
             newLightGenome.g2p = self.g2p
@@ -367,7 +367,7 @@ class LightGenome(myTools.DefaultOrderedDict):
             return objectAlreadyBuilt
         newLightGenome = LightGenome(withDict=self.withDict)
         newLightGenome.name = copy.deepcopy(self.name, {})
-        for c in list(self.keys()):
+        for c in self.keys():
             for gene in self[c]:
                 newLightGenome[c].append(OGene(gene.n, gene.s))
         if self.withDict:
@@ -442,7 +442,7 @@ class LightGenome(myTools.DefaultOrderedDict):
     # TODO change name to getGeneNames (no ambiguity any more with a possible setter)
     def getGeneNames(self, asA=set, checkNoDuplicates=False):
         res = asA()
-        for chrom in list(self.values()):
+        for chrom in self.values():
             for gene in chrom:
                 if checkNoDuplicates and gene.n in res:
                     raise ValueError("%s contains two times the same gene name %s" % (self.name, gene.n))
@@ -457,7 +457,7 @@ class LightGenome(myTools.DefaultOrderedDict):
         assert asA in [set, list]
         assert isinstance(families, Families)
         res = asA()
-        for chrom in list(self.values()):
+        for chrom in self.values():
             for gene in chrom:
                 family = families.getFamilyByName(gene.n, default=None)
                 if family:
@@ -470,7 +470,7 @@ class LightGenome(myTools.DefaultOrderedDict):
 
     def getOwnedFamilies(self, families):
         res = []
-        for fn in self.getOwnedFamilyNames(families, asA=asA):
+        for fn in self.getOwnedFamilyNames(families, asA=set):
             res.append(families.getFamilyByName(fn))
         return res
 
@@ -478,7 +478,7 @@ class LightGenome(myTools.DefaultOrderedDict):
         assert asA in [set, list]
         assert isinstance(families, Families)
         res = asA()
-        for chrom in list(self.values()):
+        for chrom in self.values():
             for gene in chrom:
                 family = families.getFamilyByName(gene.n, default=None)
                 if family:
@@ -493,7 +493,7 @@ class LightGenome(myTools.DefaultOrderedDict):
         assert asA in [set, list]
         assert isinstance(families, Families)
         res = asA()
-        for chrom in list(self.values()):
+        for chrom in self.values():
             for gene in chrom:
                 family = families.getFamilyByName(gene.n, default=None)
                 if not family:
@@ -505,7 +505,7 @@ class LightGenome(myTools.DefaultOrderedDict):
         return res
 
     def removeChrsStrictlySmallerThan(self, minChrLen):
-        sCs = list(self.keys())
+        sCs = self.keys()
         nbRemovedChrs = 0
         nbRemovedGenes = 0
         for c in sCs:
@@ -523,10 +523,10 @@ class LightGenome(myTools.DefaultOrderedDict):
         return (nbRemovedChrs, nbRemovedGenes)
 
     def removeUnofficialChromosomes(self):
-        if len(list(self.chrSet.keys())) == 0:
-            for c in list(self.keys()):
+        if len(self.chrSet.keys()) == 0:
+            for c in self.keys():
                 self.chrSet[contigType(c)].add(c)
-        sCs = list(self.keys())
+        sCs = self.keys()
         nbRemovedChrs = 0
         nbRemovedGenes = 0
         for c in sCs:
@@ -545,8 +545,8 @@ class LightGenome(myTools.DefaultOrderedDict):
 
     def sort(self, byName=False):
         """ Sort chrs by decreasing sizes (default), or byName """
-        l = list(self.items())
-        for c in list(self.keys()):
+        l = self.items()
+        for c in self.keys():
             del self[c]
         if byName is False:
             # sort by decreasing size
@@ -572,7 +572,17 @@ class Families(list):
         if len(args) == 0:
             # null constructor
             return
-        if len(args) == 1 and isinstance(args[0], str):
+        if isinstance(args, Families):
+            families = args
+            self.name = families.name
+            for family in families:
+                self.append(Family(copy.deepcopy(family.fn), copy.deepcopy(family.dns)))
+            self.g2fid = copy.deepcopy(families.g2fid)
+            self.fidMax = families.fidMax
+            assert self.fidMax == len(self)
+            # DEBUG assert
+            assert set(self.g2fid.key()) == set().union(*[{fn} | dns for (fn, dns) in self])
+        elif len(args) == 1 and isinstance(args[0], str):
             fileName = args[0]
             self.name = fileName
             print("Loading Families from", fileName, "...", end=' ', file=sys.stderr)
