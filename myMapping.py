@@ -3,7 +3,7 @@
 # LibsDyogen_py3 version 0 (2018/11/16)
 # Copyright © 2015 IBENS/Dyogen : Joseph LUCAS, Lucas TITTMANN and Hugues ROEST CROLLIUS
 # mail : jlucas@ens.fr
-# Licences GLP v3 and CeCILL v2
+# Licenses GPL v3 and CeCILL v2
 
 # This file contains classes and methods for 1D management of chromosomes
 import sys

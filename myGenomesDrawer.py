@@ -3,7 +3,7 @@
 # LibsDyogen_py3 version 0 (2018/11/16)
 # Copyright © 2015 IBENS/Dyogen : Joseph LUCAS and Hugues ROEST CROLLIUS
 # mail : jlucas@ens.fr
-# Licences GLP v3 and CeCILL v2
+# Licenses GPL v3 and CeCILL v2
 
 # To use this file install homology teams, cf the README of LibsDyogen
 import copy

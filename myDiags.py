@@ -13,7 +13,7 @@
 # LibsDyogen_py3 version 0 (2018/11/16)
 # Copyright © 2015 IBENS/Dyogen : Joseph LUCAS, Lucas TITTMANN and Hugues ROEST CROLLIUS
 # mail : jlucas@ens.fr
-# Licences GLP v3 and CeCILL v2
+# Licenses GPL v3 and CeCILL v2
 
 ###################################################################
 # PhylDiag core algorithm and tools to manage synteny blocks #
