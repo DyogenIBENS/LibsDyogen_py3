@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 
@@ -10,8 +10,7 @@
 #              |___/                 |___/
 #
 # PhylDiag version 2.0 (6/11/2015)
-# LibsDyogen version 1.0 (6/11/2015)
-# python v2.7 at least is needed
+# LibsDyogen_py3 version 0 (2018/11/16)
 # Copyright © 2015 IBENS/Dyogen : Joseph LUCAS, Lucas TITTMANN and Hugues ROEST CROLLIUS
 # mail : jlucas@ens.fr
 # Licences GLP v3 and CeCILL v2
