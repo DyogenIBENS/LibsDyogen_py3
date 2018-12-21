@@ -121,8 +121,8 @@ class PhylogeneticTree:
 
         # post-analysis
         self.outgroupSpecies = self.newCommonNamesMapperInstance()
-        # FIXME: bad name, this is a dict that take a name as keys and return an
-        # int that corresponds to the node/leaf ID
+        # FIXME: bad name, this is a dict that take a name as keys and return
+        # the set of outgroup species names.
         self.indNames = self.newCommonNamesMapperInstance()
         """This is a dict that takes a name as key and return the
         branch ID."""
@@ -171,6 +171,9 @@ class PhylogeneticTree:
             print("Loading phylogenetic tree %s ..." % file, end=' ', file=stream)
             self.officialName = {}
             self.items = self.newCommonNamesMapperInstance()
+            self.lstEsp2X = set()
+            self.lstEsp6X = set()
+            self.lstEspFull = set()
             # name and instance of file
             f = myFile.openFile(file, 'r')
             try:
@@ -233,6 +236,8 @@ class PhylogeneticTree:
                 children.append((tmp, currLine[2] - self.ages.get(tmp)))
             # current node
             (currIndent, currNames, currAge) = currLine
+            
+            #def parse_names(self, currNames):
             name = currNames[0]
             if len(children) == 0:
                 if name[0] == SYMBOL6X:
@@ -244,6 +249,9 @@ class PhylogeneticTree:
                 else:
                     name = currNames[0]
                     self.lstEspFull.add(name)
+            for s in currLine[1]:
+                self.officialName[s] = name
+
             # FIXE: also return anc node if only one extant species
             if len(children) == 1:
                 self.items.setdefault(name, children)
@@ -252,14 +260,12 @@ class PhylogeneticTree:
                 self.items.setdefault(name, children)
             # standard informations
             self.ages.setdefault(name, currLine[2])
-            for s in currLine[1]:
-                self.officialName[s] = name
             return name
 
         self.ages = self.newCommonNamesMapperInstance()
-        self.lstEsp2X = set()
-        self.lstEsp6X = set()
-        self.lstEspFull = set()
+        #self.lstEsp2X = set()
+        #self.lstEsp6X = set()
+        #self.lstEspFull = set()
         lines = loadFile()
         self.root = recLoad(0, lines)
 
@@ -345,7 +351,8 @@ class PhylogeneticTree:
             return (elt, length, info)
 
         def calcAges(data):
-            ((children, name), _, _) = data
+            ((children, rawname), _, _) = data
+            name = rawname.split('|')[0].strip()
             if len(children) == 0:
                 res = 0
             else:
@@ -359,16 +366,47 @@ class PhylogeneticTree:
             self.ages[name] = res
             return res
 
+        # Write integer in base 26.
+        def format_uniq_suffix(n):
+            r = [n]
+            while r[0] >= 26:
+                r.insert(1, r[0] % 26)
+                r[0] //= 26
+            return ''.join(chr(65+k) for k in r)
+
+        def make_uniq_name(name):  # Could be a class method.
+            if not name: name = 'UNNAMED'
+            n = 0
+            uniqname = name
+            while uniqname in self.officialName:
+                uniqname = '%s_%s' %(name, format_uniq_suffix(n))
+                n += 1
+            return uniqname
+
         def storeTree(data):
             """fill the variables of a GenericTree"""
             ((children, name), length, info) = data
-            #FIXME for rare cases
-            if (name == '') or (name in self.officialName):
-                #FIXME ??
-                name = "NAME_%d" % self.pos
-                #FIXME ??
-                self.pos += 1
-            self.officialName[name] = name
+            
+            #name = self.parse_names(currNames)
+            currNames = [xx.strip() for xx in name.split('|')]
+            name = currNames[0]
+            if len(children) == 0:
+                if name[0] == SYMBOL6X:
+                    name = currNames[0][1:]
+                    self.lstEsp6X.add(name)
+                elif name[0] == SYMBOL2X:
+                    name = currNames[0][1:]
+                    self.lstEsp2X.add(name)
+                else:
+                    name = currNames[0]
+                    self.lstEspFull.add(name)
+
+            name = make_uniq_name(name)
+            currNames[0] = name
+            for s in currNames:
+                self.officialName[make_uniq_name(s)] = name
+            
+            #self.officialName[name] = name
             self.info[name] = info
 
             if len(children) > 0:
