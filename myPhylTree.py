@@ -417,28 +417,36 @@ class PhylogeneticTree:
         self.info = {}
         storeTree(data)
 
-    def to_ete3(self, nosinglechild=True):
+    def to_ete3(self, nosinglechild=False):
         """Convert to Ete3 tree object"""
         import ete3
         # TODO: do not import ete3 here, just try to use it and raise error
         tree = ete3.Tree(name=self.root)
+        tree.add_features(treename=self.name)
         current_nodes = [tree]
-        if nosinglechild:
-            while current_nodes:
-                current = current_nodes.pop()
+        while current_nodes:
+            current = current_nodes.pop()
+            current.add_features(age=self.ages.get(current.name),
+                                 commonNames=self.commonNames.get(current.name),
+                                 fileName=self.fileName.get(current.name),
+                                 indBranch=self.indBranches.get(current.name),
+                                 indName=self.indNames.get(current.name),
+                                 )
+                                 #officialNames=self.officialNames.get(current.name),
+            childlist = self.items.get(current.name, [])
+            if not childlist:
+                current.add_features(Esp2X=(current.name in self.lstEsp2X),
+                                     Esp6X=(current.name in self.lstEsp6X),
+                                     EspFull=(current.name in self.lstEspFull))
+                # dicGenes
+                # dicGenomes
+            while nosinglechild and (len(childlist) == 1):
+                current.name = childlist[0][0]
+                current.dist += childlist[0][1]
                 childlist = self.items.get(current.name, [])
-                while len(childlist) == 1:
-                    current.name = childlist[0][0]
-                    current.dist += childlist[0][1]
-                    childlist = self.items.get(current.name, [])
-                
-                for child, dist in childlist:
-                    current_nodes.append(current.add_child(name=child, dist=dist))
-        else:
-            while current_nodes:
-                current = current_nodes.pop()
-                for child, dist in self.items.get(current.name, []):
-                    current_nodes.append(current.add_child(name=child, dist=dist))
+
+            for child, dist in childlist:
+                current_nodes.append(current.add_child(name=child, dist=dist))
         return tree
 
     def draw(self, images=None):
