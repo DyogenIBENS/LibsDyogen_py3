@@ -171,6 +171,7 @@ class PhylogeneticTree:
             print("Loading phylogenetic tree %s ..." % file, end=' ', file=stream)
             self.officialName = {}
             self.items = self.newCommonNamesMapperInstance()
+            self.ages = self.newCommonNamesMapperInstance()
             self.lstEsp2X = set()
             self.lstEsp6X = set()
             self.lstEspFull = set()
@@ -262,10 +263,6 @@ class PhylogeneticTree:
             self.ages.setdefault(name, currLine[2])
             return name
 
-        self.ages = self.newCommonNamesMapperInstance()
-        #self.lstEsp2X = set()
-        #self.lstEsp6X = set()
-        #self.lstEspFull = set()
         lines = loadFile()
         self.root = recLoad(0, lines)
 
@@ -350,22 +347,6 @@ class PhylogeneticTree:
 
             return (elt, length, info)
 
-        def calcAges(data):
-            ((children, rawname), _, _) = data
-            name = rawname.split('|')[0].strip()
-            if len(children) == 0:
-                res = 0
-            else:
-                ress = []
-                for child in children:
-                    (eltt, length, _) = child
-                    ress.append(length + calcAges((eltt, _, _)))
-                #FIXME, this is false for gene trees of ensembl
-                #assert all([foo == ress[0] for foo in ress]) # all the children + branch lengths to the parent should have the same age
-                res = max(ress)
-            self.ages[name] = res
-            return res
-
         # Write integer in base 26.
         def format_uniq_suffix(n):
             r = [n]
@@ -406,14 +387,18 @@ class PhylogeneticTree:
             for s in currNames:
                 self.officialName[make_uniq_name(s)] = name
             
-            #self.officialName[name] = name
             self.info[name] = info
 
+            tmp_ages = []
             if len(children) > 0:
                 items = []
                 for arbre in children:
-                    items.append(storeTree(arbre))
+                    child, dist = storeTree(arbre)
+                    items.append((child, dist))
+                    tmp_ages.append(dist + self.ages[child])
+
                 self.items.setdefault(name, items)
+            self.ages.setdefault(name, max(tmp_ages, default=0))
 
             self.root = name
             return (name, length)
@@ -424,8 +409,6 @@ class PhylogeneticTree:
         self.pos = 0
         self.info = {}
         storeTree(data)
-        self.ages = self.newCommonNamesMapperInstance()
-        calcAges(data)
 
     def to_ete3(self, nosinglechild=True):
         """Convert to Ete3 tree object"""
