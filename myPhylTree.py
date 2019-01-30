@@ -211,7 +211,10 @@ class PhylogeneticTree:
                 assert l[indent] == x
                 names = [xx.strip() for xx in x.split('|')]
                 if len(l) > (indent+1):
-                    age = int(l[indent+1])
+                    try:
+                        age = int(l[indent+1])
+                    except ValueError:
+                        age = float(l[indent+1])
                 else:
                     # NOT A NICE IDEA. TODO. change to None?
                     age = 0
@@ -326,7 +329,11 @@ class PhylogeneticTree:
             if s[self.pos] == ':':
                 # ":"
                 readStr(1)
-                length = float(keepWhile("0123456789.eE-"))
+                length = keepWhile("0123456789.eE-")
+                try:
+                    length = int(length)
+                except ValueError:
+                    length = float(length)
             else:
                 length = 0
 
