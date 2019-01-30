@@ -21,7 +21,7 @@ SYMBOL2X = '*'
 GeneSpeciesPosition = collections.namedtuple("GeneSpeciesPosition", ['species', 'chromosome', 'index'])
 
 class PhylogeneticTree:
-    """class mother of all types of trees"""
+    """Mother class of all types of trees, that stores node relations."""
 
     ParentItem = collections.namedtuple("ParentItem", ['name', 'distance'])
 
@@ -59,7 +59,7 @@ class PhylogeneticTree:
         self.tmpA = []
 
         def recInitialize(node, stream=open(os.devnull, 'w')):
-            """analysing process of the tree"""
+            """Analysing process of the tree"""
             print(".", file=stream)
             self.dicLinks.setdefault(node, self.newCommonNamesMapperInstance())
             # each link between a node and itself is a list containing the node itself
@@ -160,6 +160,7 @@ class PhylogeneticTree:
         self.commonNames.update(tmp)
         self.dicGenes = {}
         self.dicGenomes = self.newCommonNamesMapperInstance()
+        #self.tmpS, self.tmpA = [], []
 
         print(" OK", file=stream)
 
@@ -372,7 +373,12 @@ class PhylogeneticTree:
             return uniqname
 
         def storeTree(data):
-            """fill the variables of a GenericTree"""
+            """Recursively fill the attributes of a PhylogeneticTree:
+                - officialName
+                - info
+                - items
+                - lstEsp{2X/6X/Full}
+                - ages"""
             ((children, name), length, info) = data
             
             #name = self.parse_names(currNames)
@@ -432,7 +438,7 @@ class PhylogeneticTree:
                                  indBranch=self.indBranches.get(current.name),
                                  indName=self.indNames.get(current.name),
                                  )
-                                 #officialNames=self.officialNames.get(current.name),
+                                 #officialName=self.officialName.get(current.name),
             childlist = self.items.get(current.name, [])
             if not childlist:
                 current.add_features(Esp2X=(current.name in self.lstEsp2X),
