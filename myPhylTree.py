@@ -340,7 +340,7 @@ class PhylogeneticTree:
 
             keepWhile(' \t')
 
-            # possibly informations between brackets
+            # possibly informations between brackets (NHX comments)
             if s[self.pos] == '[':
                 # "["
                 readStr(1)
@@ -413,7 +413,6 @@ class PhylogeneticTree:
                 self.items.setdefault(name, items)
             self.ages.setdefault(name, max(tmp_ages, default=0))
 
-            self.root = name
             return (name, length)
 
         #FIXME add the age of ancestors for an easier conversion into myFormat
@@ -421,13 +420,13 @@ class PhylogeneticTree:
         data = readTree()
         self.pos = 0
         self.info = {}
-        storeTree(data)
+        self.root, self.rootlength = storeTree(data)
 
     def to_ete3(self, nosinglechild=False):
         """Convert to Ete3 tree object"""
         import ete3
         # TODO: do not import ete3 here, just try to use it and raise error
-        tree = ete3.Tree(name=self.root)
+        tree = ete3.Tree(name=self.root, dist=getattr(self, 'rootlength', 0))
         tree.add_features(treename=self.name)
         current_nodes = [tree]
         while current_nodes:
