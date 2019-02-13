@@ -279,12 +279,18 @@ class ProteinTree:
         return do(self.root if node is None else node)
 
 
-    def flattenTree(self, phylTree, rec, node=None):
-        """Flatten a node and direct children if they represent the same taxon
-        and if their is no duplication For instance:
+    def flattenTree(self, phylTree, rec, node=None, indicator=False):
+        """
+        Flatten a node and direct children if they represent the same taxon
+        and if their is no duplication.
+        
+        For instance:
             ((Eutheria1,Eutheria2)XA,(Eutheria3,Eutheria4)XB)XC is transformed
             into (Eutheria1,Eutheria2,Eutheria3,Eutheria4) only if XA, XB et XC
             are speciation nodes.
+        
+        These situations represent *polytomies* in the Ensembl species tree,
+        where the protein tree is *resolved*.
             
         - Transform the topology at nodes where 'Duplication' is <2. Once done,
           set 'Duplication' to 0.
@@ -323,6 +329,10 @@ class ProteinTree:
                     del self.data[g]
 
                     self.info[node].update(self.info[g])
+                    if indicator:
+                        prev_indicator = self.info[node].setdefault('_flattened', [])
+                        prev_indicator.append(g)
+
                     del self.info[g]
                     flag = True
                 else:
@@ -342,14 +352,19 @@ class ProteinTree:
         return do(self.root if node is None else node)
 
 
-    def rebuildTree(self, phylTree, hasLowScore=alwaysTrue, node=None):
-        """give back the expected topology to the tree (to match the species tree)
-          gather equivalent nodes under the same child.
+    def rebuildTree(self, phylTree, hasLowScore=alwaysTrue, node=None,
+                    indicator=False):
+        """
+        Give back the expected topology to the tree (to fit the species tree).
+        Gather equivalent nodes under the same child.
           
         hasLowScore: function that takes (tree, node) and return True/False.
                      example: check that the duplication score of a node is
                      above a given threshold.
+        
         Tree traversal is preorder (from root to leaves).
+        
+        This function is usually called after `flattenTree`.
         """
         global nextNodeID
         assert nextNodeID > max(self.info)
@@ -444,9 +459,12 @@ class ProteinTree:
                                 anc = phylTree.lastCommonAncestor([self.info[g]['taxon_name'] for (g,_) in lst])
                                 self.info[nextNodeID] = {'taxon_name':anc}
                                 self.info[nextNodeID]["Duplication"] = 1 if hasLowScore(self, nextNodeID) else 3
+                                if indicator:
+                                    self.info[nextNodeID]['_rebuilt'] = 1
+
                                 todo.append(nextNodeID)
                                 newData.add( (nextNodeID,length) )
-                                self.flattenTree(phylTree, False,  nextNodeID)
+                                self.flattenTree(phylTree, False, nextNodeID, indicator)
                                 flag = True
                     assert len(newData) == len(set(g for (g,_) in newData)), newData
                     # assign newData (reordered)
@@ -454,7 +472,7 @@ class ProteinTree:
                     for x in todo:
                         if hasLowScore(self, x):
                             self.info[x]["Duplication"] = 0
-                            self.flattenTree(phylTree, False, x)
+                            self.flattenTree(phylTree, False, x, indicator)
             # recursive calls
             for (g,_) in self.data[node]:
                 try:
