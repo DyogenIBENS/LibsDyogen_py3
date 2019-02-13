@@ -95,17 +95,20 @@ class ProteinTree:
 
     def printTree(self, f, node=None):
         """print the tree into the phylTree format (with tabulations)"""
-            
+        
+        def sortkey_info(item):
+            return item[0].capitalize()
+
         def rec(n, node):
 
             indent = "\t" * n
             # id of the node
             print("%sid\t%d" % (indent, node), file=f)
             # informations
-            print("%sinfo\t{%s}" % (indent, ", ".join(repr(key) + ": " + repr(value) for (key, value) in sorted(self.info[node].items()))), file=f)
+            print("%sinfo\t{%s}" % (indent, ", ".join(repr(key) + ": " + repr(value) for (key, value) in sorted(self.info[node].items(), key=sortkey_info))), file=f)
             # children
             for (g,d) in self.data.get(node,[]):
-                print("%s\tlen\t%f" % (indent, d), file=f)
+                print("%s\tlen\t%g" % (indent, d), file=f)
                 rec(n+1, g)
 
         rec(0, self.root if node is None else node)
@@ -120,17 +123,20 @@ class ProteinTree:
                "Bootstrap": "B",
                "taxon_name": "S",
                "duplication_confidence_score": "SIS",
-               "dubious_duplication": "DD"}
+               "dubious_duplication": "DD",
+               "_flattened": "_f",
+               "_rebuilt": "_r"}
+        NHX_trans = str.maketrans(' [](),', '._____')
         def nodeinfo_to_tags(g):
             return ("[&&NHX:"
                      + ":".join(
                          tuple(("%s=%s" % (
                                  (NHX[tag],self.info[g][tag])
                                  if tag!="Duplication"
-                                 else (NHX[tag],"N" if self.info[g][tag]== 0 else "Y")
+                                 else (NHX[tag],"N" if self.info[g][tag]==0 else "Y")
                                           )
-                               ).replace(" ", ".")
-                         for tag in NHX if tag in self.info[g])
+                               ).translate(NHX_trans)
+                         for tag in sorted(set(NHX) & set(self.info[g]), key=str.capitalize))
                          + ("ID=%s" % g if withID else "",)
                        )
                      + "]" if withTags else ""
