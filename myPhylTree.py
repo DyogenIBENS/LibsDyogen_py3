@@ -20,6 +20,27 @@ SYMBOL2X = '*'
 
 GeneSpeciesPosition = collections.namedtuple("GeneSpeciesPosition", ['species', 'chromosome', 'index'])
 
+
+#TODO: move to myTools
+#TODO: synonymousSet with special intersection, union, __isin__ methods.
+class synonymDict(dict):
+    synonyms = {}  # Default *class* attribute needed during unpickling.
+
+    def __init__(self, synonyms=None, *args, **kwargs):
+        dict.__init__(self, *args, **kwargs)
+        self.synonyms = {} if synonyms is None else synonyms
+
+    def __getitem__(self, name):
+        return dict.__getitem__(self, self.synonyms.get(name, name))
+
+    def __setitem__(self, name, value):
+        dict.__setitem__(self, self.synonyms.get(name, name), value)
+    
+    def __repr__(self):
+        return 'synonymDict(%s)' % dict.__repr__(self)
+    #TODO: update, setdefault, pop, get, __contains__
+
+
 class PhylogeneticTree:
     """Mother class of all types of trees, that stores node relations."""
 
@@ -727,40 +748,12 @@ class PhylogeneticTree:
         best = searchBestValue(resultNode, None, 0)
         return (best[0], self.allNames[best[1]], best[2])
 
+
     def newCommonNamesMapperInstance(self):
         """return a dict that uses internally official names of taxons
          but that can be used with common names"""
-        dsi = dict.__setitem__
-        dgi = dict.__getitem__
+        return synonymDict(self.officialName)
 
-        class commonNamesMapper(dict):
-
-            def __getitem__(d, name):
-                if name in self.officialName:
-                    return dgi(d, self.officialName[name])
-                else:
-                    return dgi(d, name)
-
-            def __setitem__(d, name, value):
-                if name in self.officialName:
-                    dsi(d, self.officialName[name], value)
-                else:
-                    dsi(d, name, value)
-
-            # Because it's recursive, use a non-ambiguous name for this method,
-            # since 'to_dict' for instance, is already a method of
-            # pandas.DataFrames.
-            def common_names_mapper_2_dict(self):
-                """Recursively converts the commonNamesMapper instance to a
-                dictionary. (to allow pickling for example)"""
-                as_dict = {}
-                for key, value in self.items():
-                    if hasattr(value, 'common_names_mapper_2_dict'):
-                        value = value.common_names_mapper_2_dict()
-                    as_dict[key] = value
-                return as_dict
-
-        return commonNamesMapper()
 
     def loadAllSpeciesSince(self, ancestr, template, **args):
         """load all the species that come from an ancestor"""
