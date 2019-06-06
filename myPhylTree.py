@@ -75,13 +75,16 @@ class PhylogeneticTree:
         self.allDescendants = self.newCommonNamesMapperInstance()
         """self.allDescendants = {..., nodeI: [nodes that are descendant from nodeI], ...}
         interior nodes are included in the list of descendants"""
+
+        #TODO:
+        # also reinit ages and lstEsp{2X,6X,Full}
         
         self.tmpS = []
         self.tmpA = []
 
         def recInitialize(node, stream=open(os.devnull, 'w')):
             """Analysing process of the tree"""
-            print(".", file=stream)
+            print(".", end='', file=stream)
             self.dicLinks.setdefault(node, self.newCommonNamesMapperInstance())
             # each link between a node and itself is a list containing the node itself
             self.dicLinks.get(node).setdefault(node, [node])
@@ -443,12 +446,123 @@ class PhylogeneticTree:
         self.info = {}
         self.root, self.rootlength = storeTree(data)
 
-    def to_ete3(self, nosinglechild=False):
+
+    def printTree(self, f=None, root=None):
+        """Print to file f [stdout if None] in the Dyogen.PhylTree format"""
+        def do(anc, indent):
+            anc = anc.replace("*", "")
+            symbol = (SYMBOL2X if anc in getattr(self, 'lstEsp2X', ()) else
+                      SYMBOL6X if anc in getattr(self, 'lstEsp6X', ()) else '')
+            line = [myFile.myTSV.printLine(
+                            [symbol + anc]
+                            + [x for x in self.commonNames.get(anc, ())
+                               if isinstance(x, str) and (x != anc)],
+                            delim="|")
+                    ]
+            try:
+                line.append('%g' % self.ages[anc])
+            except (KeyError, AttributeError):
+                pass
+            print('\t'*indent + myFile.myTSV.printLine(line, '\t'), file=f)
+            for (child, _) in self.items.get(anc, []):
+                do(child, indent + 1)
+
+        do(self.root if root is None else root, 0)
+
+
+    def printNewick(self, f=None, root=None,
+                    filenames=False, commonnames=False, symbols=False,
+                    withTags=False):
+        if filenames:
+            def formatFilename(anc):
+                return self.fileName[anc]
+        else:
+            def formatFilename(anc):
+                return anc
+
+        if commonnames:
+            def formatLabel(anc):
+                return myFile.myTSV.printLine(
+                            [formatFilename(anc)]
+                            + [x for x in self.commonNames.get(anc, ())
+                               if isinstance(x, str) and (x != anc)],
+                            delim="|")
+        else:
+            def formatLabel(anc):
+                return anc
+        
+        if withTags:
+            NHX = {#'name'
+                        'ages': 'A',
+                        #'commonNames': 'commonNames',
+                        'fileName': 'F',
+                        #'indBranch': 'indBranch',
+                        #'indName': 
+                        'lstEsp2X': 'Esp2X',
+                        'lstEsp6X': 'Esp6X'}
+            if filenames:
+                NHX.pop('fileName')
+            if symbols:
+                NHX.pop('lstEsp2X')
+                NHX.pop('lstEsp6X')
+
+            NHX_trans = str.maketrans(' [](),', '._____')
+
+            def getTagValue(t, e):
+                val = getattr(self, t, None)
+                if isinstance(val, (set, frozenset)):
+                    return 1 if e in val else None
+                elif isinstance(val, dict):
+                    try:
+                        return val[e]
+                    except KeyError:
+                        return None
+                else:
+                    return val
+            
+            def formatTags(e):
+                tags = {}
+                for tag,tagname in NHX.items():
+                    v = getTagValue(tag, e)
+                    if v is not None:
+                        tags[tagname] = v
+                #if e == self.root:
+                #    tags.update(name=self.name)
+                #
+                if tags:
+                    return '[&&NHX:' + ':'.join(
+                                '%s=%s' %(t,str(v).translate(NHX_trans))
+                                for t,v in tags.items()
+                            ) + ']'
+                else:
+                    return ''
+        else:
+            def formatTags(e):
+                return ''
+
+        def do(anc):
+
+            a = formatLabel(anc)
+            if anc in self.listSpecies:
+                symbol = ('' if not symbols else
+                          SYMBOL2X if anc in self.lstEsp2X else
+                          SYMBOL6X if anc in self.lstEsp6X else '')
+                return symbol + a
+            else:
+                return "(" + ",".join(
+                                      do(e) + ":%g" % l + formatTags(e)
+                                      for (e, l) in self.items[anc]
+                                     ) + ")%s" % a
+
+        print(do(self.root if root is None else root) + ";", file=f)
+
+
+    def to_ete3(self, nosinglechild=False):  #TODO: Should not be a method, but an external function
         """Convert to Ete3 tree object"""
         import ete3
         # TODO: do not import ete3 here, just try to use it and raise error
         tree = ete3.Tree(name=self.root, dist=getattr(self, 'rootlength', 0))
-        tree.add_features(treename=self.name)
+        tree.add_features(treename=getattr(self, 'name', ''))
         current_nodes = [tree]
         while current_nodes:
             current = current_nodes.pop()
@@ -667,6 +781,49 @@ class PhylogeneticTree:
         assert len(root) == 1
         return (root[0], newtree)
 
+
+    def getSubItems(self, goodSpecies):
+        """Return the items (node, distance) of the sub-tree in which are
+        exclusively the chosen species."""
+        goodAnc = set(self.dicParents[e1][e2] for (e1, e2) in itertools.combinations(goodSpecies, 2))
+        newtree = collections.defaultdict(list)
+        newNames = set()
+        goodSpecies = set(goodSpecies)
+        subroot = None
+        while goodSpecies:
+            sp = goodSpecies.pop()
+            parent, dist = sp, 0
+            while parent == sp or parent not in goodAnc:
+                try:
+                    parent, d = self.parent[parent]
+                    dist += d
+                except KeyError:
+                    subroot = sp
+                    break
+            else:
+                if sp not in newNames:
+                    newtree[parent].append((sp, dist))
+                    goodSpecies.add(parent)
+                    newNames.add(sp)
+        return subroot, newtree
+
+
+        #def do(node, dist):
+        #    if node in goodAnc:
+        #        for (x, d) in self.items[node]:
+        #            newtree[node].extend((do(x, d), d))
+        #        return [node]
+        #    elif node in self.items: # i.e, not an extant species.
+        #        # TODO: itertools.chain?
+        #        return myMaths.flatten([do(x) for (x, _) in self.items[node]])
+        #    elif node in goodSpecies:
+        #        return [node]
+        #    else:
+        #        return []
+        #root = do(self.root if rootAnc is None else rootAnc)
+        #assert len(root) == 1
+        #return (root[0], newtree)
+
     def calcWeightedValue(self, values, notdefined, resultNode):
         """calculate the values for the nodes of the tree
          - 'values' represents some defined values (nodes or leaves)
@@ -806,6 +963,28 @@ class PhylogeneticTree:
                 self.tmpItems[par] = [x for x in self.tmpItems[par] if x[0] != anc]
                 anc = par
         self.tmpItems[newname] = self.tmpItems[node]
+
+    def pruneSpecies(self, species, inplace=False, stream=open(os.devnull, 'w')):
+        """Return a new PhylogeneticTree with the given species removed (and
+        intermediate nodes too)."""
+        goodSpecies = self.listSpecies.difference(species)
+        subroot, subitems = self.getSubItems(goodSpecies)
+        goodNames = goodSpecies.union(subitems)
+
+        subOfficialName = {name: official
+                           for name, official in self.officialName.items()
+                           if not isinstance(name, int) and set(self.commonNames[name]) & goodNames}
+
+        if inplace:
+            self.items = dict(subitems)
+            self.root = subroot
+            self.officialName = subOfficialName
+            self.reinitTree(stream)
+        else:
+            subphyltree = PhylogeneticTree((dict(subitems), subroot, subOfficialName))
+            subphyltree.reinitTree(stream)
+            return subphyltree
+        
 
     def printBranchName(self, child, stream=sys.stderr):
         # To print branch name to sys.stderr

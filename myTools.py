@@ -539,6 +539,13 @@ def checkArgs(args, options, info, showArgs=True, loadOnlyDefaultOptions=False):
     # there is less than the minimal number of arguments
     #FIXME, the second part of the condition should be avoided by upstream corrections
     if len(valArg) < len(args) and not (len(args) == 1 and args[0] == ()):
+        # Check optional arguments (must have default values)  # Change above if to while
+        #for optArg in args[len(valArg):]:
+        #    try:
+        #        s,typ,val = optArg
+        #    except IndexError:
+        #        error_usage("Not enough arguments")
+        #    valArg[s] = putValue(typ, None, val)
         print("valArg=", valArg, file=sys.stderr)
         print("args=", args, file=sys.stderr)
         error_usage("Not enough arguments")

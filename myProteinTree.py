@@ -30,20 +30,22 @@ def getIntermediateAnc(phylTree, previousAnc, lastWrittenAnc, newAnc, isDuplicat
     if lastWrittenAnc: # cruise mode
         # genes of the species between lastWritten and newAnc are recorded
         # exepted if it is a duplication node (see after)
-        toWrite =list(phylTree.dicLinks[lastWrittenAnc][newAnc][1:])
+        toWrite = list(phylTree.dicLinks[lastWrittenAnc][newAnc][1:])  # copy
 
     # in the first species of the gene tree or at the first node outside the
     # first species
-    elif not lastWrittenAnc:
+    #elif not lastWrittenAnc:
+    else:
+    #elif not previousAnc:
         if previousAnc is None: # at the root
             # the gene is recorded except if it is a duplication (see after)
-            toWrite =list([newAnc])
+            toWrite = [newAnc]
 
         elif previousAnc: # not at the root
 
             if previousAnc == newAnc: # still in the first species
                 # the gene is recorded except if it is a duplication (see after)
-                toWrite=list([newAnc])
+                toWrite = [newAnc]
 
             elif previousAnc != newAnc: # in a child species
                 # the genes of the species between previousAnc and newAnc are
@@ -94,7 +96,7 @@ class ProteinTree:
 
 
     def printTree(self, f, node=None):
-        """print the tree into the phylTree format (with tabulations)"""
+        """print the tree into the Dyogen.ProteinTree format (with tabulations)"""
         
         def sortkey_info(item):
             return item[0].capitalize()
@@ -197,6 +199,8 @@ class ProteinTree:
                "gene_name": "G",
                "protein_name": "PR",
                "family_name": "F"}
+               #"_flattened": "_f",
+               #"_rebuilt": "_r"}
         
         def nodeinfo_to_tags(g):
             return ("[&&NHX:"
@@ -373,7 +377,7 @@ class ProteinTree:
         This function is usually called after `flattenTree`.
         """
         global nextNodeID
-        assert nextNodeID > max(self.info)
+        assert nextNodeID > max(self.info), max(self.info)
 
         def do(node):
 
@@ -484,12 +488,11 @@ class ProteinTree:
                 try:
                     flag |= do(g)
                 except BaseException as err:
-                    # Add the node information in the traceback.
-                    err.args = (str(err.args[0]) +
-                                ("\nnode %d %s D=%d" % (g,
+                    # Add the path information in the traceback.
+                    err.args += ("node %d %s D=%d" % (g,
                                              self.info[g]['taxon_name'],
-                                             self.info[g]['Duplication'])),) \
-                                + err.args[1:]
+                                             self.info[g]['Duplication']),)
+                                
                     raise
             return flag
         return do(self.root if node is None else node)
@@ -543,13 +546,14 @@ def loadTree(name):
             except IndexError:
                 print('Badly formatted line:\n%r' % '\t'.join(l), file=sys.stderr)
                 raise
+            ###TODO: check that spaces were not used for indenting.
         except StopIteration:
             ns.curr = None
         return old
 
     # the analysing process of the lines of the file
     def recLoad(tree, indent):
-        # Uses variable `ns` from the outside scope
+        # Uses variable `ns` from the outside scope. nonlocal in Python 3.
 
         # id of the point
         currID = int(nextLine()[2])
