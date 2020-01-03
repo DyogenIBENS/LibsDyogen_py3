@@ -1,7 +1,10 @@
 import setuptools
+from Cython.Build import cythonize
+
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
+
 
 setuptools.setup(
     name="LibsDyogen_py3",
@@ -13,10 +16,13 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/DyogenIBENS/LibsDyogen_py3",
     packages=setuptools.find_packages(),
-    #install_requires=['numpy', 'scipy', 'matplotlib'],  # Only in bin/statsOnGenesInGenomes.py,
+    python_requires='>=3',
+    install_requires=['enum34;python_version<"3.4"'],
+    extras_require={'plotstats': ['numpy', 'scipy', 'matplotlib']},  # Only in bin/statsOnGenesInGenomes.py,
     #optional dependencies (handled in try-except)
                       #'java.lang',
                       #'psyco',  # development stopped in 2011
+    ext_modules=cythonize('LibsDyogen/extractDiags.pyx'),
     scripts = ['scripts/ancGenesFromGeneTrees.py',
                'scripts/indexGenesUsingExtremityThatStartsTranscription.py',
                'scripts/newickSpeciesTree2phylTreeSpeciesTree.py',
@@ -35,7 +41,6 @@ setuptools.setup(
         "Intended Audience :: Science/Research",
         "Topic :: Scientific/Engineering :: Bio-Informatics"
     ],
-    python_requires='>=3',
     include_package_data=True,
     zip_safe=False
 )
