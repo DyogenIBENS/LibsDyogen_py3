@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# PhylDiag v1.02
-# python 2.7
+# from PhylDiag v1.02
+# python 3
 # Copyright © 2015 IBENS/Dyogen : Joseph LUCAS, and Hugues ROEST CROLLIUS
 # mail : hrc@ens.fr or jlucas@ens.fr
 # This is free software, you may copy, modify and/or distribute this work under the terms of the GNU General Public License, version 3 (GPL v3) or later and the CeCiLL v2 license in France
@@ -13,7 +13,7 @@ import collections
         genes are consistent with their orientation.
 """
 
-from LibsDyogen import sys, itertools
+import sys, itertools
 from LibsDyogen import myTools, myFile, myLightGenomes
 
 def intOrNone(string):

@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# PhylDiag v1.02
-# python 2.7
+# from PhylDiag v1.02
+# python 3
 # Copyright © 2013 IBENS/Dyogen : Joseph LUCAS, Matthieu MUFFATO and Hugues ROEST CROLLIUS
 # mail : hrc@ens.fr or jlucas@ens.fr
 # This is free software; you may copy, modify and/or distribute this work under the terms of the GNU General Public License, version 3 or later and the CeCiLL v2 license in France
 
-__doc__ = """ convert species tree (newick to phylTree) or (phylTree to newick) """
+""" convert species tree (newick to phylTree) or (phylTree to newick) """
 
 from LibsDyogen import myFile
 from LibsDyogen import myTools

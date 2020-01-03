@@ -5,10 +5,12 @@
 
 
 import sys, itertools, collections
+
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.ticker import FuncFormatter
 from scipy import stats
+
 from LibsDyogen import myTools, myFile, myLightGenomes
 
 
