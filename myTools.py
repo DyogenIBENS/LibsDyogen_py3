@@ -238,9 +238,9 @@ class memoizeMethod(object):
 #    """
 
 def which(program):
-    """Check is an excecutable is accessible.
+    """Check is an executable is accessible.
 
-    This may be usefull to check if a plugged external programm has been added
+    This may be useful to check if a plugged external programm has been added
     to the PATH environment variable."""
     import os
     def is_exe(fpath):
@@ -273,7 +273,7 @@ class myIterator:
 
 @memoize
 def partitions(n, k):
-    """Liste of partitions of size k in range(n)"""
+    """List of partitions of size k in range(n)"""
     if n == 1:
         if k == 1:
             return [ [[0]] ]

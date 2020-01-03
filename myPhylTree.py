@@ -300,7 +300,7 @@ class PhylogeneticTree:
             for s in currLine[1]:
                 self.officialName[s] = name
 
-            # FIXE: also return anc node if only one extant species
+            # FIXME: also return anc node if only one extant species
             if len(children) == 1:
                 self.items.setdefault(name, children)
             # several children, they are recorded
