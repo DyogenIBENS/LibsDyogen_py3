@@ -62,7 +62,7 @@ sudo apt-get install git
 
 # Install cython (not mandatory)
 # http://docs.cython.org/src/quickstart/install.html
-sudo apt-get install cython3
+sudo apt-get install python3-dev cython3
 ```
 
 ### Setup

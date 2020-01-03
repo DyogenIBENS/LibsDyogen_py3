@@ -41,10 +41,29 @@ class synonymDict(dict):
     #TODO: update, setdefault, pop, get, __contains__
 
 
+def format_uniq_suffix(n):
+    """Write integer in base 26."""
+    if n<0: raise ValueError("Requires non-negative integers")
+    r = [n]
+    while r[0] >= 26:
+        r.insert(1, r[0] % 26)
+        r[0] //= 26
+    return ''.join(chr(65+k) for k in r)
+
+
 class PhylogeneticTree:
     """Mother class of all types of trees, that stores node relations."""
 
     ParentItem = collections.namedtuple("ParentItem", ['name', 'distance'])
+
+    def make_uniq_name(self, name):
+        if not name: name = 'UNNAMED'
+        n = 0
+        uniqname = name
+        while uniqname in self.officialName:
+            uniqname = '%s_%s' %(name, format_uniq_suffix(n))
+            n += 1
+        return uniqname
 
     def reinitTree(self, stream=open(os.devnull, 'w')):
         # object initialisations
@@ -379,23 +398,6 @@ class PhylogeneticTree:
 
             return (elt, length, info)
 
-        # Write integer in base 26.
-        def format_uniq_suffix(n):
-            r = [n]
-            while r[0] >= 26:
-                r.insert(1, r[0] % 26)
-                r[0] //= 26
-            return ''.join(chr(65+k) for k in r)
-
-        def make_uniq_name(name):  # Could be a class method.
-            if not name: name = 'UNNAMED'
-            n = 0
-            uniqname = name
-            while uniqname in self.officialName:
-                uniqname = '%s_%s' %(name, format_uniq_suffix(n))
-                n += 1
-            return uniqname
-
         def storeTree(data):
             """Recursively fill the attributes of a PhylogeneticTree:
                 - officialName
@@ -419,10 +421,10 @@ class PhylogeneticTree:
                     name = currNames[0]
                     self.lstEspFull.add(name)
 
-            name = make_uniq_name(name)
+            name = self.make_uniq_name(name)
             currNames[0] = name
             for s in currNames:
-                self.officialName[make_uniq_name(s)] = name
+                self.officialName[self.make_uniq_name(s)] = name
             
             self.info[name] = info
 
