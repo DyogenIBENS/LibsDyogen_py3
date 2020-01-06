@@ -17,6 +17,7 @@ setuptools.setup(
     url="https://github.com/DyogenIBENS/LibsDyogen_py3",
     packages=setuptools.find_packages(),
     python_requires='>=3',
+    setup_requires=['Cython'],
     install_requires=['enum34;python_version<"3.4"'],
     extras_require={'plotstats': ['numpy', 'scipy', 'matplotlib']},  # Only in bin/statsOnGenesInGenomes.py,
     #optional dependencies (handled in try-except)

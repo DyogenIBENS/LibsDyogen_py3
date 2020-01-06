@@ -21,8 +21,8 @@ from LibsDyogen import myProteinTree
 # arguments
 arguments = myTools.checkArgs(
     [
-        ("speciesTree", file),
-        ("geneTreeForest", file)
+        ("speciesTree", myTools.File),
+        ("geneTreeForest", myTools.File)
     ],
     [
         ("out:ancGenes", str, ""),

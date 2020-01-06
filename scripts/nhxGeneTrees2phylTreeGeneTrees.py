@@ -130,7 +130,7 @@ def processData(data):
     printTree("", tree.root)
 
 
-arguments = myTools.checkArgs( [("tree",file)], [], __doc__)
+arguments = myTools.checkArgs( [("tree", myTools.File)], [], __doc__)
 
 f = myFile.openFile(arguments["tree"], "r")
 totalNbLines = sum(1 for line in f)

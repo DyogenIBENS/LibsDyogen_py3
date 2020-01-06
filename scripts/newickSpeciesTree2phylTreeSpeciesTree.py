@@ -12,7 +12,9 @@ from LibsDyogen import myFile
 from LibsDyogen import myTools
 from LibsDyogen import myPhylTree
 
-arguments = myTools.checkArgs([("phylTree.conf",file)], [("fromNewick",bool,True)], __doc__)
+arguments = myTools.checkArgs([("phylTree.conf", myTools.File)],
+                              [("fromNewick", bool, True)],
+                              __doc__)
 
 phylTree = myPhylTree.PhylogeneticTree(arguments["phylTree.conf"])
 

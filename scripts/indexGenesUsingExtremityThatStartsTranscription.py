@@ -47,7 +47,7 @@ def readerDependingOnFileWithDebAndEnd(fileName):
 # arguments
 arguments = myTools.checkArgs(
     [
-        ("genome", myTools.file),
+        ("genome", myTools.File),
     ],
     [
         ("orderGenesByIncreasingTranscriptionStart", bool, True),
