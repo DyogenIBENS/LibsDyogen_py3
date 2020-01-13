@@ -15,8 +15,8 @@ This code may be freely distributed and modified under the terms of the GNU
 General Public License version 3 (GPL v3) and the CeCILL licence version 2 of
 the CNRS. These licences are contained in the files:
 
-1. LICENSE-GPL.txt (or <http://www.gnu.org/licenses/gpl-3.0-standalone.html>)
-2. LICENCE-CeCILL.txt (or <http://www.cecill.info/licences/Licence_CeCILL_V2-en.html>)
+1. LICENCE-GPLv3.txt (or <http://www.gnu.org/licenses/gpl-3.0-standalone.html>)
+2. LICENCE-CeCILLv2.txt (or <http://www.cecill.info/licences/Licence_CeCILL_V2-en.html>)
 
 Copyright for this code is held jointly by the Dyogen (DYnamic and Organisation
 of GENomes) team of the Institut de Biologie de l'École Normale Supérieure
@@ -56,17 +56,17 @@ Installation:
 
 ### Requirements
 
-```bash
-# Install python3
-sudo apt-get install python3
+Ensure you have Python 3 and Git installed.
 
+```bash
 # Install cython (not mandatory)
 # http://docs.cython.org/src/quickstart/install.html
 sudo apt-get install python3-dev cython3
+```
 
-# Install git
-sudo apt-get install git
+### Install
 
+```bash
 # Clone this repository
 git clone https://github.com/DyogenIBENS/LibsDyogen_py3.git
 
