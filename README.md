@@ -35,9 +35,12 @@ Authors' contributions:
   myMapping, myProbas, mySvgDrawer and updated: myTools
 * Nga THI THUY NGUYEN: Updated some functions of myDiags and myGraph
 * Lucas TITTMANN: Updated some functions of myDiags
+* Guillaume LOUVEL: conversion to Python 3 and various updates in myFile,
+    myTools, myPhylTree, myProteinTree.
 * Hugues ROEST CROLLIUS: supervisor
 
-Mail: hrc[at]ens.fr or jlucas[at]ens.fr
+
+Mail: dyogen_git[at]biologie.ens.fr
 
 About Licences:
 ---------------
@@ -57,55 +60,24 @@ Installation:
 # Install python3
 sudo apt-get install python3
 
-# Install git
-sudo apt-get install git
-
 # Install cython (not mandatory)
 # http://docs.cython.org/src/quickstart/install.html
 sudo apt-get install python3-dev cython3
+
+# Install git
+sudo apt-get install git
+
+# Clone this repository
+git clone https://github.com/DyogenIBENS/LibsDyogen_py3.git
+
+# Install
+cd LibsDyogen_py3/
+python3 setup.py install --user
+# Or install in developer mode (the current folder is just symlinked)
+python3 setup.py develop --user
 ```
 
-### Setup
-
-#### Recommended installation path
-
-```bash
-# This path is automatically used by Python.
-# Change the Python version number according to your version.
-LIBSDIR=$HOME/.local/lib/python3.5/site-packages/
-```
-
-#### Custom installation path
-
-```bash
-# Choose a path for the installation (here it is ${HOME}/Libs)
-LIBSDIR="${HOME}/Libs"
-```
-
-Add LIBSDIR to the `PYTHONPATH` environment variable, e.g in the `~/.bashrc` file:
-
-```bash
-export PYTHONPATH="${LIBSDIR}:${PYTHONPATH}"
-```
-
-#### Clone the LibsDyogen library
-
-```bash
-# Create the root folder of LibsDyogen
-mkdir -p ${LIBSDIR}
-cd ${LIBSDIR}
-git clone <url to this repository> LibsDyogen
-#(example: https://gitlab.com/DyogenIBENS/LibsDyogen_py3.git)
-```
-
-#### Compile the extractDiags.pyx file
-
-```bash
-cd LibsDyogen
-cythonize -i extractDiags.pyx
-```
-
-#### Install optional plugable softwares:
+#### Install optional plugable softwares (related to PhylDiag):
 
 Homology teams:
 
