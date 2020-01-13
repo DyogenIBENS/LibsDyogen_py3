@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # LibsDyogen_py3 version 0 (2018/11/16)
-# Copyright © 2015 IBENS/Dyogen : Matthieu MUFFATTO, Joseph LUCAS and Hugues ROEST CROLLIUS
-# mail : jlucas@ens.fr
+# Copyright © 2015 IBENS/Dyogen : Matthieu MUFFATO, Joseph LUCAS and Hugues ROEST CROLLIUS
 # Licenses GPL v3 and CeCILL v2
 
 #######################

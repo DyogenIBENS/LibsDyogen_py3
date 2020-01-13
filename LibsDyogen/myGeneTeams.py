@@ -3,7 +3,6 @@
 
 # LibsDyogen_py3 version 0 (2018/11/16)
 # Copyright © 2015 IBENS/Dyogen : Joseph LUCAS and Hugues ROEST CROLLIUS
-# mail : jlucas@ens.fr
 # Licenses GPL v3 and CeCILL v2
 
 # Wrapper for 'homologyteams'
@@ -35,7 +34,6 @@
 # Copyright of the wrapper
 # python 2.7
 # Copyright © 2013 IBENS/Dyogen Joseph LUCAS, Matthieu MUFFATO and Hugues ROEST CROLLIUS
-# mail : hrc@ens.fr or jlucas@ens.fr
 # This is free software, you may copy, modify and/or distribute this work under the terms of the GNU General Public License, version 3 (GPL v3) or later and the CeCiLL v2 license in France
 
 # Uses also homologyteams
