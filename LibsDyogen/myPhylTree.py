@@ -558,56 +558,6 @@ class PhylogeneticTree:
         print(do(self.root if root is None else root) + ";", file=f)
 
 
-    def to_ete3(self, nosinglechild=False):  #TODO: Should not be a method, but an external function
-        """Convert to Ete3 tree object"""
-        import ete3
-        # TODO: do not import ete3 here, just try to use it and raise error
-        tree = ete3.Tree(name=self.root, dist=getattr(self, 'rootlength', 0))
-        tree.add_features(treename=getattr(self, 'name', ''))
-        current_nodes = [tree]
-        while current_nodes:
-            current = current_nodes.pop()
-            current.add_features(age=self.ages.get(current.name),
-                                 commonNames=self.commonNames.get(current.name),
-                                 fileName=self.fileName.get(current.name),
-                                 indBranch=self.indBranches.get(current.name),
-                                 indName=self.indNames.get(current.name),
-                                 )
-                                 #officialName=self.officialName.get(current.name),
-            childlist = self.items.get(current.name, [])
-            if not childlist:
-                current.add_features(Esp2X=(current.name in self.lstEsp2X),
-                                     Esp6X=(current.name in self.lstEsp6X),
-                                     EspFull=(current.name in self.lstEspFull))
-                # dicGenes
-                # dicGenomes
-            while nosinglechild and (len(childlist) == 1):
-                current.name = childlist[0][0]
-                current.dist += childlist[0][1]
-                childlist = self.items.get(current.name, [])
-
-            for child, dist in childlist:
-                current_nodes.append(current.add_child(name=child, dist=dist))
-        return tree
-
-    def draw(self, images=None):
-        """Draw tree in a gui window using Ete3"""
-        import ete3
-        ptree = self.to_ete3()
-        ts = ete3.TreeStyle()
-        ts.scale = 2
-        ts.show_branch_length = True
-        nameface = ete3.faces.AttrFace("name", fsize=12)
-        def mylayout(node):
-            if node.is_leaf():
-                # add species image
-                pass
-            else:
-                ete3.faces.add_face_to_node(nameface, node, column=0,
-                                            position='branch-top')
-        ptree.show(layout=mylayout, tree_style=ts, name='Species tree')
-
-
     def lastCommonAncestor(self, species):
         """return the name of the last common ancestor of several species"""
         anc = species[0]
