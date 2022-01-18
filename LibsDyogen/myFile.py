@@ -119,7 +119,10 @@ class firstLineBuffer:
     def __iter__(self):
         yield self.firstLine
         while True:
-            yield next(self)
+            try:
+                yield next(self)
+            except StopIteration:
+                return
 
     def __next__(self):
         while True:

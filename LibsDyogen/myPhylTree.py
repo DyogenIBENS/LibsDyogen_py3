@@ -96,6 +96,9 @@ class PhylogeneticTree:
 
         #TODO:
         # also reinit ages and lstEsp{2X,6X,Full}
+        for lstEsp in ('lstEsp2X', 'lstEsp6X', 'lstEspFull'):
+            if not hasattr(self, lstEsp):
+                setattr(self, lstEsp, set())
         
         self.tmpS = []
         self.tmpA = []
@@ -195,7 +198,7 @@ class PhylogeneticTree:
         # self.numParent[self.indNames.get('self.root')] = None
         assert set(self.indBranches.values()) == set(range(len(self.numParent)-1))
         # official names / common names
-        tmp = collections.defaultdict(list)
+        tmp = collections.defaultdict(list)  # FIXME: should be a set, or sorted.
         for (curr, off) in self.officialName.items():
             tmp[off].append(curr)
         self.commonNames = self.newCommonNamesMapperInstance()
@@ -356,7 +359,7 @@ class PhylogeneticTree:
             
             if s[self.pos] == '(':
                 children = []
-                # '(' the first time, then some ',' untill the final ')'
+                # '(' the first time, then some ',' until the final ')'
                 while readStr(1) != ')':
                     children.append(readTree())
                     keepWhile(' \t')
@@ -934,6 +937,7 @@ class PhylogeneticTree:
         else:
             subphyltree = PhylogeneticTree((dict(subitems), subroot, subOfficialName))
             subphyltree.reinitTree(stream)
+            #FIXME: ages are not added.
             return subphyltree
         
 
@@ -957,3 +961,10 @@ class PhylogeneticTree:
             # The two first chars
             speciesAcronym = node[:2]
         return ''.join(speciesAcronym)
+
+    def addCommonName(self, official, *newnames):
+        for newname in newname:
+            self.officialName[newname] = official
+            if newname not in self.commonNames[official]:
+                self.commonNames[official].append(newname)
+        
