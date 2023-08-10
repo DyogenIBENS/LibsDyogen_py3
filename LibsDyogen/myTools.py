@@ -19,7 +19,8 @@ import collections
 import enum
 
 from functools import wraps
-from collections import OrderedDict, Callable
+from collections import OrderedDict
+from collections.abc import Callable
 
 from . import myFile
 
